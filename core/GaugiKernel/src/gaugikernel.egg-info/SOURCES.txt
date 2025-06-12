@@ -1,0 +1,14 @@
+setup.py
+src/gaugikernel/ComponentAccumulator.py
+src/gaugikernel/Cpp.py
+src/gaugikernel/Logger.py
+src/gaugikernel/MultiProcessing.py
+src/gaugikernel/__init__.py
+src/gaugikernel/constants.py
+src/gaugikernel/enumerators.py
+src/gaugikernel/macros.py
+src/gaugikernel.egg-info/PKG-INFO
+src/gaugikernel.egg-info/SOURCES.txt
+src/gaugikernel.egg-info/dependency_links.txt
+src/gaugikernel.egg-info/requires.txt
+src/gaugikernel.egg-info/top_level.txt

@@ -7,6 +7,8 @@ file(GLOB_RECURSE HEADERS
                         src/FixedRegion.h
                         src/SingleParticle.h
                         src/OverlappedEvents.h
+                        src/Jpsi.h
+                        src/Upsilon.h
                           )
 
 

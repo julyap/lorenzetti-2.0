@@ -24,3 +24,5 @@ from . import OverlappedEvents
 __all__.extend(OverlappedEvents.__all__)
 from .OverlappedEvents import *
 
+from .Jpsi import Jpsi
+from .Upsilon import Upsilon

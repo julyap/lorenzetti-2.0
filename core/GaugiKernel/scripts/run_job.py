@@ -1,122 +1,109 @@
-#!/usr/bin/env python3
-
 import argparse
-import numpy as np
 import multiprocessing
-import sys,os,json
-from GaugiKernel import get_argparser_formatter, chunks
-
-
-
-def build_argparser_create_jobs():
-    parser = argparse.ArgumentParser(description = '', formatter_class=get_argparser_formatter() , add_help=False)
-
-    parser.add_argument('--production-card','-p', action='store', dest='production_card', 
-                        required = False, type=str, default=None,
-                        help = "The production card")
-    
-    parser.add_argument('--output','-o', action='store', dest='output',
-                        required = False, type=str, default=f'jobs',
-                        help = "The production card")
-    return parser
-
-def build_argparser_run_job():
-    parser = argparse.ArgumentParser(description = '', formatter_class=get_argparser_formatter() , add_help=False)
-
-    parser.add_argument('--job','-j', action='store', dest='job', 
-                        required = True, type=str, default=None,
-                        help = "The production card")
-    
-    parser.add_argument('--output-dir','-o', action='store', dest='output_dir',
-                        required = False, type=str, default='job.json',
-                        help = "The job output path.")
-    
-    parser.add_argument('-nt','--number-of-threads', action='store', dest='number_of_threads', required = False, type=int, 
-                        default=multiprocessing.cpu_count(),
-                        help = "The number of threads")
-    return parser
-
-def run_create_jobs(args):
-    prod = json.load(open(args.production_card,'r'))
-    chunk_size = prod["run"]["nov_per_job"]
-    seed = prod["run"]["seed"]
-    os.makedirs(args.output, exist_ok=True)
-    for idx, evts in enumerate(chunks(np.arange( 0, prod["run"]["nov"]).tolist(), chunk_size)):
-        with open( f"{args.output}/job.{idx}.json", 'w') as f:
-            d = prod | {"job":{"event_numbers":evts, "seed":seed*(idx+1),"job_id":idx}}
-            json.dump(d,f ,indent = 4)
-
-def run_job(args):
-    job        = json.load(open(args.job,'r'))
-    job_id     = job["job"].get("job_id")
-    run_number = job["run"].get("run_number")
-    seed       = job["job"]["seed"]
-    workarea   = os.path.abspath(args.output_dir)
-    
-    envs = {
-        f"%SEED"           : str(seed),
-        f"%RUN_NUMBER"     : str(run_number),
-        f"%JOB_WORKAREA"   : workarea,
-        f"%EVENT_NUMBERS"  : ",".join([str(evt) for evt in job["job"]["event_numbers"]]),
-        f"%CPU_CORES"      : str(args.number_of_threads),
-        f"%JOB_ID"         : str(job_id),
-    }
-    
-    os.makedirs(workarea, exist_ok=True)
-    stages = job.get("stages", [])
-    for params in stages:
-        step_dir = params.get("name")
-        step_path = f"{workarea}/{step_dir}"
-        os.makedirs(step_path, exist_ok=True)
-        command     = params.get("script")
-        input_path  = params.get("input",None) 
-        output_path = params.get("output")
-        if input_path:
-            command+= f" -i {input_path}"
-        command += f" -o {output_path}"
-        for key, value in params.get("extra_args",{}).items():
-            command += f" --{key} {value}" if value else f" --{key}"
-        for key, value in envs.items():
-            command = command.replace(key,value)
-        print(command)
-        if not os.path.exists(f"{step_path}/completed"):
-            returncode = os.system(command)
-            print(returncode)
-            if returncode==0:
-                with open(f"{step_path}/completed", 'w') as f:
-                    f.write("completed")
-            else:
-                sys.exit(returncode)
-    sys.exit(0)
-
+import sys, os, json
+from GaugiKernel import get_argparser_formatter
 
 def build_argparser():
     formatter_class = get_argparser_formatter()
-    parser    = argparse.ArgumentParser(formatter_class=formatter_class)
-    option = parser.add_subparsers(dest='option')
-    option.add_parser("run"   , parents = [build_argparser_run_job()]   ,help='Run a job using trf scripts',formatter_class=formatter_class)
-    option.add_parser("create", parents = [build_argparser_create_jobs()]   ,help='Create jobs from a production card.',formatter_class=formatter_class)
+    parser = argparse.ArgumentParser(formatter_class=formatter_class)
+
+    subparsers = parser.add_subparsers(dest='option', required=True)
+
+    # Subparser para o comando "run"
+    run_parser = subparsers.add_parser("run", help='Executa um job a partir de um JSON.', formatter_class=formatter_class)
+    run_parser.add_argument('--job','-j', required=True, type=str, help="Caminho para o arquivo job.json")
+    run_parser.add_argument('--output-dir','-o', type=str, default='job_output', help="Diretório onde os arquivos de saída serão gerados")
+    run_parser.add_argument('-nt','--number-of-threads', type=int, default=multiprocessing.cpu_count(), help="Número de threads")
+    run_parser.add_argument('--force', action='store_true', help="Força a reexecução de etapas já concluídas")
+
     return parser
+
+def run_job(args):
+    # Carrega o job JSON
+    job = json.load(open(args.job, 'r'))
     
+    # Handle both JSON structures:
+    # 1. New style: {"job": {"job_id": 123, ...}, "run": {...}}
+    # 2. Old style: {"job_id": 123, "run": {...}, ...}
+    job_data = job.get("job", job)  # Use nested "job" if exists, else use root
+    run_data = job.get("run", {})   # Get run info from root if not in job
     
+    # Get job parameters with defaults
+    job_id = job_data.get("job_id", 0)
+    seed = job_data.get("seed", 512)
+    event_numbers = job_data.get("event_numbers", [])
+    run_number = run_data.get("run_number", 20250122)  # Default run number
     
+    workarea = os.path.abspath(args.output_dir)
     
+    # Substituições de variáveis de ambiente no script
+    envs = {
+        "%SEED": str(seed),
+        "%RUN_NUMBER": str(run_number),
+        "%JOB_WORKAREA": workarea,
+        "%EVENT_NUMBERS": ",".join([str(evt) for evt in event_numbers]),
+        "%CPU_CORES": str(args.number_of_threads),
+        "%JOB_ID": str(job_id),
+    }
+
+    os.makedirs(workarea, exist_ok=True)
+    stages = job.get("stages", [])
+
+    for params in stages:
+        step_dir = params.get("name")
+        step_path = os.path.join(workarea, step_dir)
+        os.makedirs(step_path, exist_ok=True)
+
+        command = params.get("script")
+        input_path = params.get("input", None)
+        output_path = params.get("output")
+
+        # Construir o comando com os parâmetros
+        if input_path:
+            command += f" -i {input_path}"
+        command += f" -o {output_path}"
+
+        for key, value in params.get("extra_args", {}).items():
+             if value == "None":  # Handle string "None" specially
+              command += f" --{key}"
+             elif value:  # Only add if value exists
+               command += f" --{key} {value}"
+             else:  # For empty values
+               command += f" --{key}"
+
+        # Substituir as variáveis no comando final
+        for key, value in envs.items():
+            command = command.replace(key, f'"{value}"')
+
+        completed_flag = os.path.join(step_path, 'completed')
+
+        if not os.path.exists(completed_flag) or args.force:
+            print(f"\n Executando etapa: {params['name']}")
+            print(f" Comando: {command}")
+            returncode = os.system(command)
+            print(f" Código de retorno: {returncode}")
+            if returncode == 0:
+                with open(completed_flag, 'w') as f:
+                    f.write("completed")
+            else:
+                print(f" Falha na etapa '{params['name']}' com código {returncode}")
+                sys.exit(returncode)
+        else:
+            print(f" Etapa '{params['name']}' já concluída. Use --force para reexecutar.")
+
+    print("\n Job finalizado com sucesso.")
+    sys.exit(0)
+
 def run_parser(args):
-    if args.option == "create":
-        run_create_jobs(args)
-    elif args.option == "run":  
+    if args.option == "run":
         run_job(args)
     else:
-        print("Option not implemented")
-  
-
-
-        
+        print(" Opção não implementada")
 
 if __name__ == "__main__":
     parser = build_argparser()
-    if len(sys.argv)==1:
-        print(parser.print_help())
-        sys.exit(1) 
+    if len(sys.argv) == 1:
+        parser.print_help()
+        sys.exit(1)
     args = parser.parse_args()
-    run_parser(args)    
+    run_parser(args)

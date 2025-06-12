@@ -43,6 +43,8 @@ namespace generator{
   
       float trunc_centered_gauss(float sigma, float trunc) const;
       
+       /*! Sample J/psi decay fluctuation */
+      float sample_jpsi_decay() const;  
       /*! Level message */
       int m_outputLevel;
       /* Max number of errors */
@@ -50,6 +52,7 @@ namespace generator{
       /*! Number of errors */
       int m_iAbort;
       /*! Time fluctuations in pp collisions */
+      float m_sigma_jpsi;  // Fluctuations associated with J/psi decay
       float m_sigma_t;
       /*! Z axis fluctuations in pp collisions */
       float m_sigma_z;
@@ -57,6 +60,11 @@ namespace generator{
       float m_trunc_t;
       /*! Truncate large z fluctuations (mm) */
       float m_trunc_z;
+            /*! Truncate large J/psi fluctuations (GeV/c^2) */
+      float m_trunc_jpsi;  // Truncate large J/psi decay fluctuations
+      float sample_Upsilon_decay() const;  
+      float m_sigma_Upsilon;  // Fluctuations associated with Upsilon
+      float m_trunc_Upsilon;
       /*! Set maximum mu to avoid overflow. */
       float m_trunc_mu = 300;
 

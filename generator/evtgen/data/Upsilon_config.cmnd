@@ -1,0 +1,36 @@
+! 1) Settings used in the main program.
+Main:numberOfEvents = 100          ! number of events to generate
+Main:timesAllowErrors = 3          ! how many aborts before run stops
+
+! 2) Settings related to output in init(), next() and stat().
+Init:showChangedSettings = on      ! list changed settings
+Init:showChangedParticleData = on  ! list changed particle data
+Next:numberCount = 10              ! print message every n events
+Next:numberShowInfo = 1            ! print event information n times
+Next:numberShowProcess = 0         ! print process record n times
+Next:numberShowEvent = 0           ! print event record n times
+
+! 3) Beam parameter settings. Values below agree with default ones.
+Beams:idA = 2212                   ! first beam, p = 2212, pbar = -2212
+Beams:idB = 2212                   ! second beam, p = 2212, pbar = -2212
+Beams:eCM = 14000.                 ! CM energy of collision
+
+! 4) Settings for the hard-process generation.
+HardQCD:gg2bbbar = on              ! Enable bottom quark pair production via gluon fusion
+HardQCD:qqbar2bbbar = on           ! Enable bottom quark pair production via qq-bar annihilation
+
+! 6) Ensure Υ production (with no EvtGen)
+Bottomonium:all = on               ! Habilita a produção de Υ diretamente no Pythia8
+
+! 7) Restrict the phase space for subprocesses to ensure Υ production
+PhaseSpace:pTHatMin = 5.0         ! Minimum transverse momentum for subprocesses (Υ geralmente tem mais energia)
+PhaseSpace:mHatMin = 9.0          ! Minimum invariant mass to evitar estados excitados desnecessários
+
+! 8) Set decay modes for Υ
+553:onMode = off                   ! Turn off all decay modes for Υ
+553:onIfMatch = 13 -13             ! Only decay Υ to μ⁺μ⁻ (muons)
+
+! 10) Optional: Other additional settings
+StringPT:sigma = 0.3              ! Fine-tuning for fragmentation (if needed)
+HadronLevel:Hadronize = on         ! Habilita a hadronização, sem usar EvtGen
+
