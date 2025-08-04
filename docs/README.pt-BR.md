@@ -5,17 +5,28 @@
 Este repositório contém o código do **Lorenzetti**, um projeto que roda dentro de um container Apptainer (Singularity). Este guia mostra como instalar as dependências, preparar o ambiente e compilar o projeto.
 
 ---
-
 ## 📦 Pré-requisitos
 
-- [Go](https://golang.org/)
-- [Apptainer](https://apptainer.org/) (ou Singularity)
-
-No Ubuntu, instale com:
+Instale os seguintes pacotes no seu sistema (recomendado para Ubuntu 22.04 ou superior):
 
 ```bash
 sudo apt update
-sudo apt install golang-go apptainer -y
+sudo apt install -y \
+  golang-go \
+  apptainer \
+  build-essential \
+  cmake \
+  libexpat1-dev \
+  zlib1g-dev \
+  libxerces-c-dev \
+  libgl1-mesa-dev \
+  libx11-dev \
+  libxext-dev \
+  libice-dev \
+  libsm-dev \
+  python3.10-dev \
+  python3.10 \
+  libpython3.10-dev
 ```
 
 ---
@@ -83,12 +94,23 @@ Agora o Lorenzetti está instalado e pronto para uso dentro do container. Para d
 
 Para testar o Lorenzetti, você pode rodar um evento de exemplo com a geração de uma partícula.
 
-1. Dentro do container, navegue até a pasta de exemplos:
+1. Dentro do container,  vá para a pasta de cards de produção::
+   ```bash
+   cd EVT/production cards
+  
+2. Depois, crie os jobs usando o executável:
+
+```bash
+./create_jobs <production_card_path> <output_dir> <chunk_size> <MAX_EVENT_NUM> <nome_da_particula>
+```
+
+3. Navegue até a pasta de exemplos:
    ```bash
    cd generator/examples
    ```
 
-2. Escolha o evento desejado (por exemplo, `jpsi`, `pion`, `muon`, etc).
+2. Escolha o evento desejado 
+3. Substitua o caminho para o seu diretorio nos locais apropriados
 
 3. Execute o script correspondente:
    ```bash

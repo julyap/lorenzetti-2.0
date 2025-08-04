@@ -8,17 +8,25 @@ This repository contains the code for **Lorenzetti**, a project that runs inside
 
 ## 📦 Requirements
 
-- [Go](https://golang.org/)
-- [Apptainer](https://apptainer.org/) (or Singularity)
-
-On Ubuntu:
-
 ```bash
 sudo apt update
-sudo apt install golang-go apptainer -y
+sudo apt install -y \
+  golang-go \
+  apptainer \
+  build-essential \
+  cmake \
+  libexpat1-dev \
+  zlib1g-dev \
+  libxerces-c-dev \
+  libgl1-mesa-dev \
+  libx11-dev \
+  libxext-dev \
+  libice-dev \
+  libsm-dev \
+  python3.10-dev \
+  python3.10 \
+  libpython3.10-dev
 ```
-
----
 
 ## 📥 Clone the repository
 
@@ -79,22 +87,35 @@ Lorenzetti is now ready to use inside the container. If you have questions or su
 ---
 
 ## 🎯 How to Run a Quick Example
+🎯 Running a Quick Example
 
-To quickly test Lorenzetti, you can run an example event that generates a particle.
+To test Lorenzetti, you can run a sample particle generation event:
 
-1. Inside the container, go to the examples directory:
+1. Inside the container, go to the production cards folder:
+  
+    ```bash
+    cd EVT/production_cards
+   ```
+2. Create jobs using the executable:
+
+   ```bash
+   ./create_jobs <production_card_path> <output_dir> <chunk_size> <MAX_EVENT_NUM> <particle_name>
+   ```
+3. Then go to the examples folder:
+
    ```bash
    cd generator/examples
    ```
+4. Choose the desired event.
 
-2. Choose the particle/event you want to run (e.g., `jpsi`, `Zee`, `muon`, etc).
+5. Replace the paths in the script with your own directory structure where needed.
 
-3. Execute the corresponding script:
+6. Run the corresponding script:
    ```bash
-   ./gen_particula.sh
+    ./gen_particula.sh
    ```
-
-The script will set up and run the simulation for that particle.
+   
+The script will configure and run the simulation for that specific particle.
 
 ## 🛠 More Help
 
