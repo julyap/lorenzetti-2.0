@@ -94,17 +94,7 @@ Agora o Lorenzetti está instalado e pronto para uso dentro do container. Para d
 
 Para testar o Lorenzetti, você pode rodar um evento de exemplo com a geração de uma partícula.
 
-1. Dentro do container,  vá para a pasta de cards de produção::
-   ```bash
-   cd EVT/production cards
-  
-2. Depois, crie os jobs usando o executável:
-
-```bash
-./create_jobs <production_card_path> <output_dir> <chunk_size> <MAX_EVENT_NUM> <nome_da_particula>
-```
-
-3. Navegue até a pasta de exemplos:
+1. Dentro do container, navegue até a pasta de exemplos:
    ```bash
    cd generator/examples
    ```
@@ -112,7 +102,7 @@ Para testar o Lorenzetti, você pode rodar um evento de exemplo com a geração 
 2. Escolha o evento desejado 
 3. Substitua o caminho para o seu diretorio nos locais apropriados
 
-3. Execute o script correspondente:
+4. Execute o script correspondente:
    ```bash
    ./gen_particula.sh
    ```

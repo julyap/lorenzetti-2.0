@@ -91,26 +91,16 @@ Lorenzetti is now ready to use inside the container. If you have questions or su
 
 To test Lorenzetti, you can run a sample particle generation event:
 
-1. Inside the container, go to the production cards folder:
-  
-    ```bash
-    cd EVT/production_cards
-   ```
-2. Create jobs using the executable:
-
-   ```bash
-   ./create_jobs <production_card_path> <output_dir> <chunk_size> <MAX_EVENT_NUM> <particle_name>
-   ```
-3. Then go to the examples folder:
+1. Inside the container, go to the examples folder:
 
    ```bash
    cd generator/examples
    ```
-4. Choose the desired event.
+2. Choose the desired event.
 
-5. Replace the paths in the script with your own directory structure where needed.
+3. Replace the paths in the script with your own directory structure where needed.
 
-6. Run the corresponding script:
+4. Run the corresponding script:
    ```bash
     ./gen_particula.sh
    ```
