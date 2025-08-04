@@ -5,31 +5,36 @@ from GaugiKernel.macros import *
 from CaloClusterBuilder import CaloClusterFlags as flags
 import ROOT
 
-class CaloClusterMaker( Cpp ):
+class CaloClusterMaker(Cpp):
 
+  def __init__(self, name,
+               InputCellsKey: str, 
+               InputSeedsKey: str,
+               OutputClusterKey: str, 
+               EtaWindow: float = flags.EtaWindow, 
+               PhiWindow: float = flags.PhiWindow,
+               MinCenterEnergy: float = flags.MinCenterEnergy,
+               doForwardMoments: bool = flags.doForwardMoments,
+               OutputLevel: str = "0", 
+               HistogramPath: str = "Expert/Clusters"):
 
-  def __init__( self, name,
-                InputCellsKey    : str, 
-                InputSeedsKey    : str,
-                OutputClusterKey : str, 
-                EtaWindow        : float=flags.EtaWindow, 
-                PhiWindow        : float=flags.PhiWindow,
-                MinCenterEnergy  : float=flags.MinCenterEnergy,
-                doForwardMoments : bool=flags.doForwardMoments,
-                OutputLevel      : str=0, 
-                HistogramPath    : str="Expert/Clusters",
-              ):
+    cpp_obj = ROOT.CaloClusterMaker(name)
+    super().__init__(cpp_obj)
 
-    Cpp.__init__(self, ROOT.CaloClusterMaker(name) )
+    # Define helper for safe property setting
+    def safe_set(key, value):
+      try:
+        self.setProperty(key, value)
+      except Exception:
+        raise AttributeError(f"[CaloClusterMaker] Property '{key}' is not valid for this object.")
 
-    self.setProperty( "InputCellsKey"        , InputCellsKey        ) 
-    self.setProperty( "InputSeedsKey"        , InputSeedsKey        )
-    self.setProperty( "OutputClusterKey"     , OutputClusterKey     ) 
-    self.setProperty( "EtaWindow"            , EtaWindow            ) 
-    self.setProperty( "PhiWindow"            , PhiWindow            )
-    self.setProperty( "MinCenterEnergy"      , MinCenterEnergy      )
-    self.setProperty( "DoForwardMoments"     , doForwardMoments     )
-    self.setProperty( "OutputLevel"          , OutputLevel          ) 
-    self.setProperty( "HistogramPath"        , HistogramPath        )
-
+    safe_set("InputCellsKey",        InputCellsKey)
+    safe_set("InputSeedsKey",        InputSeedsKey)
+    safe_set("OutputClusterKey",     OutputClusterKey)
+    safe_set("EtaWindow",            EtaWindow)
+    safe_set("PhiWindow",            PhiWindow)
+    safe_set("MinCenterEnergy",      MinCenterEnergy)
+    safe_set("DoForwardMoments",     doForwardMoments)
+    safe_set("OutputLevel",          OutputLevel)
+    safe_set("HistogramPath",        HistogramPath)
 

@@ -1,0 +1,7 @@
+Module libc not found.
+Usage: simu_trf.py [--enable-magnetic-field] [-t TIMEOUT] [-l OUTPUT_LEVEL]
+                   [-c COMMAND] [--save-all-hits] -i INPUT_FILE -o OUTPUT_FILE
+                   [--nov NUMBER_OF_EVENTS] [--events-per-job EVENTS_PER_JOB]
+                   [-nt NUMBER_OF_THREADS] [-m] [--overwrite]
+                   [--job-file JOB_FILE]
+simu_trf.py: error: unrecognized arguments: --evt 40

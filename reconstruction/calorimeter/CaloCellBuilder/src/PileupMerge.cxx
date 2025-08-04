@@ -1,5 +1,4 @@
 
-
 #include "PileupMerge.h"
 #include "CaloHit/CaloHitConverter.h"
 #include "EventInfo/EventInfoConverter.h"
@@ -212,6 +211,3 @@ void PileupMerge::InitBranch(TTree* fChain, std::string branch_name, T* param) c
   fChain->SetBranchStatus(bname.c_str(), 1.);
   fChain->SetBranchAddress(bname.c_str(), param);
 }
-
-
-

@@ -1,9 +1,6 @@
-
 #include "EventInfo/EventInfoContainer.h"
 #include "EventInfo/SeedContainer.h"
 #include "TruthParticle/TruthParticleContainer.h"
-
-
 #include "G4Kernel/EventReader.h"
 #include "G4Kernel/RunReconstruction.h"
 #include "G4Kernel/constants.h"
@@ -28,13 +25,11 @@ EventReader::EventReader(std::string name):
     m_evt(0)
 {
   ROOT::EnableThreadSafety();  
-  
   declareProperty( "InputFileName"      , m_filename=""          );
   declareProperty( "OutputEventKey"     , m_eventKey="EventInfo" );
   declareProperty( "OutputTruthKey"     , m_truthKey="Particles" );
   declareProperty( "OutputSeedKey"      , m_seedKey="Seed"       );
   declareProperty( "BunchDuration"      , m_bc_duration=25*ns    );
-
 }
 
 PrimaryGenerator* EventReader::copy()
@@ -48,13 +43,10 @@ PrimaryGenerator* EventReader::copy()
   return gun;
 }
 
-
-
 EventReader::~EventReader()
 {
   if( m_f ) delete m_f;
 }
-
 
 StatusCode EventReader::initialize()
 {    
@@ -69,7 +61,6 @@ StatusCode EventReader::initialize()
   return StatusCode::SUCCESS;
 }
 
-
 StatusCode EventReader::finalize()
 {
   if(m_filename!=""){
@@ -78,8 +69,6 @@ StatusCode EventReader::finalize()
   }
   return StatusCode::SUCCESS;
 }
-
-
 
 template <class T> 
 void EventReader::InitBranch(TTree* fChain, std::string branch_name, T* param, bool message)
@@ -95,7 +84,6 @@ void EventReader::InitBranch(TTree* fChain, std::string branch_name, T* param, b
   fChain->SetBranchStatus(bname.c_str(), 1.);
   fChain->SetBranchAddress(bname.c_str(), param);
 }
-
 
 void EventReader::link(TTree *t)
 {  
@@ -119,7 +107,6 @@ void EventReader::link(TTree *t)
   InitBranch( t, "p_et"       ,&m_p_et        );
 }
 
-
 void EventReader::clear()
 { 
   m_avgmu       = 0.0;
@@ -141,7 +128,6 @@ void EventReader::clear()
   m_p_et      ->clear();
 }
 
-
 void EventReader::allocate()
 {
   m_p_isMain  = new std::vector<int>();
@@ -160,7 +146,6 @@ void EventReader::allocate()
   m_p_e       = new std::vector<float>();
   m_p_et      = new std::vector<float>();
 }
-
 
 void EventReader::release()
 {
@@ -181,8 +166,6 @@ void EventReader::release()
   delete m_p_et       ;
 }
 
-
-// Call by geant
 void EventReader::GeneratePrimaryVertex( G4Event* anEvent )
 {
   clear();
@@ -216,7 +199,6 @@ void EventReader::GeneratePrimaryVertex( G4Event* anEvent )
   }
 }
 
-
 bool EventReader::CheckVertexInsideWorld(const G4ThreeVector& pos) const
 {
   G4Navigator* navigator= G4TransportationManager::GetTransportationManager()->GetNavigatorForTracking();
@@ -226,7 +208,6 @@ bool EventReader::CheckVertexInsideWorld(const G4ThreeVector& pos) const
   if( qinside != kInside) return false;
   else return true;
 }
-
 
 int EventReader::Load( G4Event* g4event )
 {
@@ -242,7 +223,7 @@ int EventReader::Load( G4Event* g4event )
   int num_of_seeds = 0;
   int seed_id = -1;
 
-  // Add all particles into the Geant event
+  // Process ALL particles (main + pileup)
   for ( unsigned int i=0; i < m_p_e->size(); ++i )
   {
     int bc_id = m_p_bc_id->at(i);
@@ -253,70 +234,49 @@ int EventReader::Load( G4Event* g4event )
                                          m_p_et->at(i)*MeV, 
                                          m_p_eta->at(i), 
                                          m_p_phi->at(i)
-                                          );
-
-      MSG_INFO( "Seed " << seed_id << " in eta = " << seed->eta() << ", phi = " << seed->phi());
+                                       );
       seeds->push_back(seed);
       num_of_seeds++;
       continue; 
     }
     
-    
-    if( m_p_isMain->at(i) ){ // Is main event?
-        if( Add( g4event, i, bc_id ) ){ // Is inside of the world
-            // particle is main event and inside of the world, add particle
-            totalEnergy+= m_p_et->at(i);
-            xAOD::TruthParticle *par = new xAOD::TruthParticle( 
-                                                                m_p_pdg_id->at(i),
-                                                                seed_id,
-                                                                m_p_e->at(i)*MeV, 
-                                                                m_p_et->at(i)*MeV, 
-                                                                m_p_eta->at(i), 
-                                                                m_p_phi->at(i), 
-                                                                m_p_px->at(i)*MeV, 
-                                                                m_p_py->at(i)*MeV, 
-                                                                m_p_pz->at(i)*MeV, 
-                                                                m_p_prod_x->at(i)*mm,
-                                                                m_p_prod_y->at(i)*mm,
-                                                                m_p_prod_z->at(i)*mm
-                                                              );
-
-            MSG_DEBUG( "Particle in eta = " << par->eta() << ", phi = " << par->phi());
-            particles->push_back(par);
-        }
-    }else{ // Is not a main event
-      Add( g4event, i, bc_id );
+    // Add ALL particles to Geant4 and TruthParticleContainer
+    if( Add( g4event, i, bc_id ) ){
+        xAOD::TruthParticle *par = new xAOD::TruthParticle( 
+            m_p_pdg_id->at(i),
+            seed_id,
+            m_p_e->at(i)*MeV, 
+            m_p_et->at(i)*MeV, 
+            m_p_eta->at(i), 
+            m_p_phi->at(i), 
+            m_p_px->at(i)*MeV, 
+            m_p_py->at(i)*MeV, 
+            m_p_pz->at(i)*MeV, 
+            m_p_prod_x->at(i)*mm,
+            m_p_prod_y->at(i)*mm,
+            m_p_prod_z->at(i)*mm
+        );
+        particles->push_back(par);
     }
   }
 
   return num_of_seeds;
 }
 
-
 bool EventReader::Add( G4Event* g4event , int i, int bc_id )
 {
-  G4LorentzVector xvtx( m_p_prod_x->at(i)*mm, m_p_prod_y->at(i)*mm, m_p_prod_z->at(i)*mm, (m_p_prod_t->at(i) /*mm*/ * mm /*m*/ / (c_light*ns) /*ns*/) + (bc_id*m_bc_duration) /*ns*/  );
-  G4PrimaryVertex* g4vtx= new G4PrimaryVertex(  xvtx.x(), xvtx.y(), xvtx.z(), xvtx.t()  );
-  //MSG_INFO("Adding particle ID = " << m_p_pdg_id->at(i));
+  G4LorentzVector xvtx( m_p_prod_x->at(i)*mm, m_p_prod_y->at(i)*mm, m_p_prod_z->at(i)*mm, (m_p_prod_t->at(i) * mm / (c_light*ns)) + (bc_id*m_bc_duration) );
+  G4PrimaryVertex* g4vtx= new G4PrimaryVertex( xvtx.x(), xvtx.y(), xvtx.z(), xvtx.t() );
+  
   if (! CheckVertexInsideWorld(xvtx.vect())){
-    //std::cout << "particle is not inside the world!" << std::endl;
     std::cerr << "Particle is not inside the world!" << std::endl;
-    std::cerr << "Pythia : " 
-        << " x: " << m_p_prod_x->at(i)
-        << " y: " << m_p_prod_y->at(i)
-        << " z: " << m_p_prod_z->at(i)
-        << " t[mm]: " << m_p_prod_t->at(i)
-        << " pgd_id: " << m_p_pdg_id->at(i)
-        << std::endl;
     return false;
   }
 
-
   G4int pdgcode= m_p_pdg_id->at(i);
-  G4LorentzVector p( m_p_px->at(i)*GeV, m_p_py->at(i)*GeV, m_p_pz->at(i)*GeV,  m_p_e->at(i)*GeV );
+  G4LorentzVector p( m_p_px->at(i)*GeV, m_p_py->at(i)*GeV, m_p_pz->at(i)*GeV, m_p_e->at(i)*GeV );
   G4PrimaryParticle* g4prim = new G4PrimaryParticle(pdgcode, p.x(), p.y(), p.z());
   g4vtx->SetPrimary(g4prim);
   g4event->AddPrimaryVertex(g4vtx);
   return true;
 }
-

@@ -9,7 +9,7 @@
 #include "CaloCluster/CaloClusterContainer.h"
 #include "EventInfo/SeedContainer.h"
 #include "ShowerShapes.h"
-
+#include "Rtypes.h"  // <-- necessário para ClassDef
 
 class CaloClusterMaker : public Gaugi::Algorithm
 {
@@ -17,38 +17,24 @@ class CaloClusterMaker : public Gaugi::Algorithm
   public:
     /** Constructor **/
     CaloClusterMaker( std::string );
-    
     virtual ~CaloClusterMaker();
-    
-    virtual StatusCode initialize() override;
 
-    /*! Book all histograms into the current storegate */
+    virtual StatusCode initialize() override;
     virtual StatusCode bookHistograms( SG::EventContext &ctx ) const override;
-    
     virtual StatusCode pre_execute( SG::EventContext &ctx ) const override;
-    
     virtual StatusCode execute( SG::EventContext &ctx , const G4Step *step) const override;
-    
-    /*! Execute in ComponentAccumulator */
     virtual StatusCode execute( SG::EventContext &ctx , int /*evt*/ ) const override;
-    
     virtual StatusCode post_execute( SG::EventContext &ctx ) const override;
-    
     virtual StatusCode fillHistograms( SG::EventContext &ctx ) const override;
-    
     virtual StatusCode finalize() override;
 
-
-
   private:
- 
-    
+
     void fillCluster( SG::EventContext &ctx,  xAOD::CaloCluster *clus, std::string key ) const;
-    
     float dR( float eta1, float phi1, float eta2, float phi2 ) const;
- 
-    
-      
+    float calculateClusterDeltaEta(const std::vector<const xAOD::CaloCell*>& cells) const;
+    float calculateClusterDeltaPhi(const std::vector<const xAOD::CaloCell*>& cells) const;
+
     // input keys
     std::string m_cellsKey; 
     std::string m_seedKey;
@@ -60,16 +46,11 @@ class CaloClusterMaker : public Gaugi::Algorithm
     bool m_doForwardMoments;
     std::string m_histPath;
 
-    // Shower shaper calculator
     ShowerShapes *m_showerShapes;
-
     float m_minCenterEnergy;
 
-
+    ClassDef(CaloClusterMaker, 1)  // <- macro do ROOT
 };
 
 #endif
-
-
-
 

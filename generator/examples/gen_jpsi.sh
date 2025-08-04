@@ -2,16 +2,17 @@
 # -*- coding: utf-8 -*-
 
 # Configure environment
-export PYTHONPATH="/home/administrador/apptainer-1.3.0/lorenzetti/core:$PYTHONPATH"
+export PYTHONPATH="/SEU/CAMINHO/PARA/O/LORENZETTI/lorenzetti/core:$PYTHONPATH"
 export LC_ALL=C.UTF-8  # Ensure consistent locale
 
 # Set fixed CPU count
-CPU_N=23
+CPU_N=10
 
 # Path configurations
-JOB_DIR="/home/administrador/apptainer-1.3.0/lorenzetti/EVT/jobs/jobs_jpsi"
-OUTPUT_BASE="/home/administrador/apptainer-1.3.0/lorenzetti/EVT/output_jpsi"
-SCRIPT_PATH="/home/administrador/apptainer-1.3.0/lorenzetti/core/GaugiKernel/scripts/run_job.py"
+JOB_DIR="/SEU/CAMINHO/PARA/O/LORENZETTI/lorenzetti/EVT/jobs/jobs_zee"
+OUTPUT_BASE="/SEU/CAMINHO/PARA/O/LORENZETTI/lorenzetti/EVT/output"
+SCRIPT_PATH="/SEU/CAMINHO/PARA/O/LORENZETTI/lorenzetti/core/GaugiKernel/scripts/run_job.py"
+
 
 # Validate directories
 mkdir -p "$OUTPUT_BASE" || { echo "Failed to create output directory"; exit 1; }
