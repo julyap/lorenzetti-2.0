@@ -21,6 +21,18 @@
 #include "GaugiKernel/Algorithm.h"
 #include "GaugiKernel/DataHandle.h"
 
+// --- Aditivo: headers de muon  ---
+#include "Muon/Muon.h"
+#include "Muon/MuonContainer.h"
+#include "Muon/MuonConverter.h"
+#include "MuonCell/MuonChamberCell.h"
+#include "MuonCell/MuonChamberCellContainer.h"
+#include "MuonCell/MuonChamberConverter.h"
+#include "MuonCell/MuonChamberDescriptorConverter.h"
+#include "MuonCluster/MuonCluster.h"
+#include "MuonCluster/MuonClusterContainer.h"
+#include "MuonCluster/MuonClusterConverter.h"
+
 /**
  * @class RootStreamAODMaker
  * @brief Algorithm to stream AOD content to a ROOT file.
@@ -59,6 +71,7 @@ private:
   template <class T>
   void InitBranch(TTree *fChain, std::string branch_name, T *param) const;
 
+  // --- Metodos oficiais (PRESERVADOS) ---
   void serializeCaloCluster(SG::EventContext &ctx,
                             std::string key,
                             std::vector<xAOD::CaloCluster_t> *container_t,
@@ -92,8 +105,23 @@ private:
                       std::map<unsigned long int, const xAOD::CaloCell *> &cell_map,
                       bool dump_descriptor = true) const;
 
+  // --- Metodos aditivos de muon ---
+  void serializeMuonCells(SG::EventContext &ctx,
+                          std::string key,
+                          std::vector<xAOD::MuonChamber_t> *container_t,
+                          std::vector<xAOD::MuonChamberDescriptor_t> *container_descriptor_t) const;
+
+  void serializeMuonClusters(SG::EventContext &ctx,
+                             std::string key,
+                             std::vector<xAOD::MuonCluster_t> *container_t) const;
+
+  void serializeMuons(SG::EventContext &ctx,
+                      std::string key,
+                      std::vector<xAOD::Muon_t> *container_t) const;
+
   std::string m_ntupleName;
 
+  // --- Oficiais: calorimetro ---
   std::string m_inputCellsKey;
   std::string m_inputEventKey;
   std::string m_inputSeedsKey;
@@ -125,8 +153,22 @@ private:
   std::vector<std::string> m_inputTruthRingerKeys;
   std::vector<std::string> m_outputTruthRingerKeys;
 
-  bool m_dumpCells;
-  int m_outputLevel;
+  // --- Aditivo: muon ---
+  std::string m_inputMuonCellsKey;
+  std::string m_inputMuonClusterKey;
+  std::string m_inputMuonKey;
+
+  std::string m_outputMuonCellsKey;
+  std::string m_outputMuonClusterKey;
+  std::string m_outputMuonKey;
+
+  // --- Flags ---
+  bool m_dumpCells;             // oficial
+  bool m_enableCaloOutput;      // aditivo (default true)
+  bool m_enableMuonOutput;      // aditivo (default true)
+  bool m_dumpMuonCells;         // aditivo (default false)
+  bool m_dumpMuonClusters;      // aditivo (default false)
+  int m_outputLevel;            // oficial
 };
 
 #endif

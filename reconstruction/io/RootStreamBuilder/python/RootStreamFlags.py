@@ -37,3 +37,6 @@ class RootStreamAODFlags(EnumStringification):
     CustomRingsShiftPhi: list = [0]
     StripsAxis = 0
 
+    # --- Aditivo: flags da camara de muons (defaults preservam o comportamento oficial) ---
+    DumpMuonCells    = False
+    DumpMuonClusters = False

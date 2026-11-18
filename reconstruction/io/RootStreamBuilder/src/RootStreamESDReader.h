@@ -2,21 +2,23 @@
 #define RootStreamESDReader_h
 
 #include "GaugiKernel/Algorithm.h"
+#include "GaugiKernel/MsgStream.h"
 #include "CaloCell/enumeration.h"
 #include "EventInfo/EventInfo.h"
 #include "EventInfo/Seed.h"
-
 #include "TruthParticle/TruthParticle.h"
-
-
-
+#include <vector>
 
 /**
  * @class RootStreamESDReader
  * @brief Algorithm to read ESD (Event Summary Data) from a ROOT file.
- * 
+ *
  * Reads detailed cell-level data and reconstructed objects from disk.
  * Typically used to replay events for re-reconstruction or detailed debugging.
+ *
+ * --- Aditivo: muon ---
+ * Also reads muon chamber cells (MuonChamberCellContainer) when EnableMuonOutput
+ * is true.
  */
 class RootStreamESDReader : public Gaugi::Algorithm
 {
@@ -24,43 +26,58 @@ class RootStreamESDReader : public Gaugi::Algorithm
   public:
     /** Constructor **/
     RootStreamESDReader( std::string );
-    
+
     virtual ~RootStreamESDReader();
 
     virtual StatusCode initialize() override;
 
     virtual StatusCode bookHistograms( SG::EventContext &ctx ) const override;
-    
+
     virtual StatusCode pre_execute( SG::EventContext &ctx ) const override;
-    
+
     virtual StatusCode execute( SG::EventContext &ctx , const G4Step *step) const override;
-    
+
     virtual StatusCode execute( SG::EventContext &ctx , int evt ) const override;
 
     virtual StatusCode post_execute( SG::EventContext &ctx ) const override;
-    
+
     virtual StatusCode fillHistograms( SG::EventContext &ctx ) const override;
-    
+
     virtual StatusCode finalize() override;
 
 
   private:
- 
+
     StatusCode deserialize( int evt, SG::EventContext &ctx ) const;
 
     template <class T> void InitBranch(TTree* fChain, std::string branch_name, T* param) const;
-    
+
+    // --- Oficiais: calorimetro ---
     std::string m_cellsKey;
     std::string m_cellsTruthKey;
+
+    // --- Alias da sua versao (opcional; se passado, tem precedencia) ---
+    std::string m_calocellsKey;
+    // ===== CORRIGIDO: alias simetrico para truth (usado em deserialize) =====
+    std::string m_truthCaloCellsKey;
+
+    // --- Aditivo: muon ---
+    std::string m_muonCellsKey;
+    std::vector<std::string> m_muonCellKeys;
+
+    // --- Oficiais (comuns) ---
     std::string m_eventKey;
     std::string m_truthKey;
     std::string m_seedsKey;
     std::string m_inputFile;
     std::string m_ntupleName;
 
+    // --- Flags aditivas (default preservam o comportamento oficial) ---
+    bool m_enableCaloOutput;
+    bool m_enableMuonOutput;
+
     int m_outputLevel;
 
 };
 
 #endif
-

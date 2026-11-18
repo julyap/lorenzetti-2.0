@@ -5,92 +5,101 @@ from GaugiKernel.macros import *
 from RootStreamBuilder import RootStreamAODFlags as flags
 import ROOT
 
+class RootStreamAODMaker( Cpp ):
 
-class RootStreamAODMaker(Cpp):
+  def __init__( self, name,
+                InputEventKey        : str,
+                InputTruthKey        : str,
+                InputSeedsKey        : str,
+                InputCellsKey        : str = None,
+                InputClusterKey      : str = None,
+                InputRingerKeys      : list = None,
+                InputElectronKey     : str = None,
+                # --- Aditivo: chaves de muon (opcionais) ---
+                InputMuonKey         : str = None,
+                InputMuonCellsKey    : str = None,
+                InputMuonClusterKey  : str = None,
+                OutputEventKey       : str = None,
+                OutputTruthKey       : str = None,
+                OutputSeedsKey       : str = None,
+                OutputCellsKey       : str = None,
+                OutputClusterKey     : str = None,
+                OutputRingerKeys     : list = None,
+                OutputElectronKey    : str = None,
+                # --- Aditivo: chaves de muon (opcionais) ---
+                OutputMuonKey        : str = None,
+                OutputMuonCellsKey   : str = None,
+                OutputMuonClusterKey : str = None,
+                OutputLevel          : int = 0, 
+                NtupleName           : str = "CollectionTree",
+                # --- Aditivo: flags de output (default preservam o comportamento oficial) ---
+                EnableCaloOutput     : bool = True,
+                EnableMuonOutput     : bool = True,
+                DumpCells            : bool = flags.DumpCells,
+                DumpMuonCells        : bool = False,
+                DumpMuonClusters     : bool = False,
+              ): 
+    
+    Cpp.__init__(self, ROOT.RootStreamAODMaker(name))
+    
+    # Calorimeter inputs (apenas se fornecidos) -- IGUAL AO OFICIAL
+    self.setProperty( "InputEventKey"    , InputEventKey     )
+    self.setProperty( "InputTruthKey"    , InputTruthKey     )
+    self.setProperty( "InputSeedsKey"    , InputSeedsKey     )
+    
+    if InputCellsKey:
+        self.setProperty( "InputCellsKey"    , InputCellsKey     )
+    if InputClusterKey:
+        self.setProperty( "InputClusterKey"  , InputClusterKey   )
+    if InputRingerKeys:
+        self.setProperty( "InputRingerKeys"  , InputRingerKeys   )
+    if InputElectronKey:
+        self.setProperty( "InputElectronKey" , InputElectronKey  )
+    
+    # --- Aditivo: muon inputs (opcionais) ---
+    if InputMuonKey:
+        self.setProperty( "InputMuonKey", InputMuonKey )
+    if InputMuonCellsKey:
+        self.setProperty( "InputMuonCellsKey", InputMuonCellsKey )
+    if InputMuonClusterKey:
+        self.setProperty( "InputMuonClusterKey", InputMuonClusterKey )
 
-    def __init__(
-        self,
-        name,
-        InputEventKey: str,
-        InputSeedsKey: str,
-        InputTruthKey: str,
-        InputCellsKey: str,
-        InputClusterKey: str,
-        InputRingerKeys: list,
-        InputRingerL0Key: str,
-        InputElectronKey: str,
-        InputTruthCellsKey: str,
-        InputTruthClusterKey: str,
-        InputTruthRingerKeys: list,
-        InputTruthElectronKey: str,
-        OutputEventKey: str = None,
-        OutputTruthKey: str = None,
-        OutputCellsKey: str = None,
-        OutputClusterKey: str = None,
-        OutputRingerKeys: list = None,
-        OutputRingerL0Key: str = None,
-        OutputSeedsKey: str = None,
-        OutputElectronKey: str = None,
-        OutputTruthCellsKey: str = None,
-        OutputTruthClusterKey: str = None,
-        OutputTruthRingerKeys: list = None,
-        OutputTruthElectronKey: str = None,
-        OutputLevel: int = 0,
-        NtupleName: str = "CollectionTree",
-        DumpCells: bool = flags.DumpCells,
-    ):
-
-        Cpp.__init__(self, ROOT.RootStreamAODMaker(name))
-        self.setProperty("InputEventKey", InputEventKey)
-        self.setProperty("InputTruthKey", InputTruthKey)
-        self.setProperty("InputCellsKey", InputCellsKey)
-        self.setProperty("InputClusterKey", InputClusterKey)
-        self.setProperty("InputRingerKeys", InputRingerKeys)
-        self.setProperty("InputSeedsKey", InputSeedsKey)
-        self.setProperty("InputElectronKey", InputElectronKey)
-        self.setProperty("InputTruthCellsKey", InputTruthCellsKey)
-        self.setProperty("InputTruthClusterKey", InputTruthClusterKey)
-        self.setProperty("InputTruthRingerKeys", InputTruthRingerKeys)
-        self.setProperty(
-            "OutputEventKey", OutputEventKey if OutputEventKey else InputEventKey
-        )
-        self.setProperty(
-            "OutputTruthKey", OutputTruthKey if OutputTruthKey else InputTruthKey
-        )
-        self.setProperty(
-            "OutputCellsKey", OutputCellsKey if OutputCellsKey else InputCellsKey
-        )
-        self.setProperty(
-            "OutputClusterKey",
-            OutputClusterKey if OutputClusterKey else InputClusterKey,
-        )
-        self.setProperty("OutputRingerKeys", OutputRingerKeys or InputRingerKeys)
-        self.setProperty(
-            "OutputSeedsKey", OutputSeedsKey if OutputSeedsKey else InputSeedsKey
-        )
-        self.setProperty(
-            "OutputElectronKey",
-            OutputElectronKey if OutputElectronKey else InputElectronKey,
-        )
-        self.setProperty(
-            "OutputTruthCellsKey",
-            OutputTruthCellsKey if OutputTruthCellsKey else InputTruthCellsKey,
-        )
-        self.setProperty(
-            "OutputTruthClusterKey",
-            OutputTruthClusterKey if OutputTruthClusterKey else InputTruthClusterKey,
-        )
-        self.setProperty(
-            "OutputTruthRingerKeys", OutputTruthRingerKeys or InputTruthRingerKeys
-        )
-        self.setProperty(
-            "OutputRingerL0Key",
-            OutputRingerL0Key if OutputRingerL0Key else InputRingerL0Key,
-        )
-        self.setProperty(
-            "OutputTruthElectronKey",
-            OutputTruthElectronKey if OutputTruthElectronKey else InputTruthElectronKey,
-        )
-        self.setProperty("OutputLevel", OutputLevel)
-        self.setProperty("NtupleName", NtupleName)
-        self.setProperty("DumpCells", DumpCells)
+    # Calorimeter outputs -- IGUAL AO OFICIAL
+    self.setProperty( "OutputEventKey"    , OutputEventKey if OutputEventKey else InputEventKey       )
+    self.setProperty( "OutputTruthKey"    , OutputTruthKey if OutputTruthKey else InputTruthKey       )
+    self.setProperty( "OutputSeedsKey"    , OutputSeedsKey if OutputSeedsKey else InputSeedsKey       )
+    
+    if OutputCellsKey or InputCellsKey:
+        self.setProperty( "OutputCellsKey"    , OutputCellsKey if OutputCellsKey else InputCellsKey       )
+    if OutputClusterKey or InputClusterKey:
+        self.setProperty( "OutputClusterKey"  , OutputClusterKey if OutputClusterKey else InputClusterKey )
+    if OutputRingerKeys or InputRingerKeys:
+        self.setProperty( "OutputRingerKeys"  , OutputRingerKeys if OutputRingerKeys else InputRingerKeys )
+    if OutputElectronKey or InputElectronKey:
+        self.setProperty( "OutputElectronKey" , OutputElectronKey if OutputElectronKey else InputElectronKey)
+    
+    # --- Aditivo: muon outputs (opcionais) ---
+    if OutputMuonKey:
+        self.setProperty( "OutputMuonKey", OutputMuonKey )
+    elif InputMuonKey:
+        self.setProperty( "OutputMuonKey", InputMuonKey )
+        
+    if OutputMuonCellsKey:
+        self.setProperty( "OutputMuonCellsKey", OutputMuonCellsKey )
+    elif InputMuonCellsKey:
+        self.setProperty( "OutputMuonCellsKey", InputMuonCellsKey )
+        
+    if OutputMuonClusterKey:
+        self.setProperty( "OutputMuonClusterKey", OutputMuonClusterKey )
+    elif InputMuonClusterKey:
+        self.setProperty( "OutputMuonClusterKey", InputMuonClusterKey )
+    
+    # General settings -- IGUAL AO OFICIAL + flags aditivas
+    self.setProperty( "OutputLevel"       , OutputLevel       ) 
+    self.setProperty( "NtupleName"        , NtupleName        )
+    # --- Aditivo: flags de output (default preservam o comportamento oficial) ---
+    self.setProperty( "EnableCaloOutput"  , EnableCaloOutput  )
+    self.setProperty( "EnableMuonOutput"  , EnableMuonOutput  )
+    self.setProperty( "DumpCells"         , DumpCells         )
+    self.setProperty( "DumpMuonCells"     , DumpMuonCells     )     
+    self.setProperty( "DumpMuonClusters"  , DumpMuonClusters  )

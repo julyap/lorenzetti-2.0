@@ -20,6 +20,13 @@
 #include "CaloCluster/CaloClusterConverter.h"
 #include "CaloRings/CaloRingsConverter.h"
 #include "Egamma/ElectronConverter.h"
+
+// --- Aditivo: headers de muon ---
+#include "Muon/MuonContainer.h"
+#include "Muon/MuonConverter.h"
+#include "MuonCluster/MuonClusterContainer.h"
+#include "MuonCluster/MuonClusterConverter.h"
+
 #include "RootStreamNtupleMaker.h"
 #include "GaugiKernel/EDM.h"
 
@@ -38,24 +45,35 @@ using namespace Gaugi;
  * Properties:
  * - Input*Key: Keys to retrieve objects to dump.
  * - OutputNtupleName: Name of the output TTree.
+ *
+ * --- Aditivo: muon ---
+ * - InputMuonKey: Key for the muon container.
+ * - EnableCaloOutput: If false, skip all calorimeter/electron reads and the
+ *   per-electron loop (allows standalone muon-only ntuples).
+ * - EnableMuonOutput: If true, adds flat muon branches.
  */
 RootStreamNtupleMaker::RootStreamNtupleMaker(std::string name) : IMsgService(name),
                                                                  Algorithm()
 {
+  // --- Oficiais (PRESERVADAS) ---
   declareProperty("InputEventKey", m_eventKey = "EventInfo");
   declareProperty("InputTruthKey", m_truthKey = "Particles");
   declareProperty("InputSeedsKey", m_seedsKey = "Seeds");
   declareProperty("InputClusterKey", m_clusterKey = "Clusters");
-  // declareProperty("InputRingerKey", m_ringerKey = "Rings");
   declareProperty("InputRingerKeys", m_ringerKeys = {"Rings"});
   declareProperty("InputRingerL0Key", m_ringerL0Key = "RingsL0");
   declareProperty("InputTruthClusterKey", m_truthClusterKey = "TruthClusters");
-  // declareProperty("InputTruthRingerKey", m_truthRingerKey = "TruthRings");
   declareProperty("InputTruthRingerKeys", m_truthRingerKeys = {"TruthRings"});
   declareProperty("InputTruthElectronKey", m_truthElectronKey = "TruthElectrons");
   declareProperty("InputElectronKey", m_electronKey = "Electrons");
   declareProperty("OutputLevel", m_outputLevel = 0);
   declareProperty("OutputNtupleName", m_outputNtupleName = "events");
+
+  // --- Aditivo: muon ---
+  declareProperty("InputMuonKey", m_muonKey = "Muons");
+  declareProperty("InputMuonClusterKey", m_muonClusterKey = "MuonClusters");
+  declareProperty("EnableCaloOutput", m_enableCaloOutput = true);
+  declareProperty("EnableMuonOutput", m_enableMuonOutput = true);
 }
 
 //!=====================================================================
@@ -69,7 +87,6 @@ RootStreamNtupleMaker::~RootStreamNtupleMaker()
 StatusCode RootStreamNtupleMaker::initialize()
 {
   CHECK_INIT();
-  // setMsgLevel( (MSG::Level)m_outputLevel );
   return StatusCode::SUCCESS;
 }
 
@@ -87,6 +104,10 @@ StatusCode RootStreamNtupleMaker::finalize()
  *
  * Defines all branches: event info, cluster variables, shower shapes,
  * rings, electron MC truth, etc.
+ *
+ * --- Aditivo: muon ---
+ * Adds flat muon branches (mu_n, mu_pt, mu_eta, mu_phi, mu_e,
+ * mu_charge, mu_author) when EnableMuonOutput is true.
  */
 StatusCode RootStreamNtupleMaker::bookHistograms(EventContext &ctx) const
 {
@@ -94,6 +115,7 @@ StatusCode RootStreamNtupleMaker::bookHistograms(EventContext &ctx) const
   auto store = ctx.getStoreGateSvc();
   store->cd();
 
+  // --- Variaveis oficiais (PRESERVADAS) ---
   int eventNumber = -1;
   int runNumber = -1;
   float avgmu = -1;
@@ -196,8 +218,18 @@ StatusCode RootStreamNtupleMaker::bookHistograms(EventContext &ctx) const
   std::vector<std::vector<float> *> ring_holders(m_ringerKeys.size(), nullptr);
   std::vector<std::vector<float> *> truth_ring_holders(m_truthRingerKeys.size(), nullptr);
 
+  // --- Variaveis aditivas de muon ---
+  int mu_n = 0;
+  std::vector<float> *mu_pt = nullptr;
+  std::vector<float> *mu_eta = nullptr;
+  std::vector<float> *mu_phi = nullptr;
+  std::vector<float> *mu_e = nullptr;
+  std::vector<float> *mu_charge = nullptr;
+  std::vector<float> *mu_author = nullptr;
+
   TTree *tree = new TTree(m_outputNtupleName.c_str(), "");
 
+  // --- Branches oficiais (PRESERVADOS) ---
   tree->Branch("EventNumber", &eventNumber);
   tree->Branch("RunNumber", &runNumber);
   tree->Branch("avgmu", &avgmu);
@@ -231,7 +263,6 @@ StatusCode RootStreamNtupleMaker::bookHistograms(EventContext &ctx) const
   tree->Branch("cl_f2", &cl_f2);
   tree->Branch("cl_f3", &cl_f3);
   tree->Branch("cl_weta2", &cl_weta2);
-  // tree->Branch("cl_rings", &cl_rings);
   for (size_t i = 0; i < m_ringerKeys.size(); ++i)
     tree->Branch(("cl_rings_" + m_ringerKeys[i]).c_str(), &ring_holders[i]);
   tree->Branch("cl_ringsL0", &cl_ringsL0);
@@ -279,7 +310,6 @@ StatusCode RootStreamNtupleMaker::bookHistograms(EventContext &ctx) const
   tree->Branch("truth_cl_f2", &truth_cl_f2);
   tree->Branch("truth_cl_f3", &truth_cl_f3);
   tree->Branch("truth_cl_weta2", &truth_cl_weta2);
-  // tree->Branch("truth_cl_rings", &truth_cl_rings);
   for (size_t i = 0; i < m_truthRingerKeys.size(); ++i)
     tree->Branch(("truth_cl_rings_" + m_truthRingerKeys[i]).c_str(), &truth_ring_holders[i]);
   tree->Branch("truth_cl_secondR", &truth_cl_secondR);
@@ -303,10 +333,20 @@ StatusCode RootStreamNtupleMaker::bookHistograms(EventContext &ctx) const
   tree->Branch("mc_e", &mc_e);
   tree->Branch("mc_et", &mc_et);
 
+  // --- Branches aditivos de muon ---
+  if (m_enableMuonOutput) {
+    tree->Branch("mu_n", &mu_n);
+    tree->Branch("mu_pt", &mu_pt);
+    tree->Branch("mu_eta", &mu_eta);
+    tree->Branch("mu_phi", &mu_phi);
+    tree->Branch("mu_e", &mu_e);
+    tree->Branch("mu_charge", &mu_charge);
+    tree->Branch("mu_author", &mu_author);
+  }
+
   store->add(tree);
   return StatusCode::SUCCESS;
 }
-
 //!=====================================================================
 
 StatusCode RootStreamNtupleMaker::pre_execute(EventContext & /*ctx*/) const
@@ -343,6 +383,17 @@ StatusCode RootStreamNtupleMaker::post_execute(EventContext & /*ctx*/) const
  * For each electron in the container, it retrieves the associated cluster, rings, and truth particle.
  * It flattens their properties into the linked variables and calls `tree->Fill()`.
  * Thus, one entry in the tree corresponds to one Electron candidate.
+ *
+ * --- Aditivo: muon ---
+ * Fills the flat muon branches when EnableMuonOutput is true.
+ *
+ * 
+ * - All calorimeter/electron reads and the per-electron loop are wrapped
+ *   in `if (m_enableCaloOutput)` so that `EnableCaloOutput=false` allows a
+ *   standalone muon-only ntuple (no ElectronContainer required).
+ * - When `EnableCaloOutput=false` and `EnableMuonOutput=true`, one tree
+ *   entry is written per event (all mu_* branches filled; calorimeter
+ *   branches left at their defaults).
  */
 StatusCode RootStreamNtupleMaker::fillHistograms(EventContext &ctx) const
 {
@@ -354,44 +405,42 @@ StatusCode RootStreamNtupleMaker::fillHistograms(EventContext &ctx) const
     MSG_FATAL("It's not possible to read the xAOD::EventInfoContainer from this Context using this key " << m_eventKey);
   }
 
-  // SG::ReadHandle<xAOD::CaloRingsContainer> ringer_container(m_ringerKey, ctx);
-  // if (!ringer_container.isValid())
-  // {
-  //   MSG_FATAL("It's not possible to read the xAOD::CaloRingsContainer from this Context using this key " << m_ringerKey);
-  // }
+  // Containers de calo: declarados sempre, mas so validados/usados se EnableCaloOutput
   std::vector<SG::ReadHandle<xAOD::CaloRingsContainer>> ringer_containers;
-  for (const auto &key : m_ringerKeys)
-    ringer_containers.emplace_back(key, ctx);
-
   std::vector<SG::ReadHandle<xAOD::CaloRingsContainer>> truth_ringer_containers;
-  for (const auto &key : m_truthRingerKeys)
-    truth_ringer_containers.emplace_back(key, ctx);
-
   std::vector<std::vector<float> *> cl_ring_vecs(m_ringerKeys.size(), nullptr);
   std::vector<std::vector<float> *> truth_cl_ring_vecs(m_truthRingerKeys.size(), nullptr);
 
   SG::ReadHandle<xAOD::ElectronContainer> electron_container(m_electronKey, ctx);
-  if (!electron_container.isValid())
-  {
-    MSG_FATAL("It's not possible to read the xAOD::ElectronContainer from this Context using this key " << m_electronKey);
-  }
-
   SG::ReadHandle<xAOD::SeedContainer> seed_container(m_seedsKey, ctx);
-  if (!seed_container.isValid())
-  {
-    MSG_FATAL("It's not possible to read the xAOD::SeedContainer from this Context using this key " << m_seedsKey);
-  }
-
   SG::ReadHandle<xAOD::TruthParticleContainer> truth_container(m_truthKey, ctx);
-  if (!truth_container.isValid())
-  {
-    MSG_FATAL("It's not possible to read the xAOD::TruthParticleContainer from this Context using this key " << m_truthKey);
-  }
-
   SG::ReadHandle<xAOD::CaloRingsContainer> ringerL0_container(m_ringerL0Key, ctx);
   SG::ReadHandle<xAOD::CaloClusterContainer> truth_cluster_container(m_truthClusterKey, ctx);
-  // SG::ReadHandle<xAOD::CaloRingsContainer> truth_ringer_container(m_truthRingerKey, ctx);
   SG::ReadHandle<xAOD::ElectronContainer> truth_electron_container(m_truthElectronKey, ctx);
+
+  if (m_enableCaloOutput) {
+    // --- CORRIGIDO: so exige ElectronContainer/Seed/Truth se EnableCaloOutput ---
+    if (!electron_container.isValid())
+    {
+      MSG_FATAL("It's not possible to read the xAOD::ElectronContainer from this Context using this key " << m_electronKey);
+    }
+    if (!seed_container.isValid())
+    {
+      MSG_FATAL("It's not possible to read the xAOD::SeedContainer from this Context using this key " << m_seedsKey);
+    }
+    if (!truth_container.isValid())
+    {
+      MSG_FATAL("It's not possible to read the xAOD::TruthParticleContainer from this Context using this key " << m_truthKey);
+    }
+
+    for (const auto &key : m_ringerKeys)
+      ringer_containers.emplace_back(key, ctx);
+    for (const auto &key : m_truthRingerKeys)
+      truth_ringer_containers.emplace_back(key, ctx);
+  }
+
+  // --- Aditivo: muon container (declarado sempre; usado conforme EnableMuonOutput) ---
+  SG::ReadHandle<xAOD::MuonContainer> muon_container(m_muonKey, ctx);
 
   auto store = ctx.getStoreGateSvc();
   store->cd();
@@ -399,6 +448,7 @@ StatusCode RootStreamNtupleMaker::fillHistograms(EventContext &ctx) const
 
   MSG_INFO("Link all branches..." << tree);
 
+  // --- Variaveis oficiais ---
   int runNumber = 0;
   int eventNumber = 0;
   float avgmu = 0;
@@ -445,7 +495,6 @@ StatusCode RootStreamNtupleMaker::fillHistograms(EventContext &ctx) const
   bool el_medium = false;
   bool el_loose = false;
   bool el_vloose = false;
-  // std::vector<float> *cl_rings = nullptr;
   float seed_eta = 0;
   float seed_phi = 0;
   std::vector<float> *mc_pdgid = nullptr;
@@ -491,7 +540,6 @@ StatusCode RootStreamNtupleMaker::fillHistograms(EventContext &ctx) const
   float truth_cl_fracMax = 0;
   float truth_cl_lateralMom = 0;
   float truth_cl_longitudinalMom = 0;
-  // std::vector<float> *truth_cl_rings = nullptr;
   float truth_el_eta = -1;
   float truth_el_et = -1;
   float truth_el_phi = -1;
@@ -500,6 +548,16 @@ StatusCode RootStreamNtupleMaker::fillHistograms(EventContext &ctx) const
   bool truth_el_loose = false;
   bool truth_el_vloose = false;
 
+  // --- Variaveis aditivas de muon ---
+  int mu_n = 0;
+  std::vector<float> *mu_pt = nullptr;
+  std::vector<float> *mu_eta = nullptr;
+  std::vector<float> *mu_phi = nullptr;
+  std::vector<float> *mu_e = nullptr;
+  std::vector<float> *mu_charge = nullptr;
+  std::vector<float> *mu_author = nullptr;
+
+  // --- InitBranch oficiais ---
   InitBranch(tree, "avgmu", &avgmu);
   InitBranch(tree, "EventNumber", &eventNumber);
   InitBranch(tree, "RunNumber", &runNumber);
@@ -539,7 +597,6 @@ StatusCode RootStreamNtupleMaker::fillHistograms(EventContext &ctx) const
   InitBranch(tree, "cl_fracMax", &cl_fracMax);
   InitBranch(tree, "cl_lateralMom", &cl_lateralMom);
   InitBranch(tree, "cl_longitudinalMom", &cl_longitudinalMom);
-  // InitBranch(tree, "cl_rings", &cl_rings);
   for (size_t i = 0; i < m_ringerKeys.size(); ++i)
     InitBranch(tree, ("cl_rings_" + m_ringerKeys[i]).c_str(), &cl_ring_vecs[i]);
   InitBranch(tree, "el_eta", &el_eta);
@@ -588,7 +645,6 @@ StatusCode RootStreamNtupleMaker::fillHistograms(EventContext &ctx) const
   InitBranch(tree, "truth_cl_f2", &truth_cl_f2);
   InitBranch(tree, "truth_cl_f3", &truth_cl_f3);
   InitBranch(tree, "truth_cl_weta2", &truth_cl_weta2);
-  // InitBranch(tree, "truth_cl_rings", &truth_cl_rings);
   for (size_t i = 0; i < m_truthRingerKeys.size(); ++i)
     InitBranch(tree, ("truth_cl_rings_" + m_truthRingerKeys[i]).c_str(), &truth_cl_ring_vecs[i]);
   InitBranch(tree, "truth_cl_secondR", &truth_cl_secondR);
@@ -605,298 +661,342 @@ StatusCode RootStreamNtupleMaker::fillHistograms(EventContext &ctx) const
   InitBranch(tree, "truth_el_loose", &truth_el_loose);
   InitBranch(tree, "truth_el_vloose", &truth_el_vloose);
 
-  auto evt = (**event_container.ptr()).front();
+  // --- InitBranch aditivos de muon ---
+  if (m_enableMuonOutput) {
+    InitBranch(tree, "mu_n", &mu_n);
+    InitBranch(tree, "mu_pt", &mu_pt);
+    InitBranch(tree, "mu_eta", &mu_eta);
+    InitBranch(tree, "mu_phi", &mu_phi);
+    InitBranch(tree, "mu_e", &mu_e);
+    InitBranch(tree, "mu_charge", &mu_charge);
+    InitBranch(tree, "mu_author", &mu_author);
+  }
 
-  for (auto el : **electron_container.ptr())
-  {
-    // cl_rings->clear();
-    mc_pdgid->clear();
-    mc_eta->clear();
-    mc_phi->clear();
-    mc_e->clear();
-    mc_et->clear();
+  // ============================================================
+  // Modo calorimetro/atlas (PRESERVADO)
+  // ============================================================
+  if (m_enableCaloOutput) {
+    auto evt = (**event_container.ptr()).front();
 
-    cl_ringsL0->clear();
-    // truth_cl_rings->clear();
-    truth_cl_eta = 0;
-    truth_cl_phi = 0;
-    truth_cl_e = 0;
-    truth_cl_et = 0;
-    truth_cl_deta = 0;
-    truth_cl_dphi = 0;
-    truth_cl_e0 = 0;
-    truth_cl_e1 = 0;
-    truth_cl_e2 = 0;
-    truth_cl_e3 = 0;
-    truth_cl_ehad1 = 0;
-    truth_cl_ehad2 = 0;
-    truth_cl_ehad3 = 0;
-    truth_cl_etot = 0;
-    truth_cl_e233 = 0;
-    truth_cl_e237 = 0;
-    truth_cl_e277 = 0;
-    truth_cl_emaxs1 = 0;
-    truth_cl_emaxs2 = 0;
-    truth_cl_e2tsts1 = 0;
-    truth_cl_reta = 0;
-    truth_cl_rphi = 0;
-    truth_cl_rhad = 0;
-    truth_cl_rhad1 = 0;
-    truth_cl_eratio = 0;
-    truth_cl_f0 = 0;
-    truth_cl_f1 = 0;
-    truth_cl_f2 = 0;
-    truth_cl_f3 = 0;
-    truth_cl_weta2 = 0;
-    truth_cl_secondR = 0;
-    truth_cl_lambdaCenter = 0;
-    truth_cl_secondLambda = 0;
-    truth_cl_fracMax = 0;
-    truth_cl_lateralMom = 0;
-    truth_cl_longitudinalMom = 0;
-
-    truth_el_eta = -1;
-    truth_el_et = -1;
-    truth_el_phi = -1;
-    truth_el_tight = false;
-    truth_el_medium = false;
-    truth_el_loose = false;
-    truth_el_vloose = false;
-
-    auto clus = el->caloCluster();
-
-    // const xAOD::CaloRings *cl_ringer = nullptr;
-    // for (auto ring : **ringer_container.ptr())
-    // {
-    //   if (ring->caloCluster() == clus)
-    //   {
-    //     cl_ringer = ring;
-    //     break;
-    //   }
-    // }
-
-    // if (!cl_ringer)
-    // {
-    //   MSG_WARNING("No rings found for cluster");
-    //   continue;
-    // }
-    // inside the electron loop, replace ring fill with:
-
-    const xAOD::CaloRings *cl_ringerL0 = nullptr;
-    if (ringerL0_container.isValid())
+    for (auto el : **electron_container.ptr())
     {
-      for (auto ring : **ringerL0_container.ptr())
+      mc_pdgid->clear();
+      mc_eta->clear();
+      mc_phi->clear();
+      mc_e->clear();
+      mc_et->clear();
+      cl_ringsL0->clear();
+
+      truth_cl_eta = 0;
+      truth_cl_phi = 0;
+      truth_cl_e = 0;
+      truth_cl_et = 0;
+      truth_cl_deta = 0;
+      truth_cl_dphi = 0;
+      truth_cl_e0 = 0;
+      truth_cl_e1 = 0;
+      truth_cl_e2 = 0;
+      truth_cl_e3 = 0;
+      truth_cl_ehad1 = 0;
+      truth_cl_ehad2 = 0;
+      truth_cl_ehad3 = 0;
+      truth_cl_etot = 0;
+      truth_cl_e233 = 0;
+      truth_cl_e237 = 0;
+      truth_cl_e277 = 0;
+      truth_cl_emaxs1 = 0;
+      truth_cl_emaxs2 = 0;
+      truth_cl_e2tsts1 = 0;
+      truth_cl_reta = 0;
+      truth_cl_rphi = 0;
+      truth_cl_rhad = 0;
+      truth_cl_rhad1 = 0;
+      truth_cl_eratio = 0;
+      truth_cl_f0 = 0;
+      truth_cl_f1 = 0;
+      truth_cl_f2 = 0;
+      truth_cl_f3 = 0;
+      truth_cl_weta2 = 0;
+      truth_cl_secondR = 0;
+      truth_cl_lambdaCenter = 0;
+      truth_cl_secondLambda = 0;
+      truth_cl_fracMax = 0;
+      truth_cl_lateralMom = 0;
+      truth_cl_longitudinalMom = 0;
+
+      truth_el_eta = -1;
+      truth_el_et = -1;
+      truth_el_phi = -1;
+      truth_el_tight = false;
+      truth_el_medium = false;
+      truth_el_loose = false;
+      truth_el_vloose = false;
+
+      auto clus = el->caloCluster();
+
+      const xAOD::CaloRings *cl_ringerL0 = nullptr;
+      if (ringerL0_container.isValid())
       {
-        if (ring->caloCluster() == clus)
+        for (auto ring : **ringerL0_container.ptr())
         {
-          cl_ringerL0 = ring;
-          break;
+          if (ring->caloCluster() == clus)
+          {
+            cl_ringerL0 = ring;
+            break;
+          }
         }
       }
-    }
 
-    const xAOD::CaloCluster *truth_clus = nullptr;
-    if (truth_cluster_container.isValid())
-    {
-      for (auto tr_cl : **truth_cluster_container.ptr())
+      const xAOD::CaloCluster *truth_clus = nullptr;
+      if (truth_cluster_container.isValid())
       {
-        if (tr_cl->seed() == clus->seed())
+        for (auto tr_cl : **truth_cluster_container.ptr())
         {
-          truth_clus = tr_cl;
-          break;
+          if (tr_cl->seed() == clus->seed())
+          {
+            truth_clus = tr_cl;
+            break;
+          }
         }
       }
-    }
-    for (size_t i = 0; i < m_ringerKeys.size(); ++i)
-    {
-      cl_ring_vecs[i]->clear();
-      if (!ringer_containers[i].isValid())
-        continue;
-      for (auto ring : **ringer_containers[i].ptr())
+      for (size_t i = 0; i < m_ringerKeys.size(); ++i)
       {
-        if (ring->caloCluster() == clus)
+        cl_ring_vecs[i]->clear();
+        if (!ringer_containers[i].isValid())
+          continue;
+        for (auto ring : **ringer_containers[i].ptr())
         {
-          for (auto r : ring->rings())
-            cl_ring_vecs[i]->push_back(r);
-          break;
+          if (ring->caloCluster() == clus)
+          {
+            for (auto r : ring->rings())
+              cl_ring_vecs[i]->push_back(r);
+            break;
+          }
         }
       }
-    }
 
-    for (size_t i = 0; i < m_truthRingerKeys.size(); ++i)
-    {
-      truth_cl_ring_vecs[i]->clear();
-      if (!truth_ringer_containers[i].isValid() || !truth_clus)
-        continue;
-      for (auto ring : **truth_ringer_containers[i].ptr())
+      for (size_t i = 0; i < m_truthRingerKeys.size(); ++i)
       {
-        if (ring->caloCluster() == truth_clus)
+        truth_cl_ring_vecs[i]->clear();
+        if (!truth_ringer_containers[i].isValid() || !truth_clus)
+          continue;
+        for (auto ring : **truth_ringer_containers[i].ptr())
         {
-          for (auto r : ring->rings())
-            truth_cl_ring_vecs[i]->push_back(r);
-          break;
+          if (ring->caloCluster() == truth_clus)
+          {
+            for (auto r : ring->rings())
+              truth_cl_ring_vecs[i]->push_back(r);
+            break;
+          }
         }
       }
-    }
-    const xAOD::CaloRings *truth_ringer = nullptr;
-    // if (truth_clus && truth_ringer_container.isValid())
-    // {
-    //   for (auto ring : **truth_ringer_container.ptr())
-    //   {
-    //     if (ring->caloCluster() == truth_clus)
-    //     {
-    //       truth_ringer = ring;
-    //       break;
-    //     }
-    //   }
-    // }
+      const xAOD::CaloRings *truth_ringer = nullptr;
 
-    const xAOD::Electron *truth_el = nullptr;
-    if (truth_electron_container.isValid())
-    {
-      for (auto tr_el : **truth_electron_container.ptr())
+      const xAOD::Electron *truth_el = nullptr;
+      if (truth_electron_container.isValid())
       {
-        if (tr_el->caloCluster() && tr_el->caloCluster()->seed() == clus->seed())
+        for (auto tr_el : **truth_electron_container.ptr())
         {
-          truth_el = tr_el;
-          break;
+          if (tr_el->caloCluster() && tr_el->caloCluster()->seed() == clus->seed())
+          {
+            truth_el = tr_el;
+            break;
+          }
         }
       }
-    }
 
-    avgmu = evt->averageInteractionsPerCrossing();
-    runNumber = evt->runNumber();
-    eventNumber = evt->eventNumber();
-    cl_eta = clus->eta();
-    cl_phi = clus->phi();
-    cl_e = clus->e();
-    MSG_INFO("Cluster energy: " << cl_e);
-    cl_et = clus->et();
-    cl_deta = clus->deltaEta();
-    cl_dphi = clus->deltaPhi();
-    cl_e0 = clus->e0();
-    cl_e1 = clus->e1();
-    cl_e2 = clus->e2();
-    cl_e3 = clus->e3();
-    cl_ehad1 = clus->ehad1();
-    cl_ehad2 = clus->ehad2();
-    cl_ehad3 = clus->ehad3();
-    cl_etot = clus->etot();
-    cl_e233 = clus->e233();
-    cl_e237 = clus->e237();
-    cl_e277 = clus->e277();
-    cl_emaxs1 = clus->emaxs1();
-    cl_emaxs2 = clus->emaxs2();
-    cl_e2tsts1 = clus->e2tsts1();
-    cl_reta = clus->reta();
-    cl_rphi = clus->rphi();
-    cl_rhad = clus->rhad();
-    cl_rhad1 = clus->rhad1();
-    cl_eratio = clus->eratio();
-    cl_f0 = clus->f0();
-    cl_f1 = clus->f1();
-    cl_f2 = clus->f2();
-    cl_f3 = clus->f3();
-    cl_weta2 = clus->weta2();
-    cl_secondR = clus->secondR();
-    cl_lambdaCenter = clus->lambdaCenter();
-    cl_secondLambda = clus->secondLambda();
-    cl_fracMax = clus->fracMax();
-    cl_lateralMom = clus->lateralMom();
-    cl_longitudinalMom = clus->longitudinalMom();
-    // for (auto ring : cl_ringer->rings())
-    //     cl_rings->push_back(ring);
+      avgmu = evt->averageInteractionsPerCrossing();
+      runNumber = evt->runNumber();
+      eventNumber = evt->eventNumber();
+      cl_eta = clus->eta();
+      cl_phi = clus->phi();
+      cl_e = clus->e();
+      MSG_INFO("Cluster energy: " << cl_e);
+      cl_et = clus->et();
+      cl_deta = clus->deltaEta();
+      cl_dphi = clus->deltaPhi();
+      cl_e0 = clus->e0();
+      cl_e1 = clus->e1();
+      cl_e2 = clus->e2();
+      cl_e3 = clus->e3();
+      cl_ehad1 = clus->ehad1();
+      cl_ehad2 = clus->ehad2();
+      cl_ehad3 = clus->ehad3();
+      cl_etot = clus->etot();
+      cl_e233 = clus->e233();
+      cl_e237 = clus->e237();
+      cl_e277 = clus->e277();
+      cl_emaxs1 = clus->emaxs1();
+      cl_emaxs2 = clus->emaxs2();
+      cl_e2tsts1 = clus->e2tsts1();
+      cl_reta = clus->reta();
+      cl_rphi = clus->rphi();
+      cl_rhad = clus->rhad();
+      cl_rhad1 = clus->rhad1();
+      cl_eratio = clus->eratio();
+      cl_f0 = clus->f0();
+      cl_f1 = clus->f1();
+      cl_f2 = clus->f2();
+      cl_f3 = clus->f3();
+      cl_weta2 = clus->weta2();
+      cl_secondR = clus->secondR();
+      cl_lambdaCenter = clus->lambdaCenter();
+      cl_secondLambda = clus->secondLambda();
+      cl_fracMax = clus->fracMax();
+      cl_lateralMom = clus->lateralMom();
+      cl_longitudinalMom = clus->longitudinalMom();
 
-    if (cl_ringerL0)
-    {
-      for (auto ring : cl_ringerL0->rings())
-        cl_ringsL0->push_back(ring);
-    }
-
-    if (truth_clus)
-    {
-      truth_cl_eta = truth_clus->eta();
-      truth_cl_phi = truth_clus->phi();
-      truth_cl_e = truth_clus->e();
-      truth_cl_et = truth_clus->et();
-      truth_cl_deta = truth_clus->deltaEta();
-      truth_cl_dphi = truth_clus->deltaPhi();
-      truth_cl_e0 = truth_clus->e0();
-      truth_cl_e1 = truth_clus->e1();
-      truth_cl_e2 = truth_clus->e2();
-      truth_cl_e3 = truth_clus->e3();
-      truth_cl_ehad1 = truth_clus->ehad1();
-      truth_cl_ehad2 = truth_clus->ehad2();
-      truth_cl_ehad3 = truth_clus->ehad3();
-      truth_cl_etot = truth_clus->etot();
-      truth_cl_e233 = truth_clus->e233();
-      truth_cl_e237 = truth_clus->e237();
-      truth_cl_e277 = truth_clus->e277();
-      truth_cl_emaxs1 = truth_clus->emaxs1();
-      truth_cl_emaxs2 = truth_clus->emaxs2();
-      truth_cl_e2tsts1 = truth_clus->e2tsts1();
-      truth_cl_reta = truth_clus->reta();
-      truth_cl_rphi = truth_clus->rphi();
-      truth_cl_rhad = truth_clus->rhad();
-      truth_cl_rhad1 = truth_clus->rhad1();
-      truth_cl_eratio = truth_clus->eratio();
-      truth_cl_f0 = truth_clus->f0();
-      truth_cl_f1 = truth_clus->f1();
-      truth_cl_f2 = truth_clus->f2();
-      truth_cl_f3 = truth_clus->f3();
-      truth_cl_weta2 = truth_clus->weta2();
-      truth_cl_secondR = truth_clus->secondR();
-      truth_cl_lambdaCenter = truth_clus->lambdaCenter();
-      truth_cl_secondLambda = truth_clus->secondLambda();
-      truth_cl_fracMax = truth_clus->fracMax();
-      truth_cl_lateralMom = truth_clus->lateralMom();
-      truth_cl_longitudinalMom = truth_clus->longitudinalMom();
-    }
-
-    // if (truth_ringer)
-    // {
-    //     for (auto ring : truth_ringer->rings())
-    //         truth_cl_rings->push_back(ring);
-    // }
-
-    if (truth_el)
-    {
-      truth_el_eta = truth_el->eta();
-      truth_el_et = truth_el->et();
-      truth_el_phi = truth_el->phi();
-      truth_el_tight = truth_el->isTight();
-      truth_el_medium = truth_el->isMedium();
-      truth_el_loose = truth_el->isLoose();
-      truth_el_vloose = truth_el->isVeryLoose();
-    }
-    el_tight = el->isTight();
-    el_medium = el->isMedium();
-    el_loose = el->isLoose();
-    el_vloose = el->isVeryLoose();
-    el_et = el->et();
-    el_eta = el->eta();
-    el_phi = el->phi();
-
-    auto seed = clus->seed();
-
-    seed_eta = seed->eta();
-    seed_phi = seed->phi();
-    for (auto mc : **truth_container.ptr())
-    {
-      if (mc->seedid() == seed->id())
+      if (cl_ringerL0)
       {
-        MSG_INFO("Found mc particle with PDGID: " << mc->pdgid());
-        mc_pdgid->push_back(mc->pdgid());
-        mc_eta->push_back(mc->eta());
-        mc_phi->push_back(mc->phi());
-        mc_e->push_back(mc->e());
-        mc_et->push_back(mc->et());
+        for (auto ring : cl_ringerL0->rings())
+          cl_ringsL0->push_back(ring);
       }
+
+      if (truth_clus)
+      {
+        truth_cl_eta = truth_clus->eta();
+        truth_cl_phi = truth_clus->phi();
+        truth_cl_e = truth_clus->e();
+        truth_cl_et = truth_clus->et();
+        truth_cl_deta = truth_clus->deltaEta();
+        truth_cl_dphi = truth_clus->deltaPhi();
+        truth_cl_e0 = truth_clus->e0();
+        truth_cl_e1 = truth_clus->e1();
+        truth_cl_e2 = truth_clus->e2();
+        truth_cl_e3 = truth_clus->e3();
+        truth_cl_ehad1 = truth_clus->ehad1();
+        truth_cl_ehad2 = truth_clus->ehad2();
+        truth_cl_ehad3 = truth_clus->ehad3();
+        truth_cl_etot = truth_clus->etot();
+        truth_cl_e233 = truth_clus->e233();
+        truth_cl_e237 = truth_clus->e237();
+        truth_cl_e277 = truth_clus->e277();
+        truth_cl_emaxs1 = truth_clus->emaxs1();
+        truth_cl_emaxs2 = truth_clus->emaxs2();
+        truth_cl_e2tsts1 = truth_clus->e2tsts1();
+        truth_cl_reta = truth_clus->reta();
+        truth_cl_rphi = truth_clus->rphi();
+        truth_cl_rhad = truth_clus->rhad();
+        truth_cl_rhad1 = truth_clus->rhad1();
+        truth_cl_eratio = truth_clus->eratio();
+        truth_cl_f0 = truth_clus->f0();
+        truth_cl_f1 = truth_clus->f1();
+        truth_cl_f2 = truth_clus->f2();
+        truth_cl_f3 = truth_clus->f3();
+        truth_cl_weta2 = truth_clus->weta2();
+        truth_cl_secondR = truth_clus->secondR();
+        truth_cl_lambdaCenter = truth_clus->lambdaCenter();
+        truth_cl_secondLambda = truth_clus->secondLambda();
+        truth_cl_fracMax = truth_clus->fracMax();
+        truth_cl_lateralMom = truth_clus->lateralMom();
+        truth_cl_longitudinalMom = truth_clus->longitudinalMom();
+      }
+
+      if (truth_el)
+      {
+        truth_el_eta = truth_el->eta();
+        truth_el_et = truth_el->et();
+        truth_el_phi = truth_el->phi();
+        truth_el_tight = truth_el->isTight();
+        truth_el_medium = truth_el->isMedium();
+        truth_el_loose = truth_el->isLoose();
+        truth_el_vloose = truth_el->isVeryLoose();
+      }
+      el_tight = el->isTight();
+      el_medium = el->isMedium();
+      el_loose = el->isLoose();
+      el_vloose = el->isVeryLoose();
+      el_et = el->et();
+      el_eta = el->eta();
+      el_phi = el->phi();
+
+      auto seed = clus->seed();
+
+      seed_eta = seed->eta();
+      seed_phi = seed->phi();
+      for (auto mc : **truth_container.ptr())
+      {
+        if (mc->seedid() == seed->id())
+        {
+          MSG_INFO("Found mc particle with PDGID: " << mc->pdgid());
+          mc_pdgid->push_back(mc->pdgid());
+          mc_eta->push_back(mc->eta());
+          mc_phi->push_back(mc->phi());
+          mc_e->push_back(mc->e());
+          mc_et->push_back(mc->et());
+        }
+      }
+
+      // ============================================================
+      // Aditivo: preencher muon (se habilitado)
+      // ============================================================
+      if (m_enableMuonOutput && muon_container.isValid()) {
+        mu_pt->clear();
+        mu_eta->clear();
+        mu_phi->clear();
+        mu_e->clear();
+        mu_charge->clear();
+        mu_author->clear();
+        mu_n = 0;
+        for (auto mu : **muon_container.ptr()) {
+          mu_pt->push_back(mu->pt());
+          mu_eta->push_back(mu->eta());
+          mu_phi->push_back(mu->phi());
+          mu_e->push_back(mu->e());
+          mu_charge->push_back(mu->charge());
+          mu_author->push_back(mu->author());
+          ++mu_n;
+        }
+      }
+
+      tree->Fill();
+
+    } // each cluster should be 1 entry on ntuple file
+  }
+
+  // ============================================================
+  // Modo muon standalone: um Fill por evento, so branches de muon
+  // ============================================================
+  else if (m_enableMuonOutput) {
+    // Zera as variaveis de muon
+    mu_n = 0;
+    if (mu_pt)     mu_pt->clear();
+    if (mu_eta)    mu_eta->clear();
+    if (mu_phi)    mu_phi->clear();
+    if (mu_e)      mu_e->clear();
+    if (mu_charge) mu_charge->clear();
+    if (mu_author) mu_author->clear();
+
+    if (muon_container.isValid()) {
+      for (auto mu : **muon_container.ptr()) {
+        mu_pt->push_back(mu->pt());
+        mu_eta->push_back(mu->eta());
+        mu_phi->push_back(mu->phi());
+        mu_e->push_back(mu->e());
+        mu_charge->push_back(mu->charge());
+        mu_author->push_back(mu->author());
+        ++mu_n;
+      }
+    }
+
+    // Zera as branches de calo (ficam 0/false, mas presentes no TTree)
+    cl_eta = cl_phi = cl_e = cl_et = 0;
+    el_eta = el_et = el_phi = -1;
+    el_tight = el_medium = el_loose = el_vloose = false;
+    truth_el_eta = truth_el_et = truth_el_phi = -1;
+    truth_el_tight = truth_el_medium = truth_el_loose = truth_el_vloose = false;
+    seed_eta = seed_phi = 0;
+
+    // EventInfo: preenche EventNumber/RunNumber/avgmu se disponivel
+    if (event_container.isValid() && !(**event_container.ptr()).empty()) {
+      auto evt = (**event_container.ptr()).front();
+      avgmu = evt->averageInteractionsPerCrossing();
+      runNumber = evt->runNumber();
+      eventNumber = evt->eventNumber();
     }
 
     tree->Fill();
-
-  } // each cluster should be 1 entry on ntuple file
+  }
 
   return StatusCode::SUCCESS;
 }

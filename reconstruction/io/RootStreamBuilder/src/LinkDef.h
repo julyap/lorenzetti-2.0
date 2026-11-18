@@ -1,4 +1,3 @@
-
 #include "src/RootStreamHITMaker.h"
 #include "src/RootStreamAODMaker.h"
 #include "src/RootStreamESDMaker.h"
@@ -24,7 +23,6 @@
 #pragma link C++ class RootStreamHITReader+;
 #pragma link C++ class RootStreamESDReader+;
 #pragma link C++ class RootStreamAODReader+;
-
 
 
 #endif

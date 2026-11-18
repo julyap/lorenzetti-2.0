@@ -1,37 +1,61 @@
-#include "CaloHit/CaloHitContainer.h"
-#include "EventInfo/EventInfoContainer.h"
-#include "TruthParticle/TruthParticleContainer.h"
+#include "RootStreamHITMaker.h"
+#include <cmath>
+#include <algorithm>
+#include <iostream>
+#include <set>
+#include <tuple>
+
 #include "CaloHit/CaloHitConverter.h"
+#include "MuonHit/MuonHitConverter.h"
 #include "EventInfo/EventInfoConverter.h"
 #include "TruthParticle/TruthParticleConverter.h"
 #include "EventInfo/SeedConverter.h"
-#include "TTree.h"
-#include "RootStreamHITMaker.h"
 #include "GaugiKernel/EDM.h"
 #include "G4Kernel/CaloPhiRange.h"
 
-
-
 using namespace SG;
-using namespace Gaugi;
 
+// =====================================================================
+// Funções auxiliares de identificação de partículas (aditivas)
+// =====================================================================
+bool Gaugi::RootStreamHITMaker::isElectron(int pdgId) {
+  return std::abs(pdgId) == 11;
+}
 
+bool Gaugi::RootStreamHITMaker::isMuon(int pdgId) {
+  return std::abs(pdgId) == 13;
+}
 
-/**
- * @class RootStreamHITMaker
- * @brief Serializes simulation Hits to a ROOT file.
- * 
- * Saves `xAOD::CaloHit` objects. Useful for persisting the output of the
- * Geant4 simulation step before full digitization.
- * 
- * Properties:
- * - OnlyRoI: If true, only saves hits near TruthParticles.
- * - KeepCells: List of specific cell hashes that must always be saved (e.g. for debugging defects).
- */
-RootStreamHITMaker::RootStreamHITMaker( std::string name ) : 
+bool Gaugi::RootStreamHITMaker::isPhoton(int pdgId) {
+  return std::abs(pdgId) == 22;
+}
+
+bool Gaugi::RootStreamHITMaker::isHadron(int pdgId) {
+  int absPdgId = std::abs(pdgId);
+  return (absPdgId > 100 && absPdgId < 1000) || (absPdgId > 1000 && absPdgId < 10000);
+}
+
+bool Gaugi::RootStreamHITMaker::isHitInRoI(float hit_eta, float hit_phi, 
+                                    const std::vector<float>& particle_etas,
+                                    const std::vector<float>& particle_phis,
+                                    float etaWindow, float phiWindow) const {
+  if (particle_etas.empty()) return false;
+  for (size_t i = 0; i < particle_etas.size(); ++i) {
+    float dEta = std::abs(particle_etas[i] - hit_eta);
+    float dPhi = std::abs(CaloPhiRange::diff(particle_phis[i], hit_phi));
+    if (dEta < etaWindow/2 && dPhi < phiWindow/2) return true;
+  }
+  return false;
+}
+
+// =====================================================================
+// Construtor (oficial + muon aditivo)
+// =====================================================================
+Gaugi::RootStreamHITMaker::RootStreamHITMaker(std::string name) : 
   IMsgService(name),
   Algorithm()
 {
+  // --- Oficiais (PRESERVADAS) ---
   declareProperty( "InputEventKey"           , m_inputEventKey="Events"                );
   declareProperty( "InputTruthKey"           , m_inputTruthKey="Particles"             );
   declareProperty( "InputHitsKey"            , m_inputHitsKey="Hits"                   );
@@ -39,24 +63,34 @@ RootStreamHITMaker::RootStreamHITMaker( std::string name ) :
   declareProperty( "OutputEventKey"          , m_outputEventKey="EventInfo"            );
   declareProperty( "OutputTruthKey"          , m_outputTruthKey="Particles"            );
   declareProperty( "OutputHitsKey"           , m_outputHitsKey="Hits"                  );
-  declareProperty( "OutputSeedsKey"          , m_outputSeedsKey="Seeds"                 );
-
+  declareProperty( "OutputSeedsKey"          , m_outputSeedsKey="Seeds"                );
   declareProperty( "OutputLevel"             , m_outputLevel=1                         );
   declareProperty( "NtupleName"              , m_ntupleName="CollectionTree"           );
   declareProperty( "OnlyRoI"                 , m_onlyRoI=false                         );
   declareProperty( "EtaWindow"               , m_etaWindow=0.6                         );
   declareProperty( "PhiWindow"               , m_phiWindow=0.6                         );
-  declareProperty( "KeepCells"               , m_cellHashes={}                         );                 
+  declareProperty( "KeepCells"               , m_cellHashes={}                         );
+
+  // --- Aditivo: aliases da sua versao ---
+  declareProperty( "InputCaloHitsKey"        , m_inputCaloHitsKey=""                   );
+  declareProperty( "OutputCaloHitsKey"       , m_outputCaloHitsKey=""                  );
+
+  // --- Aditivo: muon ---
+  declareProperty( "InputMuonHitsKey"        , m_inputMuonHitsKey="MuonHits"           );
+  declareProperty( "OutputMuonHitsKey"       , m_outputMuonHitsKey="MuonHits"          );
+  declareProperty( "MuonEtaWindow"           , m_muonEtaWindow=0.6                     );
+  declareProperty( "MuonPhiWindow"           , m_muonPhiWindow=0.6                     );
+  declareProperty( "EnableMuonOutput"        , m_enableMuonOutput=true                 );
 }
 
 //!=====================================================================
 
-RootStreamHITMaker::~RootStreamHITMaker()
+Gaugi::RootStreamHITMaker::~RootStreamHITMaker()
 {;}
 
 //!=====================================================================
 
-StatusCode RootStreamHITMaker::initialize()
+StatusCode Gaugi::RootStreamHITMaker::initialize()
 {
   CHECK_INIT();
   setMsgLevel(m_outputLevel);
@@ -74,86 +108,64 @@ StatusCode RootStreamHITMaker::initialize()
   MSG_INFO("Eta Window: " << m_etaWindow);
   MSG_INFO("Phi Window: " << m_phiWindow);
   MSG_INFO("Keep Cells: " << (m_cellHashes.empty() ? "false" : "true"));
+  MSG_INFO("Muon: " << (m_enableMuonOutput ? "ENABLED" : "DISABLED"));
   return StatusCode::SUCCESS;
 }
 
 //!=====================================================================
 
-StatusCode RootStreamHITMaker::bookHistograms( SG::EventContext &ctx ) const
+StatusCode Gaugi::RootStreamHITMaker::bookHistograms(SG::EventContext &ctx) const
 {
-
   auto store = ctx.getStoreGateSvc();
 
-  std::vector<xAOD::CaloHit_t             > container_hits;
-  std::vector<xAOD::EventInfo_t           > container_event;
-  std::vector<xAOD::TruthParticle_t       > container_truth;
-  std::vector<xAOD::Seed_t                > container_seeds;
+  // --- Containers oficiais ---
+  std::vector<xAOD::CaloHit_t> *container_calo_hits = new std::vector<xAOD::CaloHit_t>();
+  std::vector<xAOD::EventInfo_t> *container_event = new std::vector<xAOD::EventInfo_t>();
+  std::vector<xAOD::TruthParticle_t> *container_truth = new std::vector<xAOD::TruthParticle_t>();
+  std::vector<xAOD::Seed_t> *container_seeds = new std::vector<xAOD::Seed_t>();
+
+  // --- Container aditivo de muon ---
+  std::vector<xAOD::MuonHit_t> *container_muon_hits = new std::vector<xAOD::MuonHit_t>();
 
   store->cd();
   TTree *tree = new TTree(m_ntupleName.c_str(), "");
-  tree->Branch( ("EventInfoContainer_"+m_outputEventKey).c_str()     , &container_event     );
-  tree->Branch( ("SeedContainer_"+m_outputSeedsKey).c_str()     , &container_seeds     );
-  tree->Branch( ("TruthParticleContainer_"+m_outputTruthKey).c_str() , &container_truth     );
-  tree->Branch( ("CaloHitContainer_"+m_outputHitsKey).c_str()        , &container_hits      );
   
-  store->add( tree );
-  
+  // --- Branches oficiais ---
+  tree->Branch(("EventInfoContainer_" + m_outputEventKey).c_str(), &container_event);
+  tree->Branch(("SeedContainer_" + m_outputSeedsKey).c_str(), &container_seeds);
+  tree->Branch(("TruthParticleContainer_" + m_outputTruthKey).c_str(), &container_truth);
+
+  // CaloHits: usa o alias se passado, senao o nome oficial
+  const std::string out_calo_hits = m_outputCaloHitsKey.empty() ? m_outputHitsKey : m_outputCaloHitsKey;
+  tree->Branch(("CaloHitContainer_" + out_calo_hits).c_str(), &container_calo_hits);
+
+  // --- Aditivo: muon ---
+  if (m_enableMuonOutput) {
+    tree->Branch(("MuonHitContainer_" + m_outputMuonHitsKey).c_str(), &container_muon_hits);
+  }
+
+  store->add(tree);
   return StatusCode::SUCCESS;
 }
 
 //!=====================================================================
 
-StatusCode RootStreamHITMaker::pre_execute( EventContext &/*ctx*/ ) const
-{
-  return StatusCode::SUCCESS;
-}
-
-//!=====================================================================
-
-StatusCode RootStreamHITMaker::execute( EventContext &/*ctx*/, const G4Step * /*step*/ ) const
-{
-  return StatusCode::SUCCESS;
-}
-
-//!=====================================================================
-
-StatusCode RootStreamHITMaker::execute( EventContext &ctx, int /*evt*/ ) const
-{
-  return StatusCode::SUCCESS;
-}
-
-//!=====================================================================
-
-StatusCode RootStreamHITMaker::finalize()
-{
-  return StatusCode::SUCCESS;
-}
-
-//!=====================================================================
-
-StatusCode RootStreamHITMaker::post_execute( EventContext &/*ctx*/ ) const
-{
-  return StatusCode::SUCCESS;
-}
-
-//!=====================================================================
-
-StatusCode RootStreamHITMaker::fillHistograms( EventContext &ctx ) const
-{
-  return serialize(ctx);
-}
+StatusCode Gaugi::RootStreamHITMaker::pre_execute(SG::EventContext &/*ctx*/) const { return StatusCode::SUCCESS; }
+StatusCode Gaugi::RootStreamHITMaker::execute(SG::EventContext &/*ctx*/, const G4Step* /*step*/) const { return StatusCode::SUCCESS; }
+StatusCode Gaugi::RootStreamHITMaker::execute(SG::EventContext &/*ctx*/, int /*evt*/) const { return StatusCode::SUCCESS; }
+StatusCode Gaugi::RootStreamHITMaker::finalize() { return StatusCode::SUCCESS; }
+StatusCode Gaugi::RootStreamHITMaker::post_execute(SG::EventContext &/*ctx*/) const { return StatusCode::SUCCESS; }
+StatusCode Gaugi::RootStreamHITMaker::fillHistograms(SG::EventContext &ctx) const { return serialize(ctx); }
 
 //!=====================================================================
 
 template <class T>
-void RootStreamHITMaker::InitBranch(TTree* fChain, std::string branch_name, T* param) const
+void Gaugi::RootStreamHITMaker::InitBranch(TTree* fChain, std::string branch_name, T* param) const
 {
   std::string bname = branch_name;
-  if (fChain->GetAlias(bname.c_str()))
-     bname = std::string(fChain->GetAlias(bname.c_str()));
-
-  if (!fChain->FindBranch(bname.c_str()) ) {
-    MSG_WARNING( "unknown branch " << bname );
+  if (fChain->GetAlias(bname.c_str())) bname = std::string(fChain->GetAlias(bname.c_str()));
+  if (!fChain->FindBranch(bname.c_str())) {
+    MSG_WARNING("unknown branch " << bname);
     return;
   }
   fChain->SetBranchStatus(bname.c_str(), 1.);
@@ -162,165 +174,232 @@ void RootStreamHITMaker::InitBranch(TTree* fChain, std::string branch_name, T* p
 
 //!=====================================================================
 
-/**
- * @brief Serializes Hits.
- * 
- * Iterates through the CaloHit container. If `OnlyRoI` is enabled, checks
- * if each hit is within `EtaWindow` x `PhiWindow` of a TruthParticle OR if its
- * hash is in the `KeepCells` list. Matched hits are converted and saved.
- */
-StatusCode RootStreamHITMaker::serialize( EventContext &ctx ) const
+StatusCode Gaugi::RootStreamHITMaker::serialize(SG::EventContext &ctx) const
 {
-
-  MSG_DEBUG("Serialize...");
   auto store = ctx.getStoreGateSvc();
-
-  for( auto key : ctx.keys())
-  {
-    MSG_DEBUG(key);
-  }
-
   store->cd();
   TTree *tree = store->tree(m_ntupleName);
- 
-  std::vector<xAOD::CaloHit_t           > *container_hits       = nullptr;
-  std::vector<xAOD::EventInfo_t         > *container_event      = nullptr;
-  std::vector<xAOD::Seed_t              > *container_seeds      = nullptr;
-  std::vector<xAOD::TruthParticle_t     > *container_truth      = nullptr;
 
-  MSG_DEBUG( "Link all branches..." );
+  // --- Ponteiros oficiais ---
+  std::vector<xAOD::CaloHit_t> *container_calo_hits = nullptr;
+  std::vector<xAOD::EventInfo_t> *container_event = nullptr;
+  std::vector<xAOD::Seed_t> *container_seeds = nullptr;
+  std::vector<xAOD::TruthParticle_t> *container_truth = nullptr;
 
-  InitBranch( tree, ("EventInfoContainer_"+m_outputEventKey).c_str()     , &container_event     );
-  InitBranch( tree, ("SeedContainer_"+m_outputSeedsKey).c_str()          , &container_seeds     );
-  InitBranch( tree, ("TruthParticleContainer_"+m_outputTruthKey).c_str() , &container_truth     );
-  InitBranch( tree, ("CaloHitContainer_"+m_outputHitsKey).c_str()        , &container_hits      );
+  // --- Ponteiros aditivos de muon ---
+  std::vector<xAOD::MuonHit_t> *container_muon_hits = nullptr;
 
-  { // serialize EventInfo
+  MSG_DEBUG("Link all branches...");
+
+  const std::string in_calo_hits  = m_inputCaloHitsKey.empty()  ? m_inputHitsKey  : m_inputCaloHitsKey;
+  const std::string out_calo_hits = m_outputCaloHitsKey.empty() ? m_outputHitsKey : m_outputCaloHitsKey;
+
+  // --- Branches oficiais ---
+  InitBranch(tree, ("EventInfoContainer_" + m_outputEventKey).c_str(), &container_event);
+  InitBranch(tree, ("SeedContainer_" + m_outputSeedsKey).c_str(), &container_seeds);
+  InitBranch(tree, ("TruthParticleContainer_" + m_outputTruthKey).c_str(), &container_truth);
+  InitBranch(tree, ("CaloHitContainer_" + out_calo_hits).c_str(), &container_calo_hits);
+
+  // --- Branch aditiva de muon ---
+  if (m_enableMuonOutput) {
+    InitBranch(tree, ("MuonHitContainer_" + m_outputMuonHitsKey).c_str(), &container_muon_hits);
+  }
+
+  // --- EventInfo (OFICIAL) ---
+  {
     MSG_DEBUG("Serialize EventInfo...");
     SG::ReadHandle<xAOD::EventInfoContainer> event(m_inputEventKey, ctx);
 
-    if( !event.isValid() ){
-      MSG_FATAL( "It's not possible to read the xAOD::EventInfoContainer from this Context" );
+    if (!event.isValid()) {
+      MSG_FATAL("It's not possible to read the xAOD::EventInfoContainer from this Context");
     }
 
     xAOD::EventInfo_t event_t;
     xAOD::EventInfoConverter cnv;
-    cnv.convert( (**event.ptr()).front(), event_t);
+    cnv.convert((**event.ptr()).front(), event_t);
     container_event->push_back(event_t);
   }
-  
 
-  { // Serialize Seed
+  // --- Seeds (OFICIAL) ---
+  {
     MSG_DEBUG("Serialize Seed..");
-    SG::ReadHandle<xAOD::SeedContainer> container( m_inputSeedsKey, ctx );
-
-    if( !container.isValid() )
-    {
-      MSG_FATAL("It's not possible to read the xAOD::SeedContainer from this Context using this key " << m_inputSeedsKey );
+    SG::ReadHandle<xAOD::SeedContainer> container(m_inputSeedsKey, ctx);
+    if (!container.isValid()) {
+      MSG_FATAL("It's not possible to read the xAOD::SeedContainer from this Context using this key " << m_inputSeedsKey);
     }
-
-    for (const auto seed : **container.ptr() ){
+    for (const auto seed : **container.ptr()) {
       xAOD::Seed_t seed_t;
       xAOD::SeedConverter cnv;
-      cnv.convert( seed, seed_t );
+      cnv.convert(seed, seed_t);
       container_seeds->push_back(seed_t);
     }
   }
-  
 
+  // --- Truth Particles + cálculo de par (ADITIVO) ---
+  bool hasCaloParticles = false;
+  bool hasMuons = false;
+  std::vector<float> muon_etas, muon_phis, calo_etas, calo_phis;
+  
+  {
+    SG::ReadHandle<xAOD::TruthParticleContainer> container(m_inputTruthKey, ctx);
+    if (container.isValid()) {
+      for (const auto par : **container.ptr()) {
+        if (!par) continue;
+        int pdgId = par->pdgid();
+        
+        if (isMuon(pdgId)) {
+          hasMuons = true;
+          muon_etas.push_back(par->eta());
+          muon_phis.push_back(par->phi());
+        } else if (isElectron(pdgId) || isPhoton(pdgId) || isHadron(pdgId)) {
+          hasCaloParticles = true;
+          calo_etas.push_back(par->eta());
+          calo_phis.push_back(par->phi());
+        }
+        
+        xAOD::TruthParticle_t par_t;
+        xAOD::TruthParticleConverter cnv;
+        cnv.convert(par, par_t);
+        container_truth->push_back(par_t);
+      }
+    }
+  }
+
+  // Cálculo das variáveis de par (ADITIVO)
+  if (container_truth) {
+    std::map<int, std::vector<int>> seed_particles;
+    for (size_t i = 0; i < container_truth->size(); ++i) {
+      int seed = (*container_truth)[i].seedid;
+      seed_particles[seed].push_back(i);
+    }
+    
+    for (const auto& seed_pair : seed_particles) {
+      int seed_id = seed_pair.first;
+      const std::vector<int>& indices = seed_pair.second;
+      
+      if (indices.size() >= 2) {
+        int idx1 = indices[0];
+        int idx2 = indices[1];
+        auto& p1 = (*container_truth)[idx1];
+        auto& p2 = (*container_truth)[idx2];
+        
+        float delta_eta = p1.eta - p2.eta;
+        float delta_phi = p1.phi - p2.phi;
+        while (delta_phi > M_PI) delta_phi -= 2 * M_PI;
+        while (delta_phi < -M_PI) delta_phi += 2 * M_PI;
+        float delta_R = std::sqrt(delta_eta * delta_eta + delta_phi * delta_phi);
+        
+        float px_total = p1.px + p2.px;
+        float py_total = p1.py + p2.py;
+        float pz_total = p1.pz + p2.pz;
+        float E_total = p1.e + p2.e;
+        
+        float mass = std::sqrt(std::max(0.0f, E_total * E_total - 
+                                        px_total * px_total - 
+                                        py_total * py_total - 
+                                        pz_total * pz_total));
+        float pt_pair = std::sqrt(px_total * px_total + py_total * py_total);
+        float eta_pair = std::atanh(pz_total / std::sqrt(px_total*px_total + py_total*py_total + pz_total*pz_total));
+        float phi_pair = std::atan2(py_total, px_total);
+        
+        // Salvar no p1
+        p1.pair_pdg1 = p1.pdgid;   p1.pair_pdg2 = p2.pdgid;
+        p1.pair_pt1 = p1.et;       p1.pair_pt2 = p2.et;
+        p1.pair_eta1 = p1.eta;     p1.pair_eta2 = p2.eta;
+        p1.pair_phi1 = p1.phi;     p1.pair_phi2 = p2.phi;
+        p1.pair_delta_eta = delta_eta; p1.pair_delta_phi = delta_phi;
+        p1.pair_delta_R = delta_R; p1.pair_mass = mass;
+        p1.pair_pt = pt_pair;      p1.pair_eta = eta_pair;
+        p1.pair_phi = phi_pair;    p1.pair_seedid = seed_id;
+        
+        // Salvar no p2
+        p2.pair_pdg1 = p1.pdgid;   p2.pair_pdg2 = p2.pdgid;
+        p2.pair_pt1 = p1.et;       p2.pair_pt2 = p2.et;
+        p2.pair_eta1 = p1.eta;     p2.pair_eta2 = p2.eta;
+        p2.pair_phi1 = p1.phi;     p2.pair_phi2 = p2.phi;
+        p2.pair_delta_eta = delta_eta; p2.pair_delta_phi = delta_phi;
+        p2.pair_delta_R = delta_R; p2.pair_mass = mass;
+        p2.pair_pt = pt_pair;      p2.pair_eta = eta_pair;
+        p2.pair_phi = phi_pair;    p2.pair_seedid = seed_id;
+      }
+    }
+  }
+
+  // --- CaloHits (OFICIAL) ---
   {
     MSG_DEBUG("Serialize CaloHits...");
-
     bool keepCells = !m_cellHashes.empty();
-    MSG_INFO("Keep Cells? " << (keepCells ? "Yes" : "No") );
+    MSG_INFO("Keep Cells? " << (keepCells ? "Yes" : "No"));
 
-    SG::ReadHandle<xAOD::TruthParticleContainer> particles( m_inputTruthKey, ctx );
-
-    SG::ReadHandle<xAOD::CaloHitContainer> container(m_inputHitsKey, ctx);
-    if( !container.isValid() )
-    {
-        MSG_FATAL("It's not possible to read the xAOD::CaloHitContainer from this Contaxt using this key " << m_inputHitsKey );
+    SG::ReadHandle<xAOD::TruthParticleContainer> particles(m_inputTruthKey, ctx);
+    SG::ReadHandle<xAOD::CaloHitContainer> container(in_calo_hits, ctx);
+    if (!container.isValid()) {
+      MSG_FATAL("It's not possible to read the xAOD::CaloHitContainer from this Contaxt using this key " << in_calo_hits);
     }
 
-    float etot=0;
-    for (const auto hit : **container.ptr() ){
-         
-      if(m_onlyRoI){
-        bool match=false;
-        for (const auto& par : **particles.ptr())
-        {
-          float deltaEta = std::abs( par->eta() - hit->eta() );
-          float deltaPhi = std::abs( CaloPhiRange::diff(par->phi(), hit->phi()) );
-          if ( deltaEta < m_etaWindow/2 && deltaPhi < m_phiWindow/2 )
-          {
-            match=true;
-            // break;
-          }
-          else if (keepCells) 
-          {
-            // Check if hit->hash() is in any of the vectors inside m_cellHash
+    float etot = 0;
+    for (const auto hit : **container.ptr()) {
+      if (m_onlyRoI) {
+        bool match = false;
+        for (const auto& par : **particles.ptr()) {
+          float deltaEta = std::abs(par->eta() - hit->eta());
+          float deltaPhi = std::abs(CaloPhiRange::diff(par->phi(), hit->phi()));
+          if (deltaEta < m_etaWindow/2 && deltaPhi < m_phiWindow/2) {
+            match = true;
+          } else if (keepCells) {
             if (std::find(m_cellHashes.begin(), m_cellHashes.end(), hit->hash()) != m_cellHashes.end()) {
-              match = true; // if hash is on list of defect cell, then we keep the hit
-              MSG_INFO("Hit with hash " << hit->hash() << " is marked by the user and will be kept.");
-              // break;
+              match = true;
             }
           }
-          if (match) break;   // break if we found a match after checking the 2 conditions
-          
-        } // end loop over particles
-
-        if(!match) continue; // skip this hit
-
-      } // end of if(m_onlyRoI)
+          if (match) break;
+        }
+        if (!match) continue;
+      }
 
       xAOD::CaloHit_t hit_t;
       xAOD::CaloHitConverter hit_cnv;
       hit_cnv.convert(hit, hit_t);
 
-      if(hit->hash() != hit_t.hash){
+      if (hit->hash() != hit_t.hash) {
         MSG_FATAL("Hit missmatch " << hit->hash() << " != " << hit_t.hash);
       }
       
-      container_hits->push_back(hit_t);
-      etot+=hit->edep();
-
-    }// check if hit is inside of the window
-
-    MSG_DEBUG("Container hit size is " << container_hits->size() << " and total energy " << etot << " MeV");
-    for (const auto hit : *container_hits) {
-      MSG_DEBUG("Hit hash: " << hit.hash );
+      container_calo_hits->push_back(hit_t);
+      etot += hit->edep();
     }
-
+    MSG_DEBUG("Container hit size is " << container_calo_hits->size() << " and total energy " << etot << " MeV");
   }
 
-  { // Serialize Truth Particle
-    MSG_DEBUG("Serialize TruthParticle...");
-    SG::ReadHandle<xAOD::TruthParticleContainer> container( m_inputTruthKey, ctx );
-  
-    if( !container.isValid() )
-    {
-      MSG_FATAL("It's not possible to read the xAOD::TruthParticleContainer from this Context using this key " << m_inputTruthKey );
+  // --- MuonHits (ADITIVO) ---
+  if (m_enableMuonOutput && container_muon_hits) {
+    SG::ReadHandle<xAOD::MuonHitContainer> muon_container(m_inputMuonHitsKey, ctx);
+    
+    if (muon_container.isValid()) {
+      for (const auto hit : **muon_container.ptr()) {
+        if (!hit) continue;
+        
+        try {
+          if (m_onlyRoI && (m_muonEtaWindow > 0 || m_muonPhiWindow > 0) && hasMuons) {
+            float hit_eta = -std::log(std::tan(std::acos(hit->z() / std::sqrt(hit->x()*hit->x() + hit->y()*hit->y() + hit->z()*hit->z()))/2.0));
+            float hit_phi = std::atan2(hit->y(), hit->x());
+            if (!isHitInRoI(hit_eta, hit_phi, muon_etas, muon_phis, m_muonEtaWindow, m_muonPhiWindow))
+              continue;
+          }
+          
+          xAOD::MuonHit_t hit_t;
+          xAOD::MuonHitConverter cnv;
+          if (cnv.convert(hit, hit_t)) {
+            container_muon_hits->push_back(hit_t);
+          }
+        } catch (const std::exception& e) {
+          MSG_ERROR("Erro processando MuonHit: " << e.what());
+        }
+      }
+    } else {
+      MSG_WARNING("MuonHitContainer NAO encontrado com a chave: " << m_inputMuonHitsKey);
     }
-
-    for (const auto par : **container.ptr() ){
-      xAOD::TruthParticle_t par_t;
-      xAOD::TruthParticleConverter cnv;
-      cnv.convert( par, par_t );
-      container_truth->push_back(par_t);
-    }
-  
   }
-  
+
   tree->Fill();
-
-  delete container_hits   ;
-  delete container_event  ;
-  delete container_truth  ;
-  delete container_seeds  ;
-
   return StatusCode::SUCCESS;
- 
 }
-
-//!=====================================================================
-

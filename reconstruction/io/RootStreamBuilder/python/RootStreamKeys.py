@@ -1,6 +1,7 @@
 __all__ = ["recordable"]
 
 valid_keys = [
+    # --- Oficial (todas as 27 chaves preservadas) ---
     "EventInfo",
     "Hits",
     # CaloCellMerge
@@ -31,6 +32,18 @@ valid_keys = [
     "TruthElectrons",
     "RingsL0",
     "TruthRingsL0",
+    # --- Aditivo: chaves da camara de muons ---
+    "Event",
+    "MuonHits",
+    "CaloHits",
+    "MuonHits_Processed",
+    "TruthMuonHits",
+    "CaloCells",
+    "TruthCaloCells",
+    "MuonCells",
+    "TruthMuonCells",
+    "MuonClusters",
+    "Muons",
 ]
 
 
