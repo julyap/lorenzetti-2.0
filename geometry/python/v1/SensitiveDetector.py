@@ -1,6 +1,4 @@
-
-
-__all__ = [ "SensitiveDetector",]
+__all__ = [ "SensitiveDetector", "SensitiveCaloVolume" ]
 
 from GaugiKernel import Logger
 from GaugiKernel.macros import MSG_FATAL
@@ -75,3 +73,6 @@ class SensitiveDetector(Logger):
       return self.pv
 
 
+# Alias aditivo para a API dos builders de camara de muons (MuonChamberBuilder):
+# MuonChamber.py/MuonEndcap.py fazem `from .SensitiveDetector import SensitiveDetector as SensitiveCaloVolume`.
+SensitiveCaloVolume = SensitiveDetector

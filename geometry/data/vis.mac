@@ -1,0 +1,272 @@
+
+/vis/open OGL 600x600-0+0
+/vis/viewer/set/autoRefresh false
+/vis/verbose errors
+/vis/drawVolume
+/vis/viewer/set/viewpointVector 1 0 0
+/vis/viewer/set/lightsVector 1 0 0
+/vis/viewer/set/style wireframe
+/vis/viewer/set/auxiliaryEdge true
+/vis/viewer/set/lineSegmentsPerCircle 100
+/vis/scene/add/trajectories smooth
+/vis/modeling/trajectories/create/drawByCharge
+/vis/modeling/trajectories/drawByCharge-0/default/setDrawStepPts true
+/vis/modeling/trajectories/drawByCharge-0/default/setStepPtsSize 2
+/vis/scene/endOfEventAction accumulate
+/vis/geometry/set/visibility World 0 false
+/vis/ogl/set/displayListLimit 10000000
+
+/vis/geometry/set/colour Tracking::Pixel0::A 0 0.5 0.5 0.5
+/vis/geometry/set/colour Tracking::Pixel0::A_Layer 0 0.5 0.5 0.5
+/vis/geometry/set/colour Tracking::Pixel0::A_Abso 0 0.5 0.5 0.5
+/vis/geometry/set/colour Tracking::Pixel0::A_Gap 0 0.5 0.5 0.5
+/vis/geometry/set/visibility Tracking::Pixel0::A 0 true
+/vis/geometry/set/visibility Tracking::Pixel0::A_Layer 0 true
+/vis/geometry/set/visibility Tracking::Pixel0::A_Abso 0 true
+/vis/geometry/set/visibility Tracking::Pixel0::A_Gap 0 true
+
+/vis/geometry/set/colour Tracking::Pixel1::A 0 0.5 0.5 0.5
+/vis/geometry/set/colour Tracking::Pixel1::A_Layer 0 0.5 0.5 0.5
+/vis/geometry/set/colour Tracking::Pixel1::A_Abso 0 0.5 0.5 0.5
+/vis/geometry/set/colour Tracking::Pixel1::A_Gap 0 0.5 0.5 0.5
+/vis/geometry/set/visibility Tracking::Pixel1::A 0 true
+/vis/geometry/set/visibility Tracking::Pixel1::A_Layer 0 true
+/vis/geometry/set/visibility Tracking::Pixel1::A_Abso 0 true
+/vis/geometry/set/visibility Tracking::Pixel1::A_Gap 0 true
+
+/vis/geometry/set/colour Tracking::Pixel2::A 0 0.5 0.5 0.5
+/vis/geometry/set/colour Tracking::Pixel2::A_Layer 0 0.5 0.5 0.5
+/vis/geometry/set/colour Tracking::Pixel2::A_Abso 0 0.5 0.5 0.5
+/vis/geometry/set/colour Tracking::Pixel2::A_Gap 0 0.5 0.5 0.5
+/vis/geometry/set/visibility Tracking::Pixel2::A 0 true
+/vis/geometry/set/visibility Tracking::Pixel2::A_Layer 0 true
+/vis/geometry/set/visibility Tracking::Pixel2::A_Abso 0 true
+/vis/geometry/set/visibility Tracking::Pixel2::A_Gap 0 true
+
+/vis/geometry/set/colour Tracking::Pixel0::B 0 0.5 0.5 0.5
+/vis/geometry/set/colour Tracking::Pixel0::B_Layer 0 0.5 0.5 0.5
+/vis/geometry/set/colour Tracking::Pixel0::B_Abso 0 0.5 0.5 0.5
+/vis/geometry/set/colour Tracking::Pixel0::B_Gap 0 0.5 0.5 0.5
+/vis/geometry/set/visibility Tracking::Pixel0::B 0 true
+/vis/geometry/set/visibility Tracking::Pixel0::B_Layer 0 true
+/vis/geometry/set/visibility Tracking::Pixel0::B_Abso 0 true
+/vis/geometry/set/visibility Tracking::Pixel0::B_Gap 0 true
+
+/vis/geometry/set/colour Tracking::Pixel1::B 0 0.5 0.5 0.5
+/vis/geometry/set/colour Tracking::Pixel1::B_Layer 0 0.5 0.5 0.5
+/vis/geometry/set/colour Tracking::Pixel1::B_Abso 0 0.5 0.5 0.5
+/vis/geometry/set/colour Tracking::Pixel1::B_Gap 0 0.5 0.5 0.5
+/vis/geometry/set/visibility Tracking::Pixel1::B 0 true
+/vis/geometry/set/visibility Tracking::Pixel1::B_Layer 0 true
+/vis/geometry/set/visibility Tracking::Pixel1::B_Abso 0 true
+/vis/geometry/set/visibility Tracking::Pixel1::B_Gap 0 true
+
+/vis/geometry/set/colour Tracking::Pixel2::B 0 0.5 0.5 0.5
+/vis/geometry/set/colour Tracking::Pixel2::B_Layer 0 0.5 0.5 0.5
+/vis/geometry/set/colour Tracking::Pixel2::B_Abso 0 0.5 0.5 0.5
+/vis/geometry/set/colour Tracking::Pixel2::B_Gap 0 0.5 0.5 0.5
+/vis/geometry/set/visibility Tracking::Pixel2::B 0 true
+/vis/geometry/set/visibility Tracking::Pixel2::B_Layer 0 true
+/vis/geometry/set/visibility Tracking::Pixel2::B_Abso 0 true
+/vis/geometry/set/visibility Tracking::Pixel2::B_Gap 0 true
+
+/vis/geometry/set/colour DM::PS::Boundary 0 0.5 0.5 0.5
+/vis/geometry/set/colour DM::PS::Boundary_Layer 0 0.5 0.5 0.5
+/vis/geometry/set/colour DM::PS::Boundary_Abso 0 0.5 0.5 0.5
+/vis/geometry/set/colour DM::PS::Boundary_Gap 0 0.5 0.5 0.5
+/vis/geometry/set/visibility DM::PS::Boundary 0 true
+/vis/geometry/set/visibility DM::PS::Boundary_Layer 0 true
+/vis/geometry/set/visibility DM::PS::Boundary_Abso 0 true
+/vis/geometry/set/visibility DM::PS::Boundary_Gap 0 true
+
+/vis/geometry/set/colour DM::LAr::Boundary 0 0.5 0.5 0.5
+/vis/geometry/set/colour DM::LAr::Boundary_Layer 0 0.5 0.5 0.5
+/vis/geometry/set/colour DM::LAr::Boundary_Abso 0 0.5 0.5 0.5
+/vis/geometry/set/colour DM::LAr::Boundary_Gap 0 0.5 0.5 0.5
+/vis/geometry/set/visibility DM::LAr::Boundary 0 true
+/vis/geometry/set/visibility DM::LAr::Boundary_Layer 0 true
+/vis/geometry/set/visibility DM::LAr::Boundary_Abso 0 true
+/vis/geometry/set/visibility DM::LAr::Boundary_Gap 0 true
+
+/vis/geometry/set/colour DM::TILE::Boundary 0 0.5 0.5 0.5
+/vis/geometry/set/colour DM::TILE::Boundary_Layer 0 0.5 0.5 0.5
+/vis/geometry/set/colour DM::TILE::Boundary_Abso 0 0.5 0.5 0.5
+/vis/geometry/set/colour DM::TILE::Boundary_Gap 0 0.5 0.5 0.5
+/vis/geometry/set/visibility DM::TILE::Boundary 0 true
+/vis/geometry/set/visibility DM::TILE::Boundary_Layer 0 true
+/vis/geometry/set/visibility DM::TILE::Boundary_Abso 0 true
+/vis/geometry/set/visibility DM::TILE::Boundary_Gap 0 true
+
+/vis/geometry/set/colour DM::Crack::EM::A 0 0.5 0.5 0.5
+/vis/geometry/set/colour DM::Crack::EM::A_Layer 0 0.5 0.5 0.5
+/vis/geometry/set/colour DM::Crack::EM::A_Abso 0 0.5 0.5 0.5
+/vis/geometry/set/colour DM::Crack::EM::A_Gap 0 0.5 0.5 0.5
+/vis/geometry/set/visibility DM::Crack::EM::A 0 true
+/vis/geometry/set/visibility DM::Crack::EM::A_Layer 0 true
+/vis/geometry/set/visibility DM::Crack::EM::A_Abso 0 true
+/vis/geometry/set/visibility DM::Crack::EM::A_Gap 0 true
+
+/vis/geometry/set/colour DM::Crack::TILE::A 0 0.5 0.5 0.5
+/vis/geometry/set/colour DM::Crack::TILE::A_Layer 0 0.5 0.5 0.5
+/vis/geometry/set/colour DM::Crack::TILE::A_Abso 0 0.5 0.5 0.5
+/vis/geometry/set/colour DM::Crack::TILE::A_Gap 0 0.5 0.5 0.5
+/vis/geometry/set/visibility DM::Crack::TILE::A 0 true
+/vis/geometry/set/visibility DM::Crack::TILE::A_Layer 0 true
+/vis/geometry/set/visibility DM::Crack::TILE::A_Abso 0 true
+/vis/geometry/set/visibility DM::Crack::TILE::A_Gap 0 true
+
+/vis/geometry/set/colour DM::Crack::EM::B 0 0.5 0.5 0.5
+/vis/geometry/set/colour DM::Crack::EM::B_Layer 0 0.5 0.5 0.5
+/vis/geometry/set/colour DM::Crack::EM::B_Abso 0 0.5 0.5 0.5
+/vis/geometry/set/colour DM::Crack::EM::B_Gap 0 0.5 0.5 0.5
+/vis/geometry/set/visibility DM::Crack::EM::B 0 true
+/vis/geometry/set/visibility DM::Crack::EM::B_Layer 0 true
+/vis/geometry/set/visibility DM::Crack::EM::B_Abso 0 true
+/vis/geometry/set/visibility DM::Crack::EM::B_Gap 0 true
+
+/vis/geometry/set/colour DM::Crack::TILE::B 0 0.5 0.5 0.5
+/vis/geometry/set/colour DM::Crack::TILE::B_Layer 0 0.5 0.5 0.5
+/vis/geometry/set/colour DM::Crack::TILE::B_Abso 0 0.5 0.5 0.5
+/vis/geometry/set/colour DM::Crack::TILE::B_Gap 0 0.5 0.5 0.5
+/vis/geometry/set/visibility DM::Crack::TILE::B 0 true
+/vis/geometry/set/visibility DM::Crack::TILE::B_Layer 0 true
+/vis/geometry/set/visibility DM::Crack::TILE::B_Abso 0 true
+/vis/geometry/set/visibility DM::Crack::TILE::B_Gap 0 true
+
+/vis/geometry/set/colour Muon::MDT_Inner 0 0.5 0.5 0.5
+/vis/geometry/set/colour Muon::MDT_Inner_Layer 0 0.5 0.5 0.5
+/vis/geometry/set/colour Muon::MDT_Inner_Abso 0 0.5 0.5 0.5
+/vis/geometry/set/colour Muon::MDT_Inner_Gap 0 0.5 0.5 0.5
+/vis/geometry/set/visibility Muon::MDT_Inner 0 true
+/vis/geometry/set/visibility Muon::MDT_Inner_Layer 0 true
+/vis/geometry/set/visibility Muon::MDT_Inner_Abso 0 true
+/vis/geometry/set/visibility Muon::MDT_Inner_Gap 0 true
+
+/vis/geometry/set/colour Muon::MDT_Middle 0 0.5 0.5 0.5
+/vis/geometry/set/colour Muon::MDT_Middle_Layer 0 0.5 0.5 0.5
+/vis/geometry/set/colour Muon::MDT_Middle_Abso 0 0.5 0.5 0.5
+/vis/geometry/set/colour Muon::MDT_Middle_Gap 0 0.5 0.5 0.5
+/vis/geometry/set/visibility Muon::MDT_Middle 0 true
+/vis/geometry/set/visibility Muon::MDT_Middle_Layer 0 true
+/vis/geometry/set/visibility Muon::MDT_Middle_Abso 0 true
+/vis/geometry/set/visibility Muon::MDT_Middle_Gap 0 true
+
+/vis/geometry/set/colour Muon::RPC_Middle 0 0.5 0.5 0.5
+/vis/geometry/set/colour Muon::RPC_Middle_Layer 0 0.5 0.5 0.5
+/vis/geometry/set/colour Muon::RPC_Middle_Abso 0 0.5 0.5 0.5
+/vis/geometry/set/colour Muon::RPC_Middle_Gap 0 0.5 0.5 0.5
+/vis/geometry/set/visibility Muon::RPC_Middle 0 true
+/vis/geometry/set/visibility Muon::RPC_Middle_Layer 0 true
+/vis/geometry/set/visibility Muon::RPC_Middle_Abso 0 true
+/vis/geometry/set/visibility Muon::RPC_Middle_Gap 0 true
+
+/vis/geometry/set/colour Muon::MDT_Outer 0 0.5 0.5 0.5
+/vis/geometry/set/colour Muon::MDT_Outer_Layer 0 0.5 0.5 0.5
+/vis/geometry/set/colour Muon::MDT_Outer_Abso 0 0.5 0.5 0.5
+/vis/geometry/set/colour Muon::MDT_Outer_Gap 0 0.5 0.5 0.5
+/vis/geometry/set/visibility Muon::MDT_Outer 0 true
+/vis/geometry/set/visibility Muon::MDT_Outer_Layer 0 true
+/vis/geometry/set/visibility Muon::MDT_Outer_Abso 0 true
+/vis/geometry/set/visibility Muon::MDT_Outer_Gap 0 true
+
+/vis/geometry/set/colour Muon::RPC_Outer 0 0.5 0.5 0.5
+/vis/geometry/set/colour Muon::RPC_Outer_Layer 0 0.5 0.5 0.5
+/vis/geometry/set/colour Muon::RPC_Outer_Abso 0 0.5 0.5 0.5
+/vis/geometry/set/colour Muon::RPC_Outer_Gap 0 0.5 0.5 0.5
+/vis/geometry/set/visibility Muon::RPC_Outer 0 true
+/vis/geometry/set/visibility Muon::RPC_Outer_Layer 0 true
+/vis/geometry/set/visibility Muon::RPC_Outer_Abso 0 true
+/vis/geometry/set/visibility Muon::RPC_Outer_Gap 0 true
+
+/vis/geometry/set/colour Muon::MDT_EC1::A 0 0.5 0.5 0.5
+/vis/geometry/set/colour Muon::MDT_EC1::A_Layer 0 0.5 0.5 0.5
+/vis/geometry/set/colour Muon::MDT_EC1::A_Abso 0 0.5 0.5 0.5
+/vis/geometry/set/colour Muon::MDT_EC1::A_Gap 0 0.5 0.5 0.5
+/vis/geometry/set/visibility Muon::MDT_EC1::A 0 true
+/vis/geometry/set/visibility Muon::MDT_EC1::A_Layer 0 true
+/vis/geometry/set/visibility Muon::MDT_EC1::A_Abso 0 true
+/vis/geometry/set/visibility Muon::MDT_EC1::A_Gap 0 true
+
+/vis/geometry/set/colour Muon::TGC_EC1::A 0 0.5 0.5 0.5
+/vis/geometry/set/colour Muon::TGC_EC1::A_Layer 0 0.5 0.5 0.5
+/vis/geometry/set/colour Muon::TGC_EC1::A_Abso 0 0.5 0.5 0.5
+/vis/geometry/set/colour Muon::TGC_EC1::A_Gap 0 0.5 0.5 0.5
+/vis/geometry/set/visibility Muon::TGC_EC1::A 0 true
+/vis/geometry/set/visibility Muon::TGC_EC1::A_Layer 0 true
+/vis/geometry/set/visibility Muon::TGC_EC1::A_Abso 0 true
+/vis/geometry/set/visibility Muon::TGC_EC1::A_Gap 0 true
+
+/vis/geometry/set/colour Muon::MDT_EC2::A 0 0.5 0.5 0.5
+/vis/geometry/set/colour Muon::MDT_EC2::A_Layer 0 0.5 0.5 0.5
+/vis/geometry/set/colour Muon::MDT_EC2::A_Abso 0 0.5 0.5 0.5
+/vis/geometry/set/colour Muon::MDT_EC2::A_Gap 0 0.5 0.5 0.5
+/vis/geometry/set/visibility Muon::MDT_EC2::A 0 true
+/vis/geometry/set/visibility Muon::MDT_EC2::A_Layer 0 true
+/vis/geometry/set/visibility Muon::MDT_EC2::A_Abso 0 true
+/vis/geometry/set/visibility Muon::MDT_EC2::A_Gap 0 true
+
+/vis/geometry/set/colour Muon::TGC_EC2::A 0 0.5 0.5 0.5
+/vis/geometry/set/colour Muon::TGC_EC2::A_Layer 0 0.5 0.5 0.5
+/vis/geometry/set/colour Muon::TGC_EC2::A_Abso 0 0.5 0.5 0.5
+/vis/geometry/set/colour Muon::TGC_EC2::A_Gap 0 0.5 0.5 0.5
+/vis/geometry/set/visibility Muon::TGC_EC2::A 0 true
+/vis/geometry/set/visibility Muon::TGC_EC2::A_Layer 0 true
+/vis/geometry/set/visibility Muon::TGC_EC2::A_Abso 0 true
+/vis/geometry/set/visibility Muon::TGC_EC2::A_Gap 0 true
+
+/vis/geometry/set/colour Muon::MDT_EC3::A 0 0.5 0.5 0.5
+/vis/geometry/set/colour Muon::MDT_EC3::A_Layer 0 0.5 0.5 0.5
+/vis/geometry/set/colour Muon::MDT_EC3::A_Abso 0 0.5 0.5 0.5
+/vis/geometry/set/colour Muon::MDT_EC3::A_Gap 0 0.5 0.5 0.5
+/vis/geometry/set/visibility Muon::MDT_EC3::A 0 true
+/vis/geometry/set/visibility Muon::MDT_EC3::A_Layer 0 true
+/vis/geometry/set/visibility Muon::MDT_EC3::A_Abso 0 true
+/vis/geometry/set/visibility Muon::MDT_EC3::A_Gap 0 true
+
+/vis/geometry/set/colour Muon::MDT_EC1::C 0 0.5 0.5 0.5
+/vis/geometry/set/colour Muon::MDT_EC1::C_Layer 0 0.5 0.5 0.5
+/vis/geometry/set/colour Muon::MDT_EC1::C_Abso 0 0.5 0.5 0.5
+/vis/geometry/set/colour Muon::MDT_EC1::C_Gap 0 0.5 0.5 0.5
+/vis/geometry/set/visibility Muon::MDT_EC1::C 0 true
+/vis/geometry/set/visibility Muon::MDT_EC1::C_Layer 0 true
+/vis/geometry/set/visibility Muon::MDT_EC1::C_Abso 0 true
+/vis/geometry/set/visibility Muon::MDT_EC1::C_Gap 0 true
+
+/vis/geometry/set/colour Muon::TGC_EC1::C 0 0.5 0.5 0.5
+/vis/geometry/set/colour Muon::TGC_EC1::C_Layer 0 0.5 0.5 0.5
+/vis/geometry/set/colour Muon::TGC_EC1::C_Abso 0 0.5 0.5 0.5
+/vis/geometry/set/colour Muon::TGC_EC1::C_Gap 0 0.5 0.5 0.5
+/vis/geometry/set/visibility Muon::TGC_EC1::C 0 true
+/vis/geometry/set/visibility Muon::TGC_EC1::C_Layer 0 true
+/vis/geometry/set/visibility Muon::TGC_EC1::C_Abso 0 true
+/vis/geometry/set/visibility Muon::TGC_EC1::C_Gap 0 true
+
+/vis/geometry/set/colour Muon::MDT_EC2::C 0 0.5 0.5 0.5
+/vis/geometry/set/colour Muon::MDT_EC2::C_Layer 0 0.5 0.5 0.5
+/vis/geometry/set/colour Muon::MDT_EC2::C_Abso 0 0.5 0.5 0.5
+/vis/geometry/set/colour Muon::MDT_EC2::C_Gap 0 0.5 0.5 0.5
+/vis/geometry/set/visibility Muon::MDT_EC2::C 0 true
+/vis/geometry/set/visibility Muon::MDT_EC2::C_Layer 0 true
+/vis/geometry/set/visibility Muon::MDT_EC2::C_Abso 0 true
+/vis/geometry/set/visibility Muon::MDT_EC2::C_Gap 0 true
+
+/vis/geometry/set/colour Muon::TGC_EC2::C 0 0.5 0.5 0.5
+/vis/geometry/set/colour Muon::TGC_EC2::C_Layer 0 0.5 0.5 0.5
+/vis/geometry/set/colour Muon::TGC_EC2::C_Abso 0 0.5 0.5 0.5
+/vis/geometry/set/colour Muon::TGC_EC2::C_Gap 0 0.5 0.5 0.5
+/vis/geometry/set/visibility Muon::TGC_EC2::C 0 true
+/vis/geometry/set/visibility Muon::TGC_EC2::C_Layer 0 true
+/vis/geometry/set/visibility Muon::TGC_EC2::C_Abso 0 true
+/vis/geometry/set/visibility Muon::TGC_EC2::C_Gap 0 true
+
+/vis/geometry/set/colour Muon::MDT_EC3::C 0 0.5 0.5 0.5
+/vis/geometry/set/colour Muon::MDT_EC3::C_Layer 0 0.5 0.5 0.5
+/vis/geometry/set/colour Muon::MDT_EC3::C_Abso 0 0.5 0.5 0.5
+/vis/geometry/set/colour Muon::MDT_EC3::C_Gap 0 0.5 0.5 0.5
+/vis/geometry/set/visibility Muon::MDT_EC3::C 0 true
+/vis/geometry/set/visibility Muon::MDT_EC3::C_Layer 0 true
+/vis/geometry/set/visibility Muon::MDT_EC3::C_Abso 0 true
+/vis/geometry/set/visibility Muon::MDT_EC3::C_Gap 0 true
+
+/vis/viewer/set/autoRefresh true
+/vis/verbose warnings

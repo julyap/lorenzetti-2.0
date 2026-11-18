@@ -35,3 +35,22 @@ from .HEC import *
 from . import DeadMaterials
 __all__.extend(DeadMaterials.__all__)
 from .DeadMaterials import *
+
+# Muon chambers (configuracao Python; dependem de PhysicalVolume estendida,
+# SensitiveDetector com alias SensitiveCaloVolume e dos modulos MuonChamber/MuonEndcap
+# que devem morar em geometry/python/v1/)
+try:
+    from . import MuonChamber
+    __all__.extend(MuonChamber.__all__)
+    from .MuonChamber import *
+except Exception as _e:
+    import warnings
+    warnings.warn(f"MuonChamber nao carregado: {_e}")
+
+try:
+    from . import MuonEndcap
+    __all__.extend(MuonEndcap.__all__)
+    from .MuonEndcap import *
+except Exception as _e:
+    import warnings
+    warnings.warn(f"MuonEndcap nao carregado: {_e}")

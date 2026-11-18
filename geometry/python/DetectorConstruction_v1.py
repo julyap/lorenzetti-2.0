@@ -20,6 +20,9 @@ from geometry.v1.TILE             import getTileBarrelCfg, getTileExtendedCfg
 from geometry.v1.EMEC             import getLArEMECCfg
 from geometry.v1.HEC              import getHECCfg
 from geometry.v1.DeadMaterials    import getDMVolumesCfg, getCrackVolumesCfg
+# --- Aditivo: camara de muons ---
+from geometry.v1.MuonChamber      import getMuonBarrelCfg
+from geometry.v1.MuonEndcap       import getMuonEndcapCfg
 #from geometry.detectors.Tracking      import *
 
 
@@ -49,6 +52,8 @@ class DetectorConstruction_v1( Cpp ):
 
     self.samplings = []
     self.volumes = []
+    # --- Aditivo: camara de muons ---
+    self.muon_chambers = []
     # Center
     
     #volumes.extend( getPixelBarrelCfg()   )
@@ -66,6 +71,11 @@ class DetectorConstruction_v1( Cpp ):
     self.samplings.extend( getHECCfg(left_side=True)            )    
     self.volumes.extend( getCrackVolumesCfg(left_side=True)     )
     self.samplings = flatten(self.samplings)
+    
+    # --- Aditivo: camara de muons (barrel + endcap A + endcap C) ---
+    self.muon_chambers.extend( getMuonBarrelCfg()                   )
+    self.muon_chambers.extend( getMuonEndcapCfg()                   )  # Endcap A (+z)
+    self.muon_chambers.extend( getMuonEndcapCfg(left_side=True)     )  # Endcap C (-z)
     
   
   def compile(self):
@@ -95,6 +105,23 @@ class DetectorConstruction_v1( Cpp ):
                              pv.Cuts.PhotonCut
                              )
 
+    # --- Aditivo: camara de muons ---
+    for chamber in tqdm( self.muon_chambers, desc="Compiling muon chambers...", ncols=70):
+      pv = chamber.volume()
+      self._core.AddMuonChamber(
+          pv.Name,
+          getattr(pv, 'ChamberType', 0),
+          getattr(pv, 'RMin', 0),
+          getattr(pv, 'RMax', 1.0),
+          getattr(pv, 'ZSize', 1.0),
+          getattr(pv, 'Z', 0),
+          getattr(pv, 'ChamberStructure', 'G4_Al'),
+          getattr(pv, 'GasMixture', 'G4_Ar'),
+          getattr(pv, 'OperatingVoltage', 10000.0),
+          getattr(pv, 'GasPressure', 1.0),
+          getattr(pv, 'MuonCut', 1.0*cm) if getattr(pv, 'MuonCut', None) is not None else 1.0*cm
+      )
+
   def summary(self):
 
       print('Display all calorimeter samplings...')
@@ -123,8 +150,27 @@ class DetectorConstruction_v1( Cpp ):
                    pv.RMin, pv.RMax, pv.AbsorberMaterial, pv.GapMaterial]) 
       print(t)
 
-  
-  
+      # --- Aditivo: camara de muons ---
+      print('Display all muon chambers...')
+      t = PrettyTable(["Name", "Type", "Rmin", "Rmax", "z", "ZSize",
+                       "ChamberStructure", "GasMixture",
+                       "OperatingVoltage", "GasPressure", "MuonCut", "Container"])
+      for chamber in self.muon_chambers:
+        pv = chamber.volume()
+        ctype = getattr(pv, 'ChamberType', 0)
+        t.add_row([
+          pv.Name,
+          ctype,
+          pv.RMin, pv.RMax, pv.Z, pv.ZSize,
+          getattr(pv, 'ChamberStructure', '-'),
+          getattr(pv, 'GasMixture', '-'),
+          getattr(pv, 'OperatingVoltage', 0.0),
+          getattr(pv, 'GasPressure', 1.0),
+          getattr(pv, 'MuonCut', 0.0),
+          getattr(chamber, 'CollectionKey', '-'),
+        ])
+      print(t)
+
   def get_ui_commands(self) -> List[str]:
 
     commands = [
@@ -166,6 +212,37 @@ class DetectorConstruction_v1( Cpp ):
     for vol in self.volumes:
       commands.extend( _add_volume_vis_commands( vol.name(), vol.Color, 'true' if vol.Visualization else 'false') )
 
+    # --- Aditivo: camara de muons ---
+    # O C++ cria os volumes "<name>", "<name>_Structure" e "<name>_Gas". O comando de cor
+    # do Geant4 espera valores numericos (r g b), mas os modulos de muons passam strings
+    # ('steelblue', etc.). Aqui convertemos para RGB padrao, com fallback cinza.
+    _color_map = {
+        'steelblue':      '0.27 0.51 0.71',
+        'royalblue':      '0.25 0.41 0.88',
+        'darkblue':       '0.00 0.00 0.55',
+        'lightblue':      '0.68 0.85 0.90',
+        'skyblue':        '0.53 0.81 0.92',
+        'lightsteelblue': '0.69 0.77 0.87',
+        'cornflowerblue': '0.39 0.58 0.93',
+        'gray':           '0.50 0.50 0.50',
+        'grey':           '0.50 0.50 0.50',
+    }
+    for chamber in self.muon_chambers:
+      pv = chamber.volume()
+      name = pv.name() if hasattr(pv, 'name') else pv.Name
+      raw = getattr(pv, 'Color', None)
+      color = _color_map.get(raw, '0.50 0.50 0.50') if isinstance(raw, str) else (
+              f"{raw} {raw} {raw}" if isinstance(raw, (int, float)) else '0.50 0.50 0.50')
+      vis = 'true' if getattr(pv, 'Visualization', True) else 'false'
+      commands.extend([
+         f"/vis/geometry/set/colour {name} 0 {color}"
+        ,f"/vis/geometry/set/colour {name}_Structure 0 {color}"
+        ,f"/vis/geometry/set/colour {name}_Gas 0 {color}"
+        ,f"/vis/geometry/set/visibility {name} 0 {vis}"
+        ,f"/vis/geometry/set/visibility {name}_Structure 0 {vis}"
+        ,f"/vis/geometry/set/visibility {name}_Gas 0 {vis}"
+      ])
+
     commands.extend( [
              "/vis/viewer/set/autoRefresh true"
             ,"/vis/verbose warnings"
@@ -181,8 +258,3 @@ if __name__ == "__main__":
     atlas.summary()
     #atlas.compile()
     #pprint(atlas.create_visualization_commands())
-
-
-
-
-

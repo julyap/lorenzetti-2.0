@@ -44,6 +44,15 @@ class DetectorConstruction_v1 : public G4VUserDetectorConstruction, public MsgSe
       double positronCut;
       double gammaCut;
       double photonCut;
+
+      // --- Campos aditivos da camara de muons (defaults preservam os volumes
+      //     existentes: ECAL/TILE/EMEC/HEC/DM/Crack) ---
+      double muonCut;
+      bool   isMuonChamber;
+      int    chamberType;          // 0=MDT, 1=RPC, 2=TGC
+      std::string gasMixture;
+      double operatingVoltage;
+      double gasPressure;
     };
 
     DetectorConstruction_v1(std::string);
@@ -55,6 +64,9 @@ class DetectorConstruction_v1 : public G4VUserDetectorConstruction, public MsgSe
     const G4VPhysicalVolume* GetAbsorberPV() const;
     const G4VPhysicalVolume* GetGapPV() const;
 
+    // Metodo original do calorimetro: MANTIDO INTACTO, apenas com o
+    // parametro opcional muonCut no final (default = 1.0*cm) para nao
+    // quebrar as chamadas existentes (ECAL/TILE/EMEC/HEC/DM/Crack).
     void AddVolume(std::string region,
                    int plates,
                    std::string absorberMaterial,
@@ -72,8 +84,31 @@ class DetectorConstruction_v1 : public G4VUserDetectorConstruction, public MsgSe
                    double electronCut,
                    double positronCut,
                    double gammaCut,
-                   double photonCut
+                   double photonCut,
+                   // muon cut (aditivo; default 1 cm)
+                   double muonCut = 1.0*cm
                    );
+
+    // --- Camara de muons (aditivo) ---
+    // Cria um Volume com isMuonChamber=true. Chamado pelo DetectorConstruction_v1.py
+    // para cada detector retornado por getMuonBarrelCfg()/getMuonEndcapCfg().
+    void AddMuonChamber(std::string name,
+                        int chamberType,
+                        double rMin,
+                        double rMax,
+                        double zSize,
+                        double zPos,
+                        std::string chamberStructure,
+                        std::string gasMixture,
+                        double operatingVoltage,
+                        double gasPressure,
+                        double muonCut
+                        );
+
+    // Stub (a SD C++ da camara ainda nao foi integrada neste repositorio):
+    // registra a intencao no log. Para gerar hits, a MuonSensitiveDetector
+    // deve ser implementada e registrada aqui.
+    void SetupMuonSensitiveDetectors();
 
   private:
 
@@ -112,6 +147,15 @@ class DetectorConstruction_v1 : public G4VUserDetectorConstruction, public MsgSe
                                 const G4ThreeVector &center_pos,
                                 G4Region *region);
 
+    // --- Camara de muons (aditivo) ---
+    // Constroi a camara (estrutura + gap de gas) no world, para um Volume
+    // que tenha isMuonChamber=true. Registra cuts de muon (mu-/mu+) e
+    // cria a G4Region com o nome do volume.
+    void ConstructMuonChamber( G4LogicalVolume *worldLV,
+                               const Volume &volume,
+                               G4Material *defaultMaterial,
+                               G4Region *region );
+
     G4Region* GetRegion( std::string name );
 
 
@@ -127,4 +171,3 @@ class DetectorConstruction_v1 : public G4VUserDetectorConstruction, public MsgSe
 
 
 #endif
-

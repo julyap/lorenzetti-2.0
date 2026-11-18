@@ -6,7 +6,6 @@ from GaugiKernel.constants import um
 from GaugiKernel import EnumStringification
 
 
-
 class Plates(EnumStringification):
   Horizontal = 0
   Vertical   = 1
@@ -33,12 +32,37 @@ class PhysicalVolume(Logger):
                       "Z",
                       "Visualization",
                       "Color",
+                      # --- Campos aditivos da camara de muons (defaults preservam o
+                      #     comportamento dos volumes existentes: ECAL/TILE/EMEC/HEC) ---
+                      "ChamberStructure",
+                      "GasMixture",
+                      "StructureThickness",
+                      "GasGapThickness",
+                      "IsMuonChamber",
+                      "ChamberType",
+                      "OperatingVoltage",
+                      "GasPressure",
+                      "MuonCut",
                    ]
 
     # Constructor
     def __init__(self, **kw):
 
         Logger.__init__(self)
+
+        # Defaults aditivos de muons (aplicados ANTES do loop, para que kwargs
+        # do usuario tenham precedencia; volumes existentes nao passam esses
+        # kwargs e ficam com os defaults inertes abaixo)
+        self.ChamberStructure  = None
+        self.GasMixture        = None
+        self.StructureThickness = 0.0
+        self.GasGapThickness   = 0.0
+        self.IsMuonChamber     = False
+        self.ChamberType       = 0
+        self.OperatingVoltage  = 0.0
+        self.GasPressure       = 1.0
+        self.MuonCut           = None
+
         for key, value in kw.items():
           if key in self.__allow_keys:
             setattr(self, key, value )
@@ -57,5 +81,3 @@ class PhysicalVolume(Logger):
 class ProductionCuts(Logger):
   def __init__(self, GammaCut =  700*um, ElectronCut = 700*um, PositronCut = 700*um, PhotonCut = 700*um):
     self.GammaCut=GammaCut; self.ElectronCut=ElectronCut; self.PositronCut=PositronCut; self.PhotonCut=PhotonCut
-
-

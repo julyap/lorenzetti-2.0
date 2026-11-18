@@ -1,4 +1,3 @@
-
 #include "DetectorConstruction_v1.h"
 #include "G4Material.hh"
 #include "G4NistManager.hh"
@@ -85,11 +84,82 @@ void DetectorConstruction_v1::AddVolume(std::string region,
                                         double electronCut,
                                         double positronCut,
                                         double gammaCut,
-                                        double photonCut
+                                        double photonCut,
+                                        // muon cut (aditivo; default 1 cm)
+                                        double muonCut
                                         )
 {
-  m_volumes.push_back(Volume{region,plates,absorberMaterial,gapMaterial,nofLayers,absoThickness,gapThickness,rMin,rMax,zSize,x,y,z,
-                      electronCut,positronCut,gammaCut,photonCut});
+  Volume v;
+  v.name             = region;
+  v.plates           = plates;
+  v.absorberMaterial = absorberMaterial;
+  v.gapMaterial      = gapMaterial;
+  v.nofLayers        = nofLayers;
+  v.absoThickness    = absoThickness;
+  v.gapThickness     = gapThickness;
+  v.rMin             = rMin;
+  v.rMax             = rMax;
+  v.zSize            = zSize;
+  v.x                = x;
+  v.y                = y;
+  v.z                = z;
+  v.electronCut      = electronCut;
+  v.positronCut      = positronCut;
+  v.gammaCut         = gammaCut;
+  v.photonCut        = photonCut;
+  // defaults aditivos (nao usados pelo ramo de calorimetro)
+  v.muonCut          = muonCut;
+  v.isMuonChamber    = false;
+  v.chamberType      = 0;
+  v.gasMixture       = "";
+  v.operatingVoltage = 0.0;
+  v.gasPressure      = 1.0;
+
+  m_volumes.push_back(v);
+}
+
+
+//
+// AddMuonChamber (aditivo): cria um Volume com isMuonChamber=true
+//
+void DetectorConstruction_v1::AddMuonChamber(std::string name,
+                                             int chamberType,
+                                             double rMin,
+                                             double rMax,
+                                             double zSize,
+                                             double zPos,
+                                             std::string chamberStructure,
+                                             std::string gasMixture,
+                                             double operatingVoltage,
+                                             double gasPressure,
+                                             double muonCut)
+{
+  Volume v;
+  v.name             = name;
+  v.plates           = 0; // barrel (Horizontal); o ramo de muons usa rMin/rMax/zSize
+  v.absorberMaterial = chamberStructure;
+  v.gapMaterial      = gasMixture;
+  v.nofLayers        = 1;
+  v.absoThickness    = 0.5*cm;
+  v.gapThickness     = 1.0*cm;
+  v.rMin             = rMin;
+  v.rMax             = rMax;
+  v.zSize            = zSize;
+  v.x                = 0;
+  v.y                = 0;
+  v.z                = zPos;
+  v.electronCut      = 1.0*mm;
+  v.positronCut      = 1.0*mm;
+  v.gammaCut         = 1.0*mm;
+  v.photonCut        = 1.0*mm;
+  v.muonCut          = muonCut;
+  v.isMuonChamber    = true;
+  v.chamberType      = chamberType;
+  v.gasMixture       = gasMixture;
+  v.operatingVoltage = operatingVoltage;
+  v.gasPressure      = gasPressure;
+
+  m_volumes.push_back(v);
 }
 
 
@@ -133,6 +203,24 @@ G4VPhysicalVolume* DetectorConstruction_v1::Construct()
   for (auto &volume : m_volumes){
 
     MSG_INFO( "Creating Volume with name " << volume.name );
+
+    // --- Ramo aditivo: camara de muons ---
+    // Se o Volume foi criado por AddMuonChamber (isMuonChamber=true),
+    // construimos a camara (estrutura + gap de gas) e seguimos.
+    if (volume.isMuonChamber) {
+      auto region = GetRegion(volume.name);
+      ConstructMuonChamber(worldLV, volume, defaultMaterial, region);
+
+      G4ProductionCuts* cuts = new G4ProductionCuts();
+      cuts->SetProductionCut(volume.gammaCut,    "gamma");
+      cuts->SetProductionCut(volume.electronCut, "e-");
+      cuts->SetProductionCut(volume.positronCut, "e+");
+      cuts->SetProductionCut(volume.photonCut,   "proton");
+      cuts->SetProductionCut(volume.muonCut,     "mu-");
+      cuts->SetProductionCut(volume.muonCut,     "mu+");
+      region->SetProductionCuts(cuts);
+      continue;
+    }
 
     if(volume.plates == 0){ //Plates::Horizontal){
 
@@ -207,6 +295,11 @@ void DetectorConstruction_v1::DefineMaterials()
   nistManager->FindOrBuildMaterial("G4_Si");
   nistManager->FindOrBuildMaterial("G4_CESIUM_IODIDE");
   nistManager->FindOrBuildMaterial("PLASTIC SCINTILLATOR");
+  // --- Aditivo: materiais usados pela camara de muons ---
+  nistManager->FindOrBuildMaterial("G4_Ar");
+  nistManager->FindOrBuildMaterial("G4_CO2");
+  nistManager->FindOrBuildMaterial("G4_AIR");
+  nistManager->FindOrBuildMaterial("G4_POLYSTYRENE");
   G4Element* elH = new G4Element("Hydrogen", "H", 1., 1.0079 * g/mole);
   G4Element* elC = new G4Element("Carbon", "C", 6., 12.011 * g/mole);
   G4Material* scinti = new G4Material("PLASTIC SCINTILLATOR", 1.032 * g/cm3, 2); // Organic plastic scintillator, polystyrene
@@ -545,7 +638,111 @@ void DetectorConstruction_v1::CreateVerticalPlates(  G4LogicalVolume *worldLV,
 }
 
 
+// --- Aditivo: construcao da camara de muons ---
+//
+// Estrutura (parede) + gap de gas. Recebe o Volume com isMuonChamber=true
+// e cria:
+//   <name>            : G4Tubs envelope (defaultMaterial)
+//   <name>_Structure  : G4Tubs de "absorberMaterial" (parede)
+//   <name>_Gas        : G4Tubs de "gasMixture" (gap sensivel)
+// A G4Region <name> e registrada como root do volume-mae.
+//
+void DetectorConstruction_v1::ConstructMuonChamber( G4LogicalVolume *worldLV,
+                                                    const Volume &volume,
+                                                    G4Material *defaultMaterial,
+                                                    G4Region *region )
+{
+  G4Material* structureMat = G4Material::GetMaterial(volume.absorberMaterial);
+  G4Material* gasMat       = G4Material::GetMaterial(volume.gasMixture);
 
+  if ( !structureMat || !gasMat ) {
+    G4ExceptionDescription msg;
+    msg << "Cannot retrieve muon chamber materials ("
+        << volume.absorberMaterial << ", " << volume.gasMixture << ").";
+    G4Exception("DetectorConstruction_v1::ConstructMuonChamber()",
+                "MuonChamber0001", FatalException, msg);
+  }
+
+  const double structureT = (volume.absoThickness > 0) ? volume.absoThickness : 0.5*cm;
+  const double gapT       = (volume.gapThickness  > 0) ? volume.gapThickness  : 1.0*cm;
+
+  const double rMin  = volume.rMin;
+  const double rMax  = volume.rMax;
+  const double zSize = volume.zSize;
+
+  // Envelope (Vacuum)
+  G4VSolid* chamberS = new G4Tubs( volume.name,
+                                    rMin, rMax,
+                                    zSize/2,
+                                    0*deg,
+                                    (!m_cutOnPhi)?(360*deg):(235*deg) );
+
+  G4LogicalVolume* chamberLV = new G4LogicalVolume( chamberS,
+                                                     defaultMaterial,
+                                                     volume.name );
+
+  new G4PVPlacement( 0,
+                     G4ThreeVector(volume.x, volume.y, volume.z),
+                     chamberLV,
+                     volume.name,
+                     worldLV,
+                     false,
+                     0,
+                     m_checkOverlaps );
+
+  region->AddRootLogicalVolume(chamberLV);
+
+  // Estrutura (parede)
+  G4VSolid* structureS = new G4Tubs( volume.name + "_Structure",
+                                      rMin, rMin + structureT,
+                                      zSize/2,
+                                      0*deg,
+                                      (!m_cutOnPhi)?(360*deg):(235*deg) );
+
+  G4LogicalVolume* structureLV = new G4LogicalVolume( structureS,
+                                                       structureMat,
+                                                       volume.name + "_Structure" );
+
+  new G4PVPlacement( 0,
+                     G4ThreeVector(0,0,0),
+                     structureLV,
+                     volume.name + "_Structure",
+                     chamberLV,
+                     false,
+                     0,
+                     m_checkOverlaps );
+
+  // Gap de gas
+  G4VSolid* gasS = new G4Tubs( volume.name + "_Gas",
+                                rMin + structureT, rMin + structureT + gapT,
+                                zSize/2,
+                                0*deg,
+                                (!m_cutOnPhi)?(360*deg):(235*deg) );
+
+  G4LogicalVolume* gasLV = new G4LogicalVolume( gasS,
+                                                 gasMat,
+                                                 volume.name + "_Gas" );
+
+  new G4PVPlacement( 0,
+                     G4ThreeVector(0,0,0),
+                     gasLV,
+                     volume.name + "_Gas",
+                     chamberLV,
+                     false,
+                     0,
+                     m_checkOverlaps );
+
+  // Vis attributes (opcional, por tipo de camara)
+  G4VisAttributes* vis = nullptr;
+  switch (volume.chamberType) {
+    case 0: vis = new G4VisAttributes(G4Colour(0.0, 1.0, 0.0)); break; // MDT
+    case 1: vis = new G4VisAttributes(G4Colour(0.0, 0.0, 1.0)); break; // RPC
+    case 2: vis = new G4VisAttributes(G4Colour(1.0, 0.0, 1.0)); break; // TGC
+    default: vis = new G4VisAttributes(G4Colour(0.5, 0.5, 0.5));
+  }
+  vis->SetForceSolid(true);
+  chamberLV->SetVisAttributes(vis);
+}
 
 
 void DetectorConstruction_v1::ConstructSDandField(){
@@ -563,6 +760,21 @@ void DetectorConstruction_v1::ConstructSDandField(){
     G4AutoDelete::Register(m_magFieldMessenger); 
   }
 
+  // --- Aditivo: camara de muons ---
+  // Stub: registra a intencao. A SD C++ (MuonSensitiveDetector) ainda nao
+  // esta integrada neste repositorio; ver relatorio.
+  SetupMuonSensitiveDetectors();
+}
+
+
+
+void DetectorConstruction_v1::SetupMuonSensitiveDetectors() {
+  int n = 0;
+  for (const auto &v : m_volumes) if (v.isMuonChamber) ++n;
+  if (n > 0) {
+    MSG_INFO("Muon chambers in geometry: " << n
+             << " (SetupMuonSensitiveDetectors: SD C++ ainda nao integrada)");
+  }
 }
 
 
