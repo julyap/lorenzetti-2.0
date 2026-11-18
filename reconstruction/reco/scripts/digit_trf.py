@@ -15,13 +15,21 @@ from reco.reco_job import merge_args, update_args, create_parallel_job
 from geometry import DetectorConstruction_v1, DetectorConstruction_v2
 
 
+try:
+    from MuonCellBuilder import MuonCellBuilder
+    HAS_MUON_CELL_BUILDER = True
+except ImportError:
+    MuonCellBuilder = None
+    HAS_MUON_CELL_BUILDER = False
+
+
 """
 Script: digit_trf.py
 Purpose: Performs the digitization step in the simulation chain.
          Converts Geant4 energy hits into digital signals (cells) by simulating
          electronic logical pulses, noise, and cross-talk.
 Usage:
-    digit_trf.py -i input.HIT.root -o output.ESD.root
+    digit_trf.py -i input.HIT.root -o output.ESD.root [--systems {calorimeter,muon,atlas}]
 """
 
 def parse_args():
@@ -41,7 +49,7 @@ def parse_args():
                         dest='output_level', required=False,
                         type=str, default='INFO',
                         help="The output level messenger.")
-    
+
     parser.add_argument('--pre-init', action='store',
                         dest='pre_init', required=False, default="''",
                         help="The preinit command")
@@ -49,7 +57,7 @@ def parse_args():
     parser.add_argument('--pre-exec', action='store',
                         dest='pre_exec', required=False, default="''",
                         help="The preexec command")
-    
+
     parser.add_argument('--post-exec', action='store',
                         dest='post_exec', required=False, default="''",
                         help="The postexec command")
@@ -145,7 +153,21 @@ def parse_args():
                         type=str, default=os.environ.get('LORENZETTI_FCAL_ELECTRODES',
                                   os.path.join(os.environ.get('LORENZETTI_GEOMETRY_DATA_DIR', ''), 'LArFCalElectrodes-06.csv')),
                         help="As in simu_trf.py.")
-   
+
+    # ===== SISTEMAS DE DETECÇÃO =====
+    parser.add_argument('--systems', action='store',
+                        dest='systems', required=False,
+                        type=str, default='calorimeter',
+                        choices=['calorimeter', 'muon', 'atlas'],
+                        help="Which detector systems are digitized in this job. "
+                             "'calorimeter' (default): only CaloCellBuilder (the official behavior). "
+                             "'muon': only MuonCellBuilder (calorimeter disabled). "
+                             "'atlas': CaloCellBuilder + MuonCellBuilder (both systems). "
+                             "This is orthogonal to --detector v1/v2 (geometry). "
+                             "The 'muon' and 'atlas' modes require the MuonCellBuilder module "
+                             "to be importable (reconstruction/MuonChamber/MuonCellBuilder/python on PYTHONPATH). "
+                             "It does NOT filter particles: the input hits are the same as produced by simu_trf.py.")
+
     parser = merge_args(parser)
 
     return parser
@@ -161,13 +183,14 @@ def main(events : List[int],
          detector: str = 'v1',
          atlas_options: dict = None,
          save_all_cells: bool = False,
+         systems: str = 'calorimeter',
         ):
     """
     Main function for the digitization process.
 
-    Reads Hits from the input file, simulates the calorimeter readout electronics
-    (CaloCellBuilder), and produces an Event Summary Data (ESD) file containing
-    calorimeter cells.
+    Reads Hits from the input file, simulates the calorimeter and/or muon chamber
+    readout electronics (CaloCellBuilder and/or MuonCellBuilder), and produces an
+    Event Summary Data (ESD) file containing the corresponding cells.
 
     Args:
         events (List[int]): List of event indices to process.
@@ -180,6 +203,9 @@ def main(events : List[int],
         detector (str): v1, the original geometry, or v2, the ATLAS geometry.
         atlas_options (dict): With v2, the arguments of DetectorConstruction_v2 (the ATLAS options, as in the simulation).
         save_all_cells (bool): If True, saves all cells in the ESD regardless of the RoI.
+        systems (str): Which detector systems are digitized: 'calorimeter' (default),
+                       'muon' or 'atlas' (both). Orthogonal to the detector geometry.
+                       Does NOT filter particles.
     """
 
     if isinstance(input_file, Path):
@@ -187,57 +213,105 @@ def main(events : List[int],
     if isinstance(output_file, Path):
         output_file = str(output_file)
 
+    # ===== SISTEMAS DE DETECÇÃO =====
+    enable_calorimeter = systems in ('calorimeter', 'atlas')
+    enable_muon_system = systems in ('muon', 'atlas')
+    if enable_muon_system and not HAS_MUON_CELL_BUILDER:
+        raise ImportError(
+            "--systems '%s' requested, but MuonCellBuilder could not be imported. "
+            "Make sure reconstruction/MuonChamber/MuonCellBuilder/python is on PYTHONPATH." % systems
+        )
+
     outputLevel = LoggingLevel.toC(logging_level)
 
     exec(pre_init)
 
     acc = ComponentAccumulator("ComponentAccumulator", output_file)
 
-    # the reader must be first in sequence
-    reader = RootStreamHITReader("HITReader",
-                                 InputFile=input_file,
-                                 OutputHitsKey=recordable("Hits"),
-                                 OutputEventKey=recordable("Events"),
-                                 OutputTruthKey=recordable("Particles"),
-                                 OutputSeedsKey=recordable("Seeds"),
-                                 OutputLevel=outputLevel,
-                                 )
-
+    # ===== LEITOR DE HITS =====
+    # Mantém a chave oficial "Hits" para o calorímetro e adiciona "MuonHits" para múons.
+    reader_kwargs = dict(
+        InputFile=input_file,
+        OutputHitsKey=recordable("Hits"),
+        OutputEventKey=recordable("Events"),
+        OutputTruthKey=recordable("Particles"),
+        OutputSeedsKey=recordable("Seeds"),
+        OutputLevel=outputLevel,
+    )
+    if enable_muon_system:
+        reader_kwargs["OutputMuonHitsKey"] = recordable("MuonHits")
+        reader_kwargs["EnableMuonInput"] = True
+    reader = RootStreamHITReader("HITReader", **reader_kwargs)
     reader.merge(acc)
 
-    # digitalization!    
-    calorimeter = CaloCellBuilder("CaloCellBuilder", 
-                                  (DetectorConstruction_v2("ATLAS", **(atlas_options or {}))
-                                   if detector == 'v2' else DetectorConstruction_v1("ATLAS")),
-                                  HistogramPath="Expert/Cells",
-                                  OutputLevel=outputLevel,
-                                  InputHitsKey=recordable("Hits"),
-                                  OutputCellsKey=recordable("Cells"),
-                                  OutputTruthCellsKey=recordable("TruthCells"),
-                                  InputEventKey=recordable("Events"),
+    # ===== GEOMETRIA (compartilhada pelos builders de calorímetro e múons) =====
+    # A instância é criada uma única vez e reutilizada. O CaloCellBuilder e o
+    # MuonCellBuilder devem enxergar a mesma geometria.
+    detector_instance = (
+        DetectorConstruction_v2("ATLAS", **(atlas_options or {}))
+        if detector == 'v2' else DetectorConstruction_v1("ATLAS")
     )
-    calorimeter.merge(acc)
 
-    ESD = RootStreamESDMaker("RootStreamESDMaker",
-                             InputCellsKey=recordable("Cells"),
-                             InputCellsTruthKey=recordable("TruthCells"),
-                             InputEventKey=recordable("Events"),
-                             InputTruthKey=recordable("Particles"),
-                             InputSeedsKey=recordable("Seeds"),
-                             OnlyRoI=not save_all_cells,
-                             OutputLevel=outputLevel)
+    # ===== CALORÍMETRO =====
+    if enable_calorimeter:
+        calorimeter = CaloCellBuilder("CaloCellBuilder",
+                                      detector_instance,
+                                      HistogramPath="Expert/Cells",
+                                      OutputLevel=outputLevel,
+                                      InputHitsKey=recordable("Hits"),
+                                      OutputCellsKey=recordable("Cells"),
+                                      OutputTruthCellsKey=recordable("TruthCells"),
+                                      InputEventKey=recordable("Events"),
+                                      )
+        calorimeter.merge(acc)
+
+    # ===== CÂMARA DE MÚONS =====
+    muon_cell_keys = []
+    if enable_muon_system:
+        muon_builder = MuonCellBuilder("MuonCellBuilder",
+                                       detector=detector_instance,
+                                       HistogramPath="Expert/MuonCells",
+                                       InputHitsKey=recordable("MuonHits"),
+                                       OutputCellsKey=recordable("MuonCells"),
+                                       OutputTruthCellsKey=recordable("TruthMuonCells"),
+                                       OutputLevel=outputLevel,
+                                       )
+        muon_builder.merge(acc)
+        if hasattr(muon_builder, 'get_muon_cell_keys'):
+            muon_cell_keys = muon_builder.get_muon_cell_keys()
+
+    # ===== ESCRITOR ESD =====
+    esd_kwargs = {
+        "InputEventKey": recordable("Events"),
+        "InputTruthKey": recordable("Particles"),
+        "InputSeedsKey": recordable("Seeds"),
+        "InputCaloCellsKey": recordable("Cells") if enable_calorimeter else "",
+        "InputTruthCaloCellsKey": recordable("TruthCells") if enable_calorimeter else "",
+        "InputMuonCellsKey": recordable("MuonCells") if enable_muon_system else "",
+        "InputTruthMuonCellsKey": recordable("TruthMuonCells") if enable_muon_system else "",
+        "OutputEventKey": "EventInfo",
+        "OutputTruthKey": "Particles",
+        "OutputSeedsKey": "Seeds",
+        "OutputCaloCellsKey": "Cells",
+        "OutputTruthCaloCellsKey": "TruthCells",
+        "OutputMuonCellsKey": "MuonCells",
+        "EnableCaloOutput": enable_calorimeter,
+        "EnableMuonOutput": enable_muon_system,
+        "OnlyRoI": not save_all_cells,
+        "OutputLevel": outputLevel,
+    }
+    if muon_cell_keys:
+        esd_kwargs["InputMuonCellKeys"] = muon_cell_keys
+    ESD = RootStreamESDMaker("RootStreamESDMaker", **esd_kwargs)
     acc += ESD
-    
+
     exec(pre_exec)
     acc.run(events)
     exec(post_exec)
 
 
-    
-
-
 if __name__ == "__main__":
-    parser=parse_args()
+    parser = parse_args()
     if len(sys.argv) == 1:
         parser.print_help()
         sys.exit(1)
@@ -263,9 +337,17 @@ if __name__ == "__main__":
     args.atlas_kwargs = { camel(o): getattr(args, o) for o in atlas_options }
     args.atlas_kwargs.update( AtlasRun4Geometry=args.atlas_run4_geometry, AtlasFieldMap=args.atlas_field_map,
                               AtlasFcalElectrodes=args.atlas_fcal_electrodes )
+
+    # ===== SISTEMAS: validação cruzada =====
+    if args.systems in ('muon', 'atlas') and not HAS_MUON_CELL_BUILDER:
+        parser.error("--systems %s requires the MuonCellBuilder module "
+                     "(reconstruction/MuonChamber/MuonCellBuilder/python on PYTHONPATH)" % args.systems)
+    if args.systems == 'muon' and args.save_all_cells:
+        parser.error("--systems muon does not support --save-all-cells (no calorimeter cells)")
+
     args = update_args(args)
     pool  = create_parallel_job(args)
-    pool( main, 
+    pool( main,
          logging_level    = args.output_level,
          pre_init         = args.pre_init,
          pre_exec         = args.pre_exec,
@@ -273,4 +355,5 @@ if __name__ == "__main__":
          detector         = args.detector,
          atlas_options    = args.atlas_kwargs if args.detector == 'v2' else None,
          save_all_cells   = args.save_all_cells,
+         systems          = args.systems,
          )

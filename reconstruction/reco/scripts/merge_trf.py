@@ -30,10 +30,10 @@ def parse_args():
     parser.add_argument('-c', '--command', action='store',
                         dest='command', required=False, default="''",
                         help="The preexec command")
-    parser.add_argument('--low-pileup-files', action='store', 
+    parser.add_argument('--low-pileup-files', action='store',
                         dest='low_pileup_files', required = True,
                         help = "The event HIT file to be merged (pileup).")
-    parser.add_argument('--high-pileup-files', action='store', 
+    parser.add_argument('--high-pileup-files', action='store',
                         dest='high_pileup_files', required = True,
                         help = "The event HIT file to be merged (pileup).")
     parser.add_argument('--pileup-avg', action='store',
@@ -44,6 +44,21 @@ def parse_args():
                         dest='pileup_sigma', required=True,
                         type=int,
                         help="The pileup sigma.")
+
+    # ===== SISTEMAS DE DETECÇÃO =====
+    parser.add_argument('--systems', action='store',
+                        dest='systems', required=False,
+                        type=str, default='calorimeter',
+                        choices=['calorimeter', 'muon', 'atlas'],
+                        help="Which detector systems are present in the input HIT file "
+                             "and should be propagated to the merged output. "
+                             "'calorimeter' (default): only calorimeter hits (the official behavior); "
+                             "pileup is applied to 'Hits'. "
+                             "'muon': only muon hits; pileup is NOT applied (PileupMerge is a "
+                             "calorimeter-only tool) and 'MuonHits' pass through unchanged. "
+                             "'atlas': both; 'Hits' are merged via PileupMerge, and 'MuonHits' "
+                             "pass through unchanged (no pileup in the muon spectrometer). "
+                             "This flag is orthogonal to the pileup configuration.")
 
     return merge_args(parser)
 
@@ -56,12 +71,17 @@ def main(events: List[int],
          high_pileup_files: List[str],
          pileup_avg : int,
          pileup_sigma : int,
-         command: str):
+         command: str,
+         systems: str = 'calorimeter'):
 
     if isinstance(input_file, Path):
         input_file = str(input_file)
     if isinstance(output_file, Path):
         output_file = str(output_file)
+
+    # ===== SISTEMAS =====
+    enable_calo = systems in ('calorimeter', 'atlas')
+    enable_muon_system = systems in ('muon', 'atlas')
 
     outputLevel = LoggingLevel.toC(logging_level)
 
@@ -69,42 +89,57 @@ def main(events: List[int],
 
     acc = ComponentAccumulator("ComponentAccumulator", output_file)
 
-    reader = RootStreamHITReader("HITReader", 
-                                  InputFile       = input_file,
-                                  OutputHitsKey   = recordable("Hits"),
-                                  OutputEventKey  = recordable("Events"),
-                                  OutputTruthKey  = recordable("Particles"),
-                                  OutputSeedsKey  = recordable("Seeds"),
-                                  OutputLevel     = outputLevel,
-                                )
+    # ===== LEITOR PRINCIPAL =====
+    reader_kwargs = dict(
+        InputFile=input_file,
+        OutputHitsKey=recordable("Hits"),
+        OutputEventKey=recordable("Events"),
+        OutputTruthKey=recordable("Particles"),
+        OutputSeedsKey=recordable("Seeds"),
+        OutputLevel=outputLevel,
+    )
+    if enable_muon_system:
+        reader_kwargs["OutputMuonHitsKey"] = recordable("MuonHits")
+        reader_kwargs["EnableMuonInput"] = True
+    reader = RootStreamHITReader("HITReader", **reader_kwargs)
     reader.merge(acc)
 
-    pileup = PileupMerge( "PileupMerge", 
-                          LowPileupInputFiles = low_pileup_files,
-                          HighPileupInputFiles= high_pileup_files,
-                          PileupAvg           = pileup_avg,
-                          PileupSigma         = pileup_sigma,
-                          InputHitsKey        = recordable("Hits"),
-                          InputEventKey       = recordable("Events"),
-                          OutputHitsKey       = "Hits_Merged",
-                          OutputEventKey      = "Events_Merged",
-                          OutputLevel         = outputLevel
-                        )
-    acc += pileup
 
-    HIT = RootStreamHITMaker( "RootStreamHITMaker",
-                               # input from context
-                               InputHitsKey    = "Hits_Merged",
-                               InputEventKey   = "Events_Merged",
-                               InputTruthKey   = recordable("Particles"),
-                               InputSeedsKey   = recordable("Seeds"),
-                               # output to file
-                               OutputHitsKey   = recordable("Hits"),
-                               OutputEventKey  = recordable("Events"),
-                               OutputLevel     = outputLevel)
+    if enable_calo:
+        pileup = PileupMerge( "PileupMerge",
+                              LowPileupInputFiles = low_pileup_files,
+                              HighPileupInputFiles= high_pileup_files,
+                              PileupAvg           = pileup_avg,
+                              PileupSigma         = pileup_sigma,
+                              InputHitsKey        = recordable("Hits"),
+                              InputEventKey       = recordable("Events"),
+                              OutputHitsKey       = "Hits_Merged",
+                              OutputEventKey      = "Events_Merged",
+                              OutputLevel         = outputLevel
+                            )
+        acc += pileup
+
+    # ===== ESCRITOR DE HITS =====
+    hit_kwargs = dict(
+        InputEventKey=recordable("Events"),
+        InputTruthKey=recordable("Particles"),
+        InputSeedsKey=recordable("Seeds"),
+        OutputEventKey=recordable("Events"),
+        OutputLevel=outputLevel,
+    )
+    if enable_calo:
+        # Hits mesclados com pileup; Events correspondente
+        hit_kwargs["InputHitsKey"]  = "Hits_Merged"
+        hit_kwargs["InputEventKey"] = "Events_Merged"
+        hit_kwargs["OutputHitsKey"] = recordable("Hits")
+    if enable_muon_system:
+        # MuonHits passam direto do leitor principal (sem pileup)
+        hit_kwargs["InputMuonHitsKey"] = recordable("MuonHits")
+        hit_kwargs["EnableMuonOutput"] = True
+
+    HIT = RootStreamHITMaker("RootStreamHITMaker", **hit_kwargs)
     acc += HIT
     acc.run(events)
-
 
 
 def run(args):
@@ -118,7 +153,7 @@ def run(args):
         args.low_pileup_files = expand_folders(os.path.abspath(args.low_pileup_files))
     else:
         args.low_pileup_files = [os.path.abspath(args.low_pileup_files)]
-   
+
     if not args.high_pileup_files.exists():
         raise FileNotFoundError(f"High Pileup input files {args.high_pileup_files} not found.")
     if args.high_pileup_files.is_dir():
@@ -127,16 +162,15 @@ def run(args):
         args.high_pileup_files = [os.path.abspath(args.high_pileup_files)]
 
     pool = create_parallel_job(args)
-    pool( main, 
+    pool( main,
          logging_level    = args.output_level,
          low_pileup_files = args.low_pileup_files,
          high_pileup_files= args.high_pileup_files,
          pileup_avg       = args.pileup_avg,
          pileup_sigma     = args.pileup_sigma,
-         command          = args.command
+         command          = args.command,
+         systems          = args.systems,
          )
-    
-   
 
 
 
@@ -146,5 +180,12 @@ if __name__ == "__main__":
         parser.print_help()
         sys.exit(1)
     args = parser.parse_args()
+
+    # ===== SISTEMAS: validação =====
+    if args.systems == 'muon':
+        # PileupMerge é uma ferramenta de calorímetro; no modo muon ele é ignorado.
+        print("⚠️  --systems muon: PileupMerge will be skipped (for now it is a calorimeter-only tool); "
+              "'MuonHits' will pass through unchanged.")
+
     args = update_args(args)
     run(args)

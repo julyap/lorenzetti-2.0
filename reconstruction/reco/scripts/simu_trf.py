@@ -14,7 +14,15 @@ from CaloHitBuilder         import CaloHitBuilder
 from RootStreamBuilder      import RootStreamHITMaker
 
 from geometry import DetectorConstruction_v1, DetectorConstruction_v2
-from reco import update_args_from_file,merge_args_from_file
+from reco import update_args_from_file, merge_args_from_file
+
+
+try:
+    from MuonHitBuilder import MuonHitBuilder
+    HAS_MUON_HIT_BUILDER = True
+except ImportError:
+    MuonHitBuilder = None
+    HAS_MUON_HIT_BUILDER = False
 
 
 """
@@ -23,7 +31,7 @@ Purpose: Runs the full Geant4 simulation step in the Lorenzetti framework.
          Reads generated event files (EVT), simulates particle interactions with the detector,
          and produces Hit files (HIT).
 Usage:
-    simu_trf.py -i input.EVT.root -o output.HIT.root -nt <threads>
+    simu_trf.py -i input.EVT.root -o output.HIT.root -nt <threads> [--systems {calorimeter,muon,atlas}]
 """
 
 def parse_args():
@@ -332,6 +340,22 @@ def parse_args():
     parser.add_argument('--dry-run', action='store_true',
                         dest='dry_run', required=False,
                         help="Run the script without executing the main logic.")
+
+    # ===== SISTEMAS DE DETECÇÃO =====
+    parser.add_argument('--systems', action='store',
+                        dest='systems', required=False,
+                        type=str, default='calorimeter',
+                        choices=['calorimeter', 'muon', 'atlas'],
+                        help="Which detector systems produce hits in this job. "
+                             "'calorimeter' (default): only CaloHitBuilder (the official behavior). "
+                             "'muon': only MuonHitBuilder (calorimeter disabled). "
+                             "'atlas': CaloHitBuilder + MuonHitBuilder (both systems). "
+                             "This is orthogonal to --detector v1/v2 (geometry) and to --free-running-hits "
+                             "(output format). The 'muon' and 'atlas' modes require the MuonHitBuilder module "
+                             "to be importable (reconstruction/MuonChamber/MuonCellBuilder/python on PYTHONPATH). "
+                             "It does NOT filter particles: electrons, muons, etc. are all still simulated "
+                             "as given by the input event file.")
+
     return merge_args_from_file(parser)
 
 
@@ -386,14 +410,15 @@ def main(logging_level: str,
          number_of_events: int,
          number_of_threads: int,
          dry_run: bool,
+         systems: str = 'calorimeter',
          ):
     """
     Main function to drive the Geant4 simulation.
 
     Constructs the simulation environment using `ComponentAccumulator`:
-    1. Initializes Detector Construction (DetectorConstruction_v1).
+    1. Initializes Detector Construction (DetectorConstruction_v1 or v2).
     2. Sets up the Event Reader to stream events from input.
-    3. Configures the CaloHitBuilder to collect energy deposits.
+    3. Configures the CaloHitBuilder and/or the MuonHitBuilder, depending on `systems`.
     4. Merges components and executes the run loop.
 
     Args:
@@ -432,6 +457,9 @@ def main(logging_level: str,
         number_of_events (int): Number of events to process.
         number_of_threads (int): Number of Geant4 threads.
         dry_run (bool): If True, sets up but does not execute the run.
+        systems (str): Which detector systems produce hits: 'calorimeter' (default),
+                       'muon' or 'atlas' (both). Orthogonal to the detector geometry and to
+                       the free-running output format. Does NOT filter particles.
     """
 
     if isinstance(input_file, Path):
@@ -439,11 +467,19 @@ def main(logging_level: str,
     if isinstance(output_file, Path):
         output_file = str(output_file)
 
-    
+    # ===== SISTEMAS DE DETECÇÃO =====
+    enable_calorimeter = systems in ('calorimeter', 'atlas')
+    enable_muon_system = systems in ('muon', 'atlas')
+    if enable_muon_system and not HAS_MUON_HIT_BUILDER:
+        raise ImportError(
+            "--systems '%s' requested, but MuonHitBuilder could not be imported. "
+            "Make sure reconstruction/MuonChamber/MuonCellBuilder/python is on PYTHONPATH." % systems
+        )
+
     outputLevel = LoggingLevel.toC(logging_level)
     exec(pre_init)
 
-    acc = ComponentAccumulator("ComponentAccumulator", 
+    acc = ComponentAccumulator("ComponentAccumulator",
                                (DetectorConstruction_v2( "ATLAS", UseMagneticField=enable_magnetic_field,
                                                         UseSolenoidField=enable_solenoid_field,
                                                         TileAtlasGeometry=tile_atlas_geometry,
@@ -484,42 +520,63 @@ def main(logging_level: str,
                       OutputTruthKey=recordable("Particles"),
                       OutputSeedKey=recordable("Seeds"),
                       )
-    calorimeter = CaloHitBuilder("CaloHitBuilder",
-                                 HistogramPath="Expert/Hits",
-                                 OutputLevel=outputLevel,
-                                 OutputHitsKey=recordable("Hits"),
-                                 ActiveEnergyOnly=active_energy_only,
-                                 BirksLaw=birks_law,
-                                 AtlasHitTime=atlas_hit_time,
-                                 TileDualReadout=tile_dual_readout,
-                                 FreeRunningHits=free_running_hits,
-                                 FreeRunningBinning=free_running_binning,
-                                 FreeRunningNtupleName=("FreeRunningTree" if free_running_keep_hits else "CollectionTree"),
-                                 FreeRunningAtlasFormat=free_running_atlas_format,
-                                 EmecChargeCollection=atlas_emec_charge_collection,
-                                 EmecChargeTables=atlas_emec_tables,
-                                 EmecChargeFieldMap=atlas_emec_field_map,
-                                 EmecChargeHVMap=atlas_emec_hv_map,
-                                 InputEventKey=recordable("Events")
-                                 )
-    
+
     gun.merge(acc)
-    calorimeter.merge(acc)
-    if free_running_hits and not free_running_keep_hits:
-        # only the free-running hits (CaloFreeRunningHitWriter, added by the CaloHitBuilder)
+
+    # ===== CALORÍMETRO =====
+    if enable_calorimeter:
+        calorimeter = CaloHitBuilder("CaloHitBuilder",
+                                     HistogramPath="Expert/Hits",
+                                     OutputLevel=outputLevel,
+                                     OutputHitsKey=recordable("Hits"),
+                                     ActiveEnergyOnly=active_energy_only,
+                                     BirksLaw=birks_law,
+                                     AtlasHitTime=atlas_hit_time,
+                                     TileDualReadout=tile_dual_readout,
+                                     FreeRunningHits=free_running_hits,
+                                     FreeRunningBinning=free_running_binning,
+                                     FreeRunningNtupleName=("FreeRunningTree" if free_running_keep_hits else "CollectionTree"),
+                                     FreeRunningAtlasFormat=free_running_atlas_format,
+                                     EmecChargeCollection=atlas_emec_charge_collection,
+                                     EmecChargeTables=atlas_emec_tables,
+                                     EmecChargeFieldMap=atlas_emec_field_map,
+                                     EmecChargeHVMap=atlas_emec_hv_map,
+                                     InputEventKey=recordable("Events")
+                                     )
+        calorimeter.merge(acc)
+
+    # ===== CÂMARA DE MÚONS =====
+    if enable_muon_system:
+        muon_builder = MuonHitBuilder("MuonHitBuilder",
+                                      InputEventKey=recordable("Events"),
+                                      OutputHitsKey=recordable("MuonHits"),
+                                      HistogramPath="Expert/MuonHits",
+                                      OutputLevel=outputLevel)
+        muon_builder.merge(acc)
+
+    # ===== WRITER DE HITS =====
+    # O RootStreamHITMaker oficial lê a coleção de calorímetro ("Hits").
+    # Sem o calorímetro (systems='muon'), ele não tem nada para ler e é omitido.
+    # Se o RootStreamHITMaker tiver sido estendido para aceitar InputMuonHitsKey,
+    # passamos a coleção de múons também em systems='atlas'.
+    if not enable_calorimeter or (free_running_hits and not free_running_keep_hits):
         HIT = None
     else:
-        HIT = RootStreamHITMaker("RootStreamHITMaker",
-                                 OutputLevel=outputLevel,
-                                 OnlyRoI= not save_all_hits,
-                                 InputHitsKey=recordable("Hits"),
-                                 InputEventKey=recordable("Events"),
-                                 InputTruthKey=recordable("Particles"),
-                                 InputSeedsKey=recordable("Seeds"),
-                                 )
+        hit_kwargs = dict(
+            OutputLevel=outputLevel,
+            OnlyRoI=not save_all_hits,
+            InputHitsKey=recordable("Hits"),
+            InputEventKey=recordable("Events"),
+            InputTruthKey=recordable("Particles"),
+            InputSeedsKey=recordable("Seeds"),
+        )
+        if enable_muon_system:
+            hit_kwargs["InputMuonHitsKey"] = recordable("MuonHits")
+        HIT = RootStreamHITMaker("RootStreamHITMaker", **hit_kwargs)
+
     if HIT is not None:
         acc += HIT
-    
+
     exec(pre_exec)
     if not dry_run:
         acc.run(number_of_events)
@@ -546,7 +603,6 @@ def keep_only_collection_tree(path):
     os.replace(tmp, path)
 
 
-
 if __name__ == "__main__":
     parser=parse_args()
     if len(sys.argv) == 1:
@@ -558,7 +614,7 @@ if __name__ == "__main__":
     if Path(args.input_file).is_dir():
         raise IsADirectoryError(f"Input file '{args.input_file}' was expected to be a file, "
                                  "but it is a directory. Please provide a list of files instead.")
-    
+
     args = update_args_from_file(args)
     # defaults of the ATLAS options (F41, 05/11/2026): on with --detector v2, off with v1 (the geometry of the collaboration)
     atlas_options = ['enable_solenoid_field', 'tile_atlas_geometry', 'tile_atlas_cells', 'atlas_material_in_front', 'tile_atlas_itc', 'atlas_emb', 'atlas_emb_cells', 'atlas_hec', 'atlas_emec', 'atlas_fcal', 'atlas_fcal_cells', 'atlas_fcal_frozen_showers', 'atlas_g4', 'tile_atlas_gap', 'atlas_endcap_cryostat', 'atlas_barrel_cryostat', 'atlas_run4', 'atlas_forward_shielding', 'atlas_full_field', 'atlas_barrel_gap_services', 'tile_atlas_run4', 'atlas_emec_argon_fraction']
@@ -667,8 +723,23 @@ if __name__ == "__main__":
         parser.error("--atlas-emec-argon-fraction needs --atlas-emec")
     if args.tile_atlas_run4 and not (args.atlas_run4 and args.tile_atlas_gap):
         parser.error("--tile-atlas-run4 needs --atlas-run4 and --tile-atlas-gap")
+
+    # ===== SISTEMAS: validação cruzada =====
+    if args.systems in ('muon', 'atlas') and not HAS_MUON_HIT_BUILDER:
+        parser.error("--systems %s requires the MuonHitBuilder module "
+                     "(reconstruction/MuonChamber/MuonCellBuilder/python on PYTHONPATH)" % args.systems)
+    if args.systems == 'muon':
+        if args.free_running_hits:
+            parser.error("--systems muon cannot be combined with --free-running-hits "
+                         "(the free-running writer is a calorimeter writer)")
+        if args.save_all_hits:
+            parser.error("--systems muon does not support --save-all-hits (no calorimeter hits)")
+        if args.free_running_keep_hits:
+            parser.error("--systems muon does not support --free-running-keep-hits (no calorimeter hits)")
+
     print(f"output file: {args.output_file}")
     print(f"number of threads: {args.number_of_threads}")
+    print(f"systems: {args.systems}")
 
     main(
              logging_level         = args.output_level,
@@ -723,7 +794,5 @@ if __name__ == "__main__":
              number_of_events      = args.number_of_events,
              number_of_threads     = args.number_of_threads,
              dry_run               = args.dry_run,
+             systems               = args.systems,
         )
-
-
-
