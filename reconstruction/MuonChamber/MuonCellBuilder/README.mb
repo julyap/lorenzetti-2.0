@@ -1,0 +1,37 @@
+# MuonCellBuilder
+
+## Visão Geral
+
+Este diretório contém o módulo **MuonCellBuilder**, responsável pela reconstrução de células de muons no sistema de detecção. Este componente é parte do pipeline de reconstrução de eventos, processando dados brutos de câmaras de muons para gerar células de muons que serão posteriormente utilizadas na formação de clusters e na reconstrução de trajetórias.
+
+## Estrutura do Diretório
+
+```
+MuonChamber/
+├── MuonCellBuilder/          # Módulo atual - Builder de células de muons
+│   ├── src/                  # Código fonte
+│   │   ├── *.cxx             # Arquivos de implementação
+│   │   ├── *.h               # Arquivos de cabeçalho
+│   │   └── LinkDef.h         # Definições para geração de dicionário ROOT
+│   ├── CMakeLists.txt        # Configuração de build
+│   └── README.md             # Este arquivo
+
+```
+
+## Funcionalidade
+
+O `MuonCellBuilder` é responsável por:
+
+1. **Processamento de dados brutos**: Recebe dados de hits e informações das câmaras de muons
+2. **Reconstrução de células**: Converte sinais brutos em células de muons calibradas
+3. **Preparação para clustering**: Gera saída estruturada para o próximo estágio (`MuonClusterBuilder`)
+
+## Dependências
+
+Este módulo depende de outros componentes do sistema de reconstrução:
+
+- **GaugiKernel**: Núcleo do framework de processamento
+- **MuonChamber**: Definições das câmaras de muons
+- **MuonHit**: Representação dos hits de muons
+
+
