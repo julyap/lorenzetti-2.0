@@ -1,5 +1,3 @@
-
-
 #include "G4Kernel/RunManager.h"
 #include "G4Kernel/actions/ActionInitialization.h"
 #include "GaugiKernel/Algorithm.h"
@@ -25,6 +23,8 @@
 #include "Randomize.hh"
 #include "G4VisExecutive.hh"
 #include "G4UIExecutive.hh"
+// --- Aditivo: physics list de muons ---
+#include "MuonPhysicsList.hh"
 
 #include <stdlib.h>
 #include <unistd.h>
@@ -56,6 +56,8 @@ RunManager::RunManager( std::string name ):
   // list FTFP_BERT_ATL, the default production cut of 1 mm (GeneralCut), /process/em/applyCuts true, /process/em/UseGeneralProcess
   // true, the ATLAS stacking action (Russian roulettes, neutrinos) and the looper killer (AtlasG4Settings). Off by default.
   declareProperty( "AtlasG4"        , m_atlasG4=false          );
+  // --- Aditivo: physics list de muons (MuonPhysicsList) ---
+  declareProperty( "MuonPhysics"    , m_muonPhysics=false      );
   MSG_INFO( "Run manager was created." );
 
 }
@@ -132,7 +134,16 @@ void RunManager::run( int evt )
     runManager->SetUserInitialization(m_detector);
   }
 
-  G4VModularPhysicsList* physicsList = m_atlasG4 ? (G4VModularPhysicsList*) new FTFP_BERT_ATL : (G4VModularPhysicsList*) new FTFP_BERT;
+  // --- Aditivo: escolha da physics list ---
+  // Se m_muonPhysics for true, usa MuonPhysicsList; caso contrario,
+  // mantem a logica original (FTFP_BERT_ATL se AtlasG4, senao FTFP_BERT).
+  G4VModularPhysicsList* physicsList = nullptr;
+  if( m_muonPhysics ){
+    physicsList = (G4VModularPhysicsList*) new MuonPhysicsList();
+    MSG_INFO( "Using MuonPhysicsList (muon-specific processes)" );
+  } else {
+    physicsList = m_atlasG4 ? (G4VModularPhysicsList*) new FTFP_BERT_ATL : (G4VModularPhysicsList*) new FTFP_BERT;
+  }
   if( m_atlasG4 ){
     // GeneralCut = 1 mm (G4AtlasServicesConfig.py, PhysicsListSvc.cxx); the regions of the calorimeters set their own cuts
     physicsList->SetDefaultCutValue( 1.0 * mm );
@@ -215,5 +226,3 @@ void RunManager::header()
   }
   sleep(2); // Wait 2 seconds
 }
-
-

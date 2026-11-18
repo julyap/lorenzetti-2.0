@@ -1,4 +1,3 @@
-
 #ifndef RunManager_h
 #define RunManager_h
 
@@ -47,6 +46,8 @@ class RunManager: public MsgService,
     bool        m_fastSimulation;
     // Geant4 settings of the ATLAS production (F41 conserto 24)
     bool        m_atlasG4;
+    // --- Aditivo: physics list de muons (MuonPhysicsList) ---
+    bool        m_muonPhysics;
     std::string m_output;
 
     std::vector< Gaugi::Algorithm* >   m_acc;
