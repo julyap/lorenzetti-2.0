@@ -1,6 +1,5 @@
 // ============================================================================
 // Arquivo: MuonCluster/src/MuonCluster.cxx
-// Autora: Julya Pacheco Ferreira
 // Descrição: Implementação dos métodos da classe xAOD::MuonCluster.
 //            - Construtores (default e parametrizado): inicializam todas as
 //              variáveis (básicas, energia, qualidade da track, flags,

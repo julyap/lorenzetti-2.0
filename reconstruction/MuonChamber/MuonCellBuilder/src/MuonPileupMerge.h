@@ -1,6 +1,5 @@
 // ============================================================================
 // Arquivo: MuonPileupMerge.h
-// Autora: Julya Pacheco Ferreira
 // Descrição: Declaração da classe MuonPileupMerge (implementação em
 //            MuonPileupMerge.cxx). Define a interface do algoritmo que
 //            mescla hits e EventInfo de um arquivo ROOT de pileup com

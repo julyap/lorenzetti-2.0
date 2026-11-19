@@ -1,6 +1,5 @@
 // ============================================================================
 // Arquivo: MuonShapes.h
-// Autora: Julya Pacheco Ferreira
 // Descrição: Declaração da classe MuonShapes (implementação em
 //            MuonShapes.cxx). Define a interface do AlgTool que calcula
 //            variáveis de tracking (performTracking, estimatePt,

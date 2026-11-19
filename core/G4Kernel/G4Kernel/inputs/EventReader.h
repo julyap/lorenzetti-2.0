@@ -44,7 +44,9 @@ namespace generator{
       
       int Load( G4Event * );
   
-      bool Add( G4Event* g4event , int i, int bc_id );
+      // Assinatura alterada: recebe os valores corrigidos como parâmetros
+      bool Add( G4Event* g4event , int i, int bc_id,
+                float px, float py, float pz, float e );
   
       unsigned int           m_evt;
       std::string            m_filename;

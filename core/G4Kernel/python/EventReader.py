@@ -27,17 +27,21 @@ class EventReader( Cpp ):
     if self.InputFileName != "":
       if not os.path.exists(self.InputFileName):
         MSG_FATAL(self, f"Input file not found into the system: {self.InputFileName}")
-      f = ROOT.TFile( InputFileName )
-      t = f.Get("particles")
-      self.__entries = t.GetEntries()
-      f.Close()
+        self.__entries = 0
+      else:
+        f = ROOT.TFile( InputFileName )
+        t = f.Get("particles")
+        if t and hasattr(t, 'GetEntries'):
+          self.__entries = t.GetEntries()
+        else:
+          print(f"WARNING: Could not get entries from tree 'particles' in file {InputFileName}")
+          self.__entries = 1
+        f.Close()
     else:
       self.__entries = 0
 
- 
   def merge( self, acc ):
     acc.setGenerator( self )
-  
 
   def GetEntries(self):
     return self.__entries

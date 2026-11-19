@@ -9,17 +9,16 @@ from RootStreamBuilder import RootStreamHITFlags as flags
 from RootStreamBuilder import RootStreamESDFlags as flags_ESD
 
 class RootStreamHITMaker( Cpp ):
-
   def __init__( self, name,
                 InputEventKey    : str,
                 InputTruthKey    : str,
+                InputSeedsKey    : str,
                 # --- Oficial: hits do calorimetro ---
                 InputHitsKey     : str = None,
                 # --- Alias da sua versao (opcional; se passado, tem precedencia) ---
                 InputCaloHitsKey : str = None,
                 # --- Aditivo: hits de muon ---
-                InputMuonHitsKey : str = None,
-                InputSeedsKey    : str,               
+                InputMuonHitsKey : str = None,            
                 OutputEventKey   : str = None,
                 OutputTruthKey   : str = None,
                 # --- Oficial ---
@@ -42,7 +41,7 @@ class RootStreamHITMaker( Cpp ):
                 KeepCells        : List[int] = None,
               ): 
     
-    Cpp.__init__(self, ROOT.RootStreamHITMaker(name))
+    Cpp.__init__(self, ROOT.Gaugi.RootStreamHITMaker(name))
 
     # Resolve aliases (sua versao tem precedencia se passada)
     _in_hits  = InputCaloHitsKey  if InputCaloHitsKey  is not None else InputHitsKey

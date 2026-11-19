@@ -944,7 +944,6 @@ StatusCode RootStreamNtupleMaker::fillHistograms(EventContext &ctx) const
           mu_phi->push_back(mu->phi());
           mu_e->push_back(mu->e());
           mu_charge->push_back(mu->charge());
-          mu_author->push_back(mu->author());
           ++mu_n;
         }
       }
@@ -974,7 +973,6 @@ StatusCode RootStreamNtupleMaker::fillHistograms(EventContext &ctx) const
         mu_phi->push_back(mu->phi());
         mu_e->push_back(mu->e());
         mu_charge->push_back(mu->charge());
-        mu_author->push_back(mu->author());
         ++mu_n;
       }
     }

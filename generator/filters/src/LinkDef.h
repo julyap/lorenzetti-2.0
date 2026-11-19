@@ -5,6 +5,7 @@
 #include "src/FixedRegion.h"
 #include "src/SingleParticle.h"
 #include "src/OverlappedEvents.h"
+#include "src/Jpsi.h"
 
 
 #ifdef __CINT__
@@ -20,6 +21,6 @@
 #pragma link C++ class generator::FixedRegion+;
 #pragma link C++ class generator::SingleParticle+;
 #pragma link C++ class generator::OverlappedEvents+;
-
+#pragma link C++ class generator::Jpsi+;
 
 #endif

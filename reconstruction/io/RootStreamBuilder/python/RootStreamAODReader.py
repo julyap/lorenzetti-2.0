@@ -1,73 +1,136 @@
+
 __all__ = ["RootStreamAODReader"]
 
 from GaugiKernel import Cpp
 from GaugiKernel.macros import *
 import ROOT
 
-class RootStreamAODReader( Cpp ):
 
-  def __init__( self, name,
-                InputFile              : str,
-                OutputEventKey         : str,
-                OutputTruthKey         : str,
-                OutputSeedsKey         : str,
-                OutputClusterKey       : str = None,
-                OutputRingerKeys       : list = None,
-                OutputElectronKey      : str = None,
-                # --- Aditivo: chaves de muon (opcionais) ---
-                OutputMuonKey          : str = None,
-                OutputMuonClusterKey   : str = None,
-                OutputTruthClusterKey  : str = None,
-                OutputTruthRingerKeys  : list = None,
-                OutputTruthElectronKey : str = None,
-                OutputLevel            : int = 0, 
-                NtupleName             : str = "CollectionTree",
-                # --- Aditivo: flags (default preservam o comportamento oficial) ---
-                EnableCaloOutput       : bool = True,
-                EnableMuonOutput       : bool = True,
-              ): 
-    
-    Cpp.__init__(self, ROOT.RootStreamAODReader(name))
-    
-    # Configuracoes padrao (sempre presentes) -- IGUAL AO OFICIAL
-    self.setProperty( "OutputEventKey"   , OutputEventKey     )
-    self.setProperty( "OutputTruthKey"   , OutputTruthKey     )
-    self.setProperty( "OutputSeedsKey"   , OutputSeedsKey     )
-    self.setProperty( "OutputLevel"      , OutputLevel        ) 
-    self.setProperty( "NtupleName"       , NtupleName         )
-    self.setProperty( "InputFile"        , InputFile          )
-    
-    # Calorimeter keys (opcionais) -- IGUAL AO OFICIAL
-    if OutputClusterKey:
-      self.setProperty( "OutputClusterKey" , OutputClusterKey   )
-    if OutputRingerKeys:
-      self.setProperty( "OutputRingerKeys" , OutputRingerKeys   )
-    if OutputElectronKey:
-      self.setProperty( "OutputElectronKey", OutputElectronKey  )
-    if OutputTruthClusterKey:
-      self.setProperty( "OutputTruthClusterKey", OutputTruthClusterKey )
-    if OutputTruthRingerKeys:
-      self.setProperty( "OutputTruthRingerKeys", OutputTruthRingerKeys )
-    if OutputTruthElectronKey:
-      self.setProperty( "OutputTruthElectronKey", OutputTruthElectronKey )
-    
-    # --- Aditivo: muon keys (opcionais) ---
-    if OutputMuonKey:
-      self.setProperty( "OutputMuonKey"       , OutputMuonKey      )
-    if OutputMuonClusterKey:
-      self.setProperty( "OutputMuonClusterKey", OutputMuonClusterKey)
-    
-    # --- Aditivo: flags (default preservam o comportamento oficial) ---
-    self.setProperty( "EnableCaloOutput" , EnableCaloOutput   )
-    self.setProperty( "EnableMuonOutput" , EnableMuonOutput   )
-    
-    # Contagem de eventos -- IGUAL AO OFICIAL
-    f = ROOT.TFile(self.InputFile, "read")
-    t = f.Get(self.NtupleName)
-    self.__entries = t.GetEntries()
+class RootStreamAODReader(Cpp):
 
-  def GetEntries(self):
-    return self.__entries
+    def __init__(
+        self,
+        name,
+        InputFile: str,
+        OutputEventKey: str,
+        OutputTruthKey: str,
+        OutputSeedsKey: str,
 
-  def merge(self, acc):
-    acc.SetReader(self)
+        # Calorímetro
+        OutputClusterKey: str = None,
+        OutputRingerKeys: list = None,
+        OutputRingerL0Key: str = None,
+        OutputElectronKey: str = None,
+
+        # Truth
+        OutputTruthClusterKey: str = None,
+        OutputTruthRingerKeys: list = None,
+        OutputTruthElectronKey: str = None,
+
+        # Sistema de múons
+        OutputMuonKey: str = None,
+        OutputMuonClusterKey: str = None,
+        OutputMuonCellsKey: str = None,
+        OutputMuonDescriptorKey: str = None,
+
+        # Configuração
+        OutputLevel: int = 0,
+        NtupleName: str = "CollectionTree",
+
+        # Flags
+        EnableCaloOutput: bool = True,
+        EnableMuonOutput: bool = True,
+        EnableMuonCellsOutput: bool = True,
+    ):
+
+        Cpp.__init__(self, ROOT.RootStreamAODReader(name))
+
+        # ---------------------------------------------------------
+        # Propriedades obrigatórias
+        # ---------------------------------------------------------
+        self.setProperty("OutputEventKey", OutputEventKey)
+        self.setProperty("OutputTruthKey", OutputTruthKey)
+        self.setProperty("OutputSeedsKey", OutputSeedsKey)
+
+        self.setProperty("OutputLevel", OutputLevel)
+        self.setProperty("NtupleName", NtupleName)
+        self.setProperty("InputFile", InputFile)
+
+        # ---------------------------------------------------------
+        # Calorímetro
+        # ---------------------------------------------------------
+        if OutputClusterKey is not None:
+            self.setProperty("OutputClusterKey", OutputClusterKey)
+
+        if OutputRingerKeys is not None:
+            self.setProperty("OutputRingerKeys", OutputRingerKeys)
+
+        if OutputRingerL0Key is not None:
+            self.setProperty("OutputRingerL0Key", OutputRingerL0Key)
+
+        if OutputElectronKey is not None:
+            self.setProperty("OutputElectronKey", OutputElectronKey)
+
+        # ---------------------------------------------------------
+        # Truth
+        # ---------------------------------------------------------
+        if OutputTruthClusterKey is not None:
+            self.setProperty("OutputTruthClusterKey", OutputTruthClusterKey)
+
+        if OutputTruthRingerKeys is not None:
+            self.setProperty("OutputTruthRingerKeys", OutputTruthRingerKeys)
+
+        if OutputTruthElectronKey is not None:
+            self.setProperty("OutputTruthElectronKey", OutputTruthElectronKey)
+
+        # ---------------------------------------------------------
+        # Sistema de múons
+        # ---------------------------------------------------------
+        if OutputMuonKey is not None:
+            self.setProperty("OutputMuonKey", OutputMuonKey)
+
+        if OutputMuonClusterKey is not None:
+            self.setProperty("OutputMuonClusterKey", OutputMuonClusterKey)
+
+        if OutputMuonCellsKey is not None:
+            self.setProperty("OutputMuonCellsKey", OutputMuonCellsKey)
+
+        if OutputMuonDescriptorKey is not None:
+            self.setProperty("OutputMuonDescriptorKey", OutputMuonDescriptorKey)
+
+        # ---------------------------------------------------------
+        # Flags
+        # ---------------------------------------------------------
+        self.setProperty("EnableCaloOutput", EnableCaloOutput)
+        self.setProperty("EnableMuonOutput", EnableMuonOutput)
+        self.setProperty("EnableMuonCellsOutput", EnableMuonCellsOutput)
+
+        # ---------------------------------------------------------
+        # Número de eventos
+        # ---------------------------------------------------------
+        f = ROOT.TFile(self.InputFile, "READ")
+
+        if not f or f.IsZombie():
+            raise RuntimeError(
+                f"Não foi possível abrir o arquivo AOD: {self.InputFile}"
+            )
+
+        t = f.Get(self.NtupleName)
+
+        if not t:
+            f.Close()
+            raise RuntimeError(
+                f"Não foi possível encontrar a árvore {self.NtupleName} "
+                f"no arquivo {self.InputFile}"
+            )
+
+        self.__entries = t.GetEntries()
+
+        f.Close()
+
+    def GetEntries(self):
+        return self.__entries
+
+    def merge(self, acc):
+        acc.SetReader(self)
+

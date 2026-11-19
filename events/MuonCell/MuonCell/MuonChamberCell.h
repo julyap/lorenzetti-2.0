@@ -1,6 +1,5 @@
 // ============================================================================
 // Arquivo: MuonCell/MuonChamberCell.h
-// Autora: Julya Pacheco Ferreira
 // Descrição: Declaração da classe xAOD::MuonChamberCell, que representa uma
 //            célula de câmara de múon no EDM. Herda de Gaugi::EDM e armazena
 //            posição (x,y,z), dimensões (dx,dy,dz), propriedades do sinal

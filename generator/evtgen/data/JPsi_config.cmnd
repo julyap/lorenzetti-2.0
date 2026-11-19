@@ -1,0 +1,40 @@
+! 1) Settings used in the main program.
+Main:numberOfEvents = 100          ! number of events to generate
+Main:timesAllowErrors = 3          ! how many aborts before run stops
+
+! 2) Settings related to output in init(), next() and stat().
+Init:showChangedSettings = on      ! list changed settings
+Init:showChangedParticleData = on  ! list changed particle data
+Next:numberCount = 10              ! print message every n events
+Next:numberShowInfo = 1            ! print event information n times
+Next:numberShowProcess = 1         ! print process record n times
+Next:numberShowEvent = 1           ! print event record n times
+
+! 3) Beam parameter settings. Values below agree with default ones.
+Beams:idA = 2212                   ! first beam, p = 2212, pbar = -2212
+Beams:idB = 2212                   ! second beam, p = 2212, pbar = -2212
+Beams:eCM = 14000.                 ! CM energy of collision
+
+! 4) Settings for the hard-process generation.
+HardQCD:gg2ccbar = on              ! Enable charm quark pair production via gluon fusion
+HardQCD:qqbar2ccbar = on           ! Enable charm quark pair production via qq-bar annihilation
+
+! 5) Ensure J/ψ production
+Charmonium:all = on                ! Habilita a produção de J/ψ diretamente no Pythia8
+
+! 6) Restrict the phase space for subprocesses to ensure J/ψ production
+PhaseSpace:pTHatMin = 0.0         ! Minimum transverse momentum for subprocesses (reduces irrelevant events)
+PhaseSpace:mHatMin = 2.5           ! Minimum invariant mass to avoid excitatory states
+
+! 7) Set decay modes for J/ψ - BOTH ELECTRONS AND MUONS
+443:onMode = off                   ! Turn off all decay modes for J/ψ
+
+! J/ψ -> e⁺e⁻ (elétrons) - PDG 11 e -11
+443:addChannel = 1 0.059 100 11 -11  ! J/ψ -> e+ e-
+
+! J/ψ -> μ⁺μ⁻ (múons) - PDG 13 e -13
+443:addChannel = 1 0.059 100 13 -13  ! J/ψ -> mu+ mu-
+
+! 8) Optional: Other additional settings
+StringPT:sigma = 0.3               ! Fine-tuning for fragmentation (if needed)
+HadronLevel:Hadronize = on         ! Habilita a hadronização, sem usar EvtGen

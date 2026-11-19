@@ -1,6 +1,5 @@
 // ============================================================================
 // Arquivo: Muon.h
-// Autora: Julya Pacheco Ferreira
 // Descrição: Declaração da classe xAOD::Muon, que representa um múon
 //            reconstruído no EDM do ATLAS. Herda de Gaugi::EDM e expõe
 //            getters/setters para as variáveis cinemáticas (η, φ, E, ET, pT,

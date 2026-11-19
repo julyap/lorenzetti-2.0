@@ -4,11 +4,17 @@
 #            a configuração do detector e da geometria (faixa em R/Z, grade
 #            cartesiana em X/Y/Z, sampling, região, duração do bunch, etc.)
 #            e converte o nome do detector (string) para o código inteiro
-#            esperado pelo C++ (0=MDT, 1=RPC, 2=TGC). Também gera
-#            automaticamente os grids em X/Y/Z a partir de RMin/RMax e
-#            ZMin/ZMax quando eles não são fornecidos explicitamente.
-#            Permite acoplar ferramentas (Tools) e é compatível com o
-#            operador '+' para encadear ferramentas.
+#            esperado pelo C++ (0=MDT, 1=RPC, 2=TGC).
+#
+#            IMPORTANTE:
+#              - Este arquivo NÃO sobrescreve RMin/RMax/ZMin/ZMax. Todos os
+#                valores vêm do MuonHitBuilder (em mm), que por sua vez está
+#                alinhado com a geometria em ATLAS/MuonChamber.py e
+#                ATLAS/MuonEndcap.py.
+#              - Os bins em X/Y são gerados com _make_bins(), que remove
+#                duplicatas, ordena e garante bins ESTRITAMENTE CRESCENTES,
+#                evitando o erro do ROOT:
+#                  "TAxis::Set: bins must be in increasing order"
 # ============================================================================
 
 __all__ = ["MuonHitMaker"]
@@ -18,6 +24,30 @@ from GaugiKernel        import Cpp, LoggingLevel
 from GaugiKernel.macros import *
 import ROOT
 import numpy as np
+
+
+# ---------------------------------------------------------------------------
+# Helper: bins estritamente crescentes e sem duplicatas
+# ---------------------------------------------------------------------------
+def _make_bins(values, decimals=2):
+    """
+    Recebe uma lista de valores (possivelmente com duplicatas e fora de
+    ordem), arredonda para 'decimals' casas, remove duplicatas, ordena e
+    garante que cada bin seja estritamente maior que o anterior.
+
+    Isso evita o erro do ROOT:
+        Error in <TAxis::TAxis::Set>: bins must be in increasing order
+
+    Retorna uma lista Python de floats.
+    """
+    if values is None:
+        return None
+    s = sorted(set(round(float(v), decimals) for v in values))
+    out = []
+    for v in s:
+        if not out or v > out[-1]:
+            out.append(v)
+    return out
 
 
 class MuonHitMaker( Cpp ):
@@ -32,29 +62,28 @@ class MuonHitMaker( Cpp ):
                   HistogramPath        : str    = "/MuonHitMaker",
                   SamplingNoiseStd     : float  = 0.0,
                   UseCartesianGrid     : bool   = True,
-                  # Geometry parameters
+                  # Geometry parameters (R e Z em mm)
                   XBins                : list   = None,
                   YBins                : list   = None,
                   ZBins                : list   = None,
-                  RMin                 : float  = 350.0,
-                  RMax                 : float  = 750.0,
-                  ZMin                 : float  = -800.0,
-                  ZMax                 : float  = 800.0,
+                  RMin                 : float  = 5000.0,
+                  RMax                 : float  = 5500.0,
+                  ZMin                 : float  = -3500.0,
+                  ZMax                 : float  = +3500.0,
                   # Identificação do detector (ALINHADO COM O C++)
-                  Detector             : str or int = None,  # Pode ser string ("MDT") ou int (0)
-                  Region               : int    = 0,     # Local: 0=Barrel, 1=Endcap+, 2=Endcap-
-                  Sampling             : int    = 1,     # Camada: 1=MDT_Inner, 2=MDT_Middle, 3=MDT_Outer, 4=RPC_Inner, 5=RPC_Outer, 6=TGC_Inner, 7=TGC_Outer
+                  Detector             : str or int = None,  # "MDT"/"RPC"/"TGC" ou 0/1/2
+                  Region               : int    = 0,     # 0=Barrel, 1=Endcap+, 2=Endcap-
+                  Sampling             : int    = 1,     # 1..7 (ver layer_names)
                   # Parâmetros de segmentação
                   BunchIdStart         : int    = -20,
                   BunchIdEnd           : int    = 20,
                   BunchDuration        : float  = 25.0,
                   DetailedHistograms   : bool   = False,
-                  # Parâmetros auxiliares para configuração automática
+                  # Parâmetros auxiliares
                   Station              : int    = None,
                   NPhiSegments         : int    = 16,
                   NEtaSegments         : int    = 1,
                   ):
-
 
         # Instancia o objeto C++ subjacente
         Cpp.__init__(self, ROOT.MuonHitMaker(name) )
@@ -65,39 +94,37 @@ class MuonHitMaker( Cpp ):
         # ============================================================
         # CONVERTER DETECTOR STRING PARA INT
         # ============================================================
-        # O C++ espera um inteiro como código de detector. Se o usuário
-        # passar uma string ("MDT"/"RPC"/"TGC"), convertemos aqui.
         detector_map = {
             "MDT": 0,
             "RPC": 1,
             "TGC": 2
         }
 
-        # Converter Detector para int se for string
         if isinstance(Detector, str):
             if Detector in detector_map:
                 detector_int = detector_map[Detector]
                 print(f"DEBUG [MuonHitMaker]: Convertendo Detector='{Detector}' para int={detector_int}")
             else:
-                detector_int = 0  # Default MDT
+                detector_int = 0
                 print(f"WARNING [MuonHitMaker]: Detector desconhecido '{Detector}', usando MDT (0)")
         else:
             detector_int = Detector if Detector is not None else 0
+
         if detector_int == 1:  # RPC
-            print(f"🔴 RPC CONFIGURADO: Sampling={Sampling}, Region={Region}, R=[{RMin},{RMax}] cm, Z=[{ZMin},{ZMax}] cm")
+            print(f"🔴 RPC CONFIGURADO: Sampling={Sampling}, Region={Region}, "
+                  f"R=[{RMin},{RMax}] mm, Z=[{ZMin},{ZMax}] mm")
 
         # ============================================================
-        # MAPEAMENTO CORRIGIDO PARA DEBUG
+        # MAPEAMENTO PARA DEBUG
         # ============================================================
         detector_names = {0: "MDT", 1: "RPC", 2: "TGC"}
-        region_names = {0: "Barrel", 1: "Endcap+", 2: "Endcap-"}
+        region_names   = {0: "Barrel", 1: "Endcap+", 2: "Endcap-"}
 
-        # NOMENCLATURA CORRIGIDA DOS SAMPLINGS
         layer_names = {
             1: "MDT_Inner",
             2: "MDT_Middle",
             3: "MDT_Outer",
-            4: "RPC_Inner",
+            4: "RPC_Middle",
             5: "RPC_Outer",
             6: "TGC_Inner",
             7: "TGC_Outer"
@@ -115,222 +142,91 @@ class MuonHitMaker( Cpp ):
             print(f"DEBUG [MuonHitMaker]: CollectionKey gerada: {OutputCollectionKey}")
 
         # ============================================================
-        # CONFIGURAÇÃO DA GEOMETRIA POR DETECTOR/REGIÃO/CAMADA
-        # COM RAIOS CORRETOS PARA CADA CAMADA NO BARREL
+        # GRID EM X,Y,Z
+        #
+        # Não sobrescrevemos RMin/RMax/ZMin/ZMax: eles vêm do builder, já em
+        # mm e alinhados com a geometria. Aqui apenas geramos a grade
+        # cartesiana a partir deles, usando _make_bins() para garantir bins
+        # estritamente crescentes (evita o erro do TAxis).
         # ============================================================
 
-        # BARREL (Region=0)
+        # -------------------- BARREL (Region == 0) --------------------
         if Region == 0:
-            if detector_int == 0:  # MDT
-                if Sampling == 1:  # MDT_Inner
-                    RMin, RMax = 350.0, 400.0
-                    ZMin, ZMax = -800.0, 800.0
-                    print(f"DEBUG [MuonHitMaker]: MDT Barrel Inner: R=[350,400] cm, Z=[-800,800] cm")
-                elif Sampling == 2:  # MDT_Middle
-                    RMin, RMax = 500.0, 550.0
-                    ZMin, ZMax = -800.0, 800.0
-                    print(f"DEBUG [MuonHitMaker]: MDT Barrel Middle: R=[500,550] cm, Z=[-800,800] cm")
-                elif Sampling == 3:  # MDT_Outer
-                    RMin, RMax = 700.0, 750.0
-                    ZMin, ZMax = -800.0, 800.0
-                    print(f"DEBUG [MuonHitMaker]: MDT Barrel Outer: R=[700,750] cm, Z=[-800,800] cm")
-                else:
-                    print(f"WARNING [MuonHitMaker]: MDT Barrel com Sampling={Sampling} inválido! Usando MDT_Inner como default")
-                    RMin, RMax = 350.0, 400.0
-                    ZMin, ZMax = -800.0, 800.0
+            if XBins is None or YBins is None:
+                phi_bins = np.linspace(-np.pi, np.pi, NPhiSegments + 1)
+                avg_radius = 0.5 * (RMin + RMax)  # mm
 
-            elif detector_int == 1:  # RPC
-                if Sampling == 4:  # RPC_Inner
-                    RMin, RMax = 420.0, 450.0
-                    ZMin, ZMax = -800.0, 800.0
-                    print(f"DEBUG [MuonHitMaker]: RPC Barrel Inner: R=[420,450] cm, Z=[-800,800] cm")
-                elif Sampling == 5:  # RPC_Outer
-                    RMin, RMax = 600.0, 650.0
-                    ZMin, ZMax = -800.0, 800.0
-                    print(f"DEBUG [MuonHitMaker]: RPC Barrel Outer: R=[600,650] cm, Z=[-800,800] cm")
-                else:
-                    print(f"WARNING [MuonHitMaker]: RPC Barrel com Sampling={Sampling} inválido! Usando RPC_Inner como default")
-                    RMin, RMax = 420.0, 450.0
-                    ZMin, ZMax = -800.0, 800.0
+                XBins = _make_bins([avg_radius * np.cos(p) for p in phi_bins])
+                YBins = _make_bins([avg_radius * np.sin(p) for p in phi_bins])
 
-            elif detector_int == 2:  # TGC
-                print(f"WARNING [MuonHitMaker]: TGC não existe no Barrel! Apenas Endcaps.")
-                # Fallback para valores padrão
-                RMin, RMax = 350.0, 750.0
-                ZMin, ZMax = -800.0, 800.0
+            if ZBins is None:
+                ZBins = np.linspace(ZMin, ZMax, 33).tolist()
 
-        # ENDCAP POSITIVO (Region=1)
-        elif Region == 1:
-            if detector_int == 0:  # MDT
-                if Sampling == 1:  # MDT_Inner
-                    RMin, RMax = 200.0, 850.0
-                    ZMin, ZMax = 1150.0, 1250.0
-                    print(f"DEBUG [MuonHitMaker]: MDT Endcap+ Inner: Z=[1150,1250] cm, R=[200,850] cm")
-                elif Sampling == 2:  # MDT_Middle
-                    RMin, RMax = 200.0, 850.0
-                    ZMin, ZMax = 1340.0, 1380.0
-                    print(f"DEBUG [MuonHitMaker]: MDT Endcap+ Middle: Z=[1340,1380] cm, R=[200,850] cm")
-                elif Sampling == 3:  # MDT_Outer
-                    RMin, RMax = 200.0, 850.0
-                    ZMin, ZMax = 1500.0, 1540.0
-                    print(f"DEBUG [MuonHitMaker]: MDT Endcap+ Outer: Z=[1500,1540] cm, R=[200,850] cm")
-                else:
-                    print(f"WARNING [MuonHitMaker]: MDT Endcap+ com Sampling={Sampling} inválido! Usando MDT_Inner como default")
-                    RMin, RMax = 200.0, 850.0
-                    ZMin, ZMax = 1150.0, 1250.0
+        # -------------------- ENDCAPS (Region == 1 ou 2) --------------
+        else:
+            if XBins is None or YBins is None:
+                n_r   = 9
+                n_phi = 17
+                r_bins   = np.linspace(RMin, RMax, n_r).tolist()   # mm
+                phi_bins = np.linspace(-np.pi, np.pi, n_phi).tolist()
 
-            elif detector_int == 1:  # RPC
-                print(f"WARNING [MuonHitMaker]: RPC não existe no Endcap! Apenas Barrel.")
-                # Fallback para valores padrão
-                RMin, RMax = 200.0, 850.0
-                ZMin, ZMax = 1150.0, 1250.0
+                xs = []
+                ys = []
+                for r in r_bins:
+                    for p in phi_bins:
+                        xs.append(r * np.cos(p))
+                        ys.append(r * np.sin(p))
 
-            elif detector_int == 2:  # TGC
-                if Sampling == 6:  # TGC_Inner
-                    RMin, RMax = 200.0, 850.0
-                    ZMin, ZMax = 1265.0, 1295.0
-                    print(f"DEBUG [MuonHitMaker]: TGC Endcap+ Inner: Z=[1265,1295] cm, R=[200,850] cm")
-                elif Sampling == 7:  # TGC_Outer
-                    RMin, RMax = 200.0, 850.0
-                    ZMin, ZMax = 1425.0, 1455.0
-                    print(f"DEBUG [MuonHitMaker]: TGC Endcap+ Outer: Z=[1425,1455] cm, R=[200,850] cm")
-                else:
-                    print(f"WARNING [MuonHitMaker]: TGC Endcap+ com Sampling={Sampling} inválido! Usando TGC_Inner como default")
-                    RMin, RMax = 200.0, 850.0
-                    ZMin, ZMax = 1265.0, 1295.0
+                XBins = _make_bins(xs)
+                YBins = _make_bins(ys)
 
-        # ENDCAP NEGATIVO (Region=2)
-        elif Region == 2:
-            if detector_int == 0:  # MDT
-                if Sampling == 1:  # MDT_Inner
-                    RMin, RMax = 200.0, 850.0
-                    ZMin, ZMax = -1250.0, -1150.0
-                    print(f"DEBUG [MuonHitMaker]: MDT Endcap- Inner: Z=[-1250,-1150] cm, R=[200,850] cm")
-                elif Sampling == 2:  # MDT_Middle
-                    RMin, RMax = 200.0, 850.0
-                    ZMin, ZMax = -1380.0, -1340.0
-                    print(f"DEBUG [MuonHitMaker]: MDT Endcap- Middle: Z=[-1380,-1340] cm, R=[200,850] cm")
-                elif Sampling == 3:  # MDT_Outer
-                    RMin, RMax = 200.0, 850.0
-                    ZMin, ZMax = -1540.0, -1500.0
-                    print(f"DEBUG [MuonHitMaker]: MDT Endcap- Outer: Z=[-1540,-1500] cm, R=[200,850] cm")
-                else:
-                    print(f"WARNING [MuonHitMaker]: MDT Endcap- com Sampling={Sampling} inválido! Usando MDT_Inner como default")
-                    RMin, RMax = 200.0, 850.0
-                    ZMin, ZMax = -1250.0, -1150.0
+            if ZBins is None:
+                ZBins = np.linspace(ZMin, ZMax, 9).tolist()
 
-            elif detector_int == 1:  # RPC
-                print(f"WARNING [MuonHitMaker]: RPC não existe no Endcap! Apenas Barrel.")
-                # Fallback para valores padrão
-                RMin, RMax = 200.0, 850.0
-                ZMin, ZMax = -1250.0, -1150.0
-
-            elif detector_int == 2:  # TGC
-                if Sampling == 6:  # TGC_Inner
-                    RMin, RMax = 200.0, 850.0
-                    ZMin, ZMax = -1295.0, -1265.0
-                    print(f"DEBUG [MuonHitMaker]: TGC Endcap- Inner: Z=[-1295,-1265] cm, R=[200,850] cm")
-                elif Sampling == 7:  # TGC_Outer
-                    RMin, RMax = 200.0, 850.0
-                    ZMin, ZMax = -1455.0, -1425.0
-                    print(f"DEBUG [MuonHitMaker]: TGC Endcap- Outer: Z=[-1455,-1425] cm, R=[200,850] cm")
-                else:
-                    print(f"WARNING [MuonHitMaker]: TGC Endcap- com Sampling={Sampling} inválido! Usando TGC_Inner como default")
-                    RMin, RMax = 200.0, 850.0
-                    ZMin, ZMax = -1295.0, -1265.0
-
-        # ============================================================
-        # CRIAR GRID EM X,Y,Z BASEADO NOS PARÂMETROS
-        # ============================================================
-
-        # Para o barrel (Region=0), grid cilíndrico
-        if Region == 0:  # Barrel
-            # Criar bins em phi
-            phi_min = -np.pi
-            phi_max = np.pi
-            phi_bins = np.linspace(phi_min, phi_max, NPhiSegments + 1)
-
-            # IMPORTANTE: Para cada detector/sampling, usar seu raio específico!
-            # O raio médio é calculado baseado nos RMin e RMax configurados acima
-            avg_radius = (RMin + RMax) / 2.0
-
-            # CRIAÇÃO CORRETA DOS BINS EM X E Y PARA O BARREL
-            # x = r * cos(phi), y = r * sin(phi)
-            x_bins = []
-            y_bins = []
-            for phi in phi_bins:
-                x_bins.append(avg_radius * np.cos(phi))
-                y_bins.append(avg_radius * np.sin(phi))  # <-- CORRIGIDO: sin(phi) em vez de cos(phi)
-
-            # Garantir que os bins estão ordenados
-            x_bins = sorted(x_bins)
-            y_bins = sorted(y_bins)
-
-            XBins = x_bins
-            YBins = y_bins
-
-            # Criar bins em Z para o barrel
-            z_bins = np.linspace(ZMin, ZMax, 33).tolist()
-            ZBins = z_bins
-
-        else:  # Endcaps (Region=1 ou 2)
-            # Para endcaps, grid em X,Y circular
-            r_bins = np.linspace(RMin, RMax, 9).tolist()
-            phi_bins = np.linspace(-np.pi, np.pi, 17).tolist()
-
-            # Gerar pontos no círculo
-            x_points = []
-            y_points = []
-            for r in r_bins:
-                for phi in phi_bins:
-                    x_points.append(r * np.cos(phi))
-                    y_points.append(r * np.sin(phi))  # <-- CORRIGIDO
-
-            # Criar bins únicos ordenados
-            x_bins = sorted(list(set([round(x, 1) for x in x_points])))
-            y_bins = sorted(list(set([round(y, 1) for y in y_points])))
-
-            XBins = x_bins
-            YBins = y_bins
-
-            # Para endcaps, bins em Z
-            z_bins = np.linspace(ZMin, ZMax, 9).tolist()
-            ZBins = z_bins
-
-        # Fallback para defaults se algo deu errado
+        # -------------------- Sanidade final --------------------------
+        # Reaplica _make_bins por segurança (caso o usuário tenha passado
+        # XBins/YBins com duplicatas ou fora de ordem).
         if XBins is None or len(XBins) < 2:
-            XBins = [-500.0, -400.0, -300.0, -200.0, -100.0, 0.0, 100.0, 200.0, 300.0, 400.0, 500.0]
+            XBins = np.linspace(-RMax, RMax, 21).tolist()
+        else:
+            XBins = _make_bins(XBins)
+
         if YBins is None or len(YBins) < 2:
-            YBins = [-500.0, -400.0, -300.0, -200.0, -100.0, 0.0, 100.0, 200.0, 300.0, 400.0, 500.0]
+            YBins = np.linspace(-RMax, RMax, 21).tolist()
+        else:
+            YBins = _make_bins(YBins)
+
         if ZBins is None or len(ZBins) < 2:
-            ZBins = [-700.0, -600.0, -500.0, -400.0, -300.0, -200.0, -100.0, 0.0, 100.0, 200.0, 300.0, 400.0, 500.0, 600.0, 700.0]
+            ZBins = np.linspace(ZMin, ZMax, 33).tolist()
+        else:
+            # ZBins vindos do builder já são monotônicos, mas garantimos
+            ZBins = sorted(set(round(float(z), 2) for z in ZBins))
 
         # ============================================================
         # SET PROPERTIES - ALINHADO COM O C++
         # ============================================================
-        self.setProperty( "OutputCollectionKey" , OutputCollectionKey )   # chave da coleção de saída
-        self.setProperty( "OutputLevel"         , OutputLevel         )   # nível de log
-        self.setProperty( "HistogramPath"       , HistogramPath       )   # caminho dos histogramas
-        self.setProperty( "SamplingNoiseStd"    , SamplingNoiseStd    )   # ruído na amostragem
-        self.setProperty( "UseCartesianGrid"    , UseCartesianGrid    )   # usa grade cartesiana?
+        self.setProperty( "OutputCollectionKey" , OutputCollectionKey )
+        self.setProperty( "OutputLevel"         , OutputLevel         )
+        self.setProperty( "HistogramPath"       , HistogramPath       )
+        self.setProperty( "SamplingNoiseStd"    , SamplingNoiseStd    )
+        self.setProperty( "UseCartesianGrid"    , UseCartesianGrid    )
 
-        self.setProperty( "XBins"               , XBins               )   # bins em X
-        self.setProperty( "YBins"               , YBins               )   # bins em Y
-        self.setProperty( "ZBins"               , ZBins               )   # bins em Z
-        self.setProperty( "RMin"                , RMin                )   # raio mínimo
-        self.setProperty( "RMax"                , RMax                )   # raio máximo
-        self.setProperty( "ZMin"                , ZMin                )   # Z mínimo
-        self.setProperty( "ZMax"                , ZMax                )   # Z máximo
+        self.setProperty( "XBins"               , XBins               )
+        self.setProperty( "YBins"               , YBins               )
+        self.setProperty( "ZBins"               , ZBins               )
+        self.setProperty( "RMin"                , RMin                )   # mm
+        self.setProperty( "RMax"                , RMax                )   # mm
+        self.setProperty( "ZMin"                , ZMin                )   # mm
+        self.setProperty( "ZMax"                , ZMax                )   # mm
 
-        # PROPRIEDADES PRINCIPAIS - DETECTOR AGORA É INT
-        self.setProperty( "Detector"             , detector_int        )  # INT: 0=MDT, 1=RPC, 2=TGC
-        self.setProperty( "Region"               , Region              )  # Local: Barrel, Endcap
-        self.setProperty( "Sampling"             , Sampling            )  # Camada: 1=MDT_Inner, 2=MDT_Middle, 3=MDT_Outer, 4=RPC_Inner, 5=RPC_Outer, 6=TGC_Inner, 7=TGC_Outer
+        self.setProperty( "Detector"            , detector_int        )   # INT: 0=MDT, 1=RPC, 2=TGC
+        self.setProperty( "Region"              , Region              )   # 0=Barrel, 1=Endcap+, 2=Endcap-
+        self.setProperty( "Sampling"            , Sampling            )   # 1..7
 
-        self.setProperty( "BunchIdStart"        , BunchIdStart        )   # BCID inicial
-        self.setProperty( "BunchIdEnd"          , BunchIdEnd          )   # BCID final
-        self.setProperty( "BunchDuration"       , BunchDuration       )   # duração do bunch (ns)
-        self.setProperty( "DetailedHistograms"  , DetailedHistograms  )   # histogramas detalhados?
+        self.setProperty( "BunchIdStart"        , BunchIdStart        )
+        self.setProperty( "BunchIdEnd"          , BunchIdEnd          )
+        self.setProperty( "BunchDuration"       , BunchDuration       )
+        self.setProperty( "DetailedHistograms"  , DetailedHistograms  )
 
         # DEBUG FINAL
         print(f"DEBUG [MuonHitMaker]: Configuração final:")
@@ -338,8 +234,8 @@ class MuonHitMaker( Cpp ):
         print(f"DEBUG [MuonHitMaker]:   Region={Region} ({region_name})")
         print(f"DEBUG [MuonHitMaker]:   Sampling={Sampling} ({layer_name})")
         print(f"DEBUG [MuonHitMaker]:   CollectionKey={OutputCollectionKey}")
-        print(f"DEBUG [MuonHitMaker]:   R range: [{RMin}, {RMax}] cm")
-        print(f"DEBUG [MuonHitMaker]:   Z range: [{ZMin}, {ZMax}] cm")
+        print(f"DEBUG [MuonHitMaker]:   R range: [{RMin}, {RMax}] mm")
+        print(f"DEBUG [MuonHitMaker]:   Z range: [{ZMin}, {ZMax}] mm")
         print(f"DEBUG [MuonHitMaker]:   Grid: {len(XBins)-1} x-bins, {len(YBins)-1} y-bins, {len(ZBins)-1} z-bins")
 
     def core(self):

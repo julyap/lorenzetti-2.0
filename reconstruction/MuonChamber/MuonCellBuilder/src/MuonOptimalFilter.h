@@ -1,6 +1,5 @@
 // ============================================================================
 // Arquivo: MuonOptimalFilter.h
-// Autora: Julya Pacheco Ferreira
 // Descrição: Declaração da classe MuonOptimalFilter (implementação em
 //            MuonOptimalFilter.cxx). Define a interface do AlgTool que
 //            aplica o filtro ótimo (pesos de energia e tempo) a um

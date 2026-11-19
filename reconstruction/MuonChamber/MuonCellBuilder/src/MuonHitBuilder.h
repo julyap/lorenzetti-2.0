@@ -1,6 +1,5 @@
 // ============================================================================
 // Arquivo: MuonHitBuilder.h
-// Autora: Julya Pacheco Ferreira
 // Descrição: Declaração da classe MuonHitBuilder (implementação em
 //            MuonHitBuilder.cxx). Define a interface mínima do algoritmo
 //            com initialize/execute/finalize.

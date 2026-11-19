@@ -1,4 +1,3 @@
-
 import os
 import shutil
 
@@ -24,6 +23,12 @@ mapping = {
     'reconstruction/io/RootStreamBuilder/python' : 'RootStreamBuilder',
     'reconstruction/physics/EgammaBuilder/python' : 'EgammaBuilder',
     'reconstruction/reco/python' : 'reco',
+
+    # ===== MÚONS: novos diretórios =====
+
+    'reconstruction/MuonChamber/MuonCellBuilder/python'    : 'MuonCellBuilder',
+    'reconstruction/MuonChamber/MuonClusterBuilder/python' : 'MuonClusterBuilder',
+    'reconstruction/physics/MuonBuilder/python'            : 'MuonBuilder',
 }
 
 base_dir = os.path.abspath('.')
@@ -35,7 +40,8 @@ for src_rel, pkg_name in mapping.items():
     if not os.path.exists(src):
         print(f"Skipping {src} (not found)")
         continue
-    
+
     print(f"Copying {src} -> {dst}")
     # Overwrite existing directory without deleting it first to avoid permission issues
-    shutil.copytree(src, dst, dirs_exist_ok=True, ignore=shutil.ignore_patterns('__pycache__', '*.pyc'))
+    shutil.copytree(src, dst, dirs_exist_ok=True,
+                    ignore=shutil.ignore_patterns('__pycache__', '*.pyc'))

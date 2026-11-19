@@ -1,6 +1,5 @@
 // ============================================================================
 // Arquivo: MuonCrossTalkMaker.cxx
-// Autora: Julya Pacheco Ferreira
 // Descrição: Implementação do algoritmo MuonCrossTalkMaker. Aplica o efeito
 //            de cross-talk (capacitivo + indutivo) nos pulsos de hits de
 //            muon. Para cada hit com energia acima de MinEnergy, considera
@@ -16,7 +15,7 @@
 #include "MuonHit/MuonHit.h"
 #include "MuonHit/MuonHitContainer.h"
 #include "MuonHit/MuonHitCollection.h"
-#include "G4Kernel/MuonDetectorGeometry.h"
+#include "src/MuonDetectorGeometry.h"
 #include "G4Kernel/constants.h"
 
 #include "G4SystemOfUnits.hh"

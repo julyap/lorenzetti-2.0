@@ -1,6 +1,5 @@
 // ============================================================================
 // Arquivo: MuonPulseGenerator.h
-// Autora: Julya Pacheco Ferreira
 // Descrição: Declaração da classe MuonPulseGenerator (implementação em
 //            MuonPulseGenerator.cxx). Define a interface do AlgTool que
 //            gera o pulso amostrado de uma célula de muon a partir de um

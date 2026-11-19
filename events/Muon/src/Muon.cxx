@@ -1,6 +1,5 @@
 // ============================================================================
 // Arquivo: Muon.cxx
-// Autora: Julya Pacheco Ferreira
 // Descrição: Implementação dos construtores da classe xAOD::Muon.
 //            - O construtor padrão inicializa todas as variáveis em zero
 //              (e/et/pt/eta/phi/carga/qualidade/iso/d0/z0/σd0/σz0/fracMax/

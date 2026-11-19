@@ -1,6 +1,5 @@
 // ============================================================================
 // Arquivo: MuonContainer.h
-// Autora: Julya Pacheco Ferreira
 // Descrição: Define o typedef xAOD::MuonContainer como um
 //            SG::DataVector<xAOD::Muon>. Esse typedef é usado pelo
 //            StoreGate para armazenar/recuperar coleções de múons.

@@ -1,6 +1,5 @@
 // ============================================================================
 // Arquivo: MuonCluster/MuonCluster/MuonCluster.h
-// Autora: Julya Pacheco Ferreira
 // Descrição: Declaração da classe xAOD::MuonCluster, que representa um
 //            cluster de células de múon no EDM do ATLAS. Herda de
 //            Gaugi::EDM e armazena:

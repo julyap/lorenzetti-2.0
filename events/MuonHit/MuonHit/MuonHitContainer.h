@@ -1,6 +1,5 @@
 // ============================================================================
 // Arquivo: MuonHit/MuonHit/MuonHitContainer.h
-// Autora: Julya Pacheco Ferreira
 // Descrição: Define o typedef xAOD::MuonHitContainer como um
 //            SG::DataVector<xAOD::MuonHit>, ou seja, um container padrão de
 //            hits de múon do EDM. Usado pelo StoreGate para armazenar e

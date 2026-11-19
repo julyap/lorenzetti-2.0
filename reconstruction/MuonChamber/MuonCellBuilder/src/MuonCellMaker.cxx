@@ -1,6 +1,5 @@
 // ============================================================================
 // Arquivo: MuonCellMaker.cxx
-// Autora: Julya Pacheco Ferreira
 // Descrição: Implementação do algoritmo MuonCellMaker. Responsável por:
 //              - criar a coleção de "descriptors" de células de muon
 //                (MuonChamberDetDescriptorCollection) com base em uma grade
@@ -16,7 +15,7 @@
 //                energia de verdade.
 // ============================================================================
 
-#include "G4Kernel/MuonPhiRange.h"
+#include "src/MuonPhiRange.h"
 #include "MuonCell/MuonChamberDetDescriptor.h"
 #include "MuonCell/MuonChamberDetDescriptorCollection.h"
 #include "MuonCell/MuonChamberCell.h"

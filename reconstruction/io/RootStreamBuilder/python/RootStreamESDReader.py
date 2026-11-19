@@ -1,77 +1,208 @@
+
 __all__ = ["RootStreamESDReader"]
 
 from GaugiKernel import Cpp
 from GaugiKernel.macros import *
+
 import ROOT
 
-class RootStreamESDReader( Cpp ):
 
-  def __init__( self, name,
-                InputFile           : str,
-                OutputEventKey      : str,
-                OutputTruthKey      : str,
-                OutputSeedsKey      : str,
-                # --- Calorimeter (nomes oficiais preservados) ---
-                OutputCellsKey      : str = None,
-                OutputCellsTruthKey : str = None,
-                # --- Alias da sua versao (opcional; se passado, tem precedencia) ---
-                OutputCaloCellsKey  : str = None,
-                # --- Aditivo: muon ---
-                OutputMuonCellsKey  : str = "MuonCells",
-                # --- Oficial ---
-                OutputLevel         : int = 0,
-                NtupleName          : str = "CollectionTree",
-                # --- Aditivo: flags (default preservam o comportamento oficial) ---
-                EnableCaloOutput    : bool = True,
-                EnableMuonOutput    : bool = True,
-                MuonCellKeys        : list = [],
-              ): 
+class RootStreamESDReader(Cpp):
 
-    Cpp.__init__(self, ROOT.RootStreamESDReader(name))
+    def __init__(
+        self,
+        name,
+        InputFile: str,
 
-    # Resolve alias (sua versao tem precedencia se passada)
-    _out_cells = OutputCaloCellsKey if OutputCaloCellsKey is not None else OutputCellsKey
+        OutputEventKey: str,
+        OutputTruthKey: str,
+        OutputSeedsKey: str,
 
-    self.setProperty( "OutputEventKey"      , OutputEventKey      )
-    self.setProperty( "OutputTruthKey"      , OutputTruthKey      )
-    self.setProperty( "OutputSeedsKey"      , OutputSeedsKey      )
-    # Calorimeter (nomes oficiais preservados)
-    self.setProperty( "OutputCellsKey"      , _out_cells if _out_cells is not None else "" )
-    self.setProperty( "OutputCellsTruthKey" , OutputCellsTruthKey if OutputCellsTruthKey is not None else "" )
-    # Muon (aditivo)
-    self.setProperty( "OutputMuonCellsKey"  , OutputMuonCellsKey  )
-    self.setProperty( "OutputLevel"         , OutputLevel         ) 
-    self.setProperty( "NtupleName"          , NtupleName          )
-    self.setProperty( "InputFile"           , InputFile           )
-    # Flags (aditivo)
-    self.setProperty( "EnableCaloOutput"    , EnableCaloOutput    )
-    self.setProperty( "EnableMuonOutput"    , EnableMuonOutput    )
+        InputEventBranchKey: str = "EventInfo",
 
-    # Configurar multiplas chaves de muon se fornecidas
-    if MuonCellKeys:
-        self.setProperty( "MuonCellKeys", MuonCellKeys )
-        self.setProperty( "EnableMuonOutput", True )
+        OutputCellsKey: str = None,
+        OutputCellsTruthKey: str = None,
 
-    # Armazenar para uso posterior
-    self.InputFile = InputFile
-    self.NtupleName = NtupleName
+        OutputCaloCellsKey: str = None,
+        OutputCaloCellsTruthKey: str = None,
+        OutputTruthCaloCellsKey: str = None,
 
-    # Verificar arquivo e obter numero de entradas
-    f = ROOT.TFile.Open( InputFile, "read" )
-    if not f or f.IsZombie():
-        raise RuntimeError( f"Could not open file: {InputFile}" )
+        OutputMuonCellsKey: str = "MuonCells",
+        MuonCellKeys: list = None,
 
-    t = f.Get( NtupleName )
-    if not t:
-        raise RuntimeError( f"Could not find tree '{NtupleName}' in file: {InputFile}" )
+        OutputLevel: int = 0,
+        NtupleName: str = "CollectionTree",
 
-    self.__entries = t.GetEntries()
-    f.Close()
+        EnableCaloOutput: bool = True,
+        EnableMuonOutput: bool = True,
+    ):
+
+        Cpp.__init__(
+            self,
+            ROOT.RootStreamESDReader(name)
+        )
 
 
-  def GetEntries(self):
-    return self.__entries
+        # --------------------------------------------------
+        # Resolver aliases do calorímetro
+        # --------------------------------------------------
+
+        cells_key = (
+            OutputCaloCellsKey
+            if OutputCaloCellsKey is not None
+            else (
+                OutputCellsKey
+                if OutputCellsKey is not None
+                else "Hits"
+            )
+        )
+
+        cells_truth_key = (
+            OutputCaloCellsTruthKey
+            if OutputCaloCellsTruthKey is not None
+            else (
+                OutputTruthCaloCellsKey
+                if OutputTruthCaloCellsKey is not None
+                else (
+                    OutputCellsTruthKey
+                    if OutputCellsTruthKey is not None
+                    else "CellsTruth"
+                )
+            )
+        )
 
 
-  def merge(self, acc):
-    acc.SetReader(self)
+        # --------------------------------------------------
+        # Propriedades oficiais
+        # --------------------------------------------------
+
+        self.setProperty("InputFile", InputFile)
+
+        self.setProperty("OutputEventKey", OutputEventKey)
+
+        # NOVO: branch de entrada independente da chave de saída
+        self.setProperty(
+            "InputEventBranchKey",
+            InputEventBranchKey
+        )
+
+        self.setProperty("OutputTruthKey", OutputTruthKey)
+
+        self.setProperty("OutputSeedsKey", OutputSeedsKey)
+
+
+        # --------------------------------------------------
+        # Calorímetro
+        # --------------------------------------------------
+
+        self.setProperty("OutputCellsKey", cells_key)
+
+        self.setProperty("OutputCaloCellsKey", cells_key)
+
+        self.setProperty(
+            "OutputCellsTruthKey",
+            cells_truth_key
+        )
+
+        self.setProperty(
+            "OutputTruthCaloCellsKey",
+            cells_truth_key
+        )
+
+
+        # --------------------------------------------------
+        # Muon
+        # --------------------------------------------------
+
+        self.setProperty(
+            "OutputMuonCellsKey",
+            OutputMuonCellsKey
+        )
+
+        if MuonCellKeys:
+
+            self.setProperty(
+                "OutputMuonCellKeys",
+                MuonCellKeys
+            )
+
+
+        # --------------------------------------------------
+        # Configurações
+        # --------------------------------------------------
+
+        self.setProperty(
+            "EnableCaloOutput",
+            EnableCaloOutput
+        )
+
+        self.setProperty(
+            "EnableMuonOutput",
+            EnableMuonOutput
+        )
+
+        self.setProperty(
+            "OutputLevel",
+            OutputLevel
+        )
+
+        self.setProperty(
+            "NtupleName",
+            NtupleName
+        )
+
+
+        # --------------------------------------------------
+        # Verificar arquivo ROOT
+        # --------------------------------------------------
+
+        self.InputFile = InputFile
+
+        self.NtupleName = NtupleName
+
+        f = ROOT.TFile.Open(
+            InputFile,
+            "read"
+        )
+
+        if not f or f.IsZombie():
+
+            raise RuntimeError(
+                f"Could not open file: {InputFile}"
+            )
+
+        try:
+
+            t = f.Get(NtupleName)
+
+            if not t:
+
+                raise RuntimeError(
+                    f"Could not find tree {NtupleName} "
+                    f"in file {InputFile}"
+                )
+
+            self.__entries = t.GetEntries()
+
+        finally:
+
+            f.Close()
+
+
+    # ------------------------------------------------------
+    # Número de eventos
+    # ------------------------------------------------------
+
+    def GetEntries(self):
+
+        return self.__entries
+
+
+    # ------------------------------------------------------
+    # Merge
+    # ------------------------------------------------------
+
+    def merge(self, acc):
+
+        acc.SetReader(self)
+

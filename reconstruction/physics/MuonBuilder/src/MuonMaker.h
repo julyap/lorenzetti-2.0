@@ -1,6 +1,5 @@
 // ============================================================================
 // Arquivo: MuonMaker.h
-// Autora: Julya Pacheco Ferreira
 // Descrição: Declaração da classe MuonMaker (implementação em MuonMaker.cxx).
 //            Define a interface do algoritmo que reconstrói múons MS-only a
 //            partir de clusters, incluindo as funções de avaliação de

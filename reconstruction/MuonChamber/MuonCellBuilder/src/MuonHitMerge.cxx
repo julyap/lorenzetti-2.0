@@ -1,6 +1,5 @@
 // ============================================================================
 // Arquivo: MuonHitMerge.cxx
-// Autora: Julya Pacheco Ferreira
 // Descrição: Implementação do algoritmo MuonHitMerge. Lê todas as coleções
 //            de hits de muon (MuonHitCollection) produzidas pelos múltiplos
 //            MuonHitMaker e as funde em uma única coleção de hits

@@ -1,6 +1,5 @@
 // ============================================================================
 // Arquivo: MuonCell/MuonChamberDetDescriptor.h
-// Autora: Julya Pacheco Ferreira
 // Descrição: Declaração da classe xAOD::MuonChamberDescriptor, que representa
 //            a geometria e as propriedades de uma célula de câmara de múon no
 //            EDM. Inclui:

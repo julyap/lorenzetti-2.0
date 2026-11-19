@@ -18,10 +18,10 @@
 #include "G4PhysicalConstants.hh"
 #include "G4SystemOfUnits.hh"
 #include "G4UniformMagField.hh"
-#include "G4ProductionCuts.hh"
 #include "G4TransportationManager.hh"
 #include "G4FieldManager.hh"
 #include "G4RegionStore.hh"
+#include "G4UserLimits.hh"          // ← NOVO: para G4UserLimits
 #include <string>
 #include <sstream>
 
@@ -34,19 +34,6 @@ template <typename T> int sign(T val) {
 G4ThreadLocal G4GlobalMagFieldMessenger* DetectorConstruction_v1::m_magFieldMessenger = nullptr;
 
 
-/**
- * @class DetectorConstruction_v1
- * @brief Defines the full detector geometry for the simulation.
- * 
- * This class implements the G4VUserDetectorConstruction interface to build the 
- * Lorenzetti detector (calorimeters) using Geant4 geometry primitives.
- * It manages materials, logical volumes, and placements for both horizontal 
- * and vertical calorimeter plates.
- * 
- * Properties:
- * - UseMagneticField: Toggle global magnetic field (2 Tesla).
- * - CutOnPhi: Restrict the detector to a phi wedge (used for debugging/visualization).
- */
 DetectorConstruction_v1::DetectorConstruction_v1(std::string name)
  : 
   IMsgService(name), 
@@ -63,10 +50,6 @@ DetectorConstruction_v1::~DetectorConstruction_v1()
 {;}
 
 
-
-//
-// Add volume
-//
 void DetectorConstruction_v1::AddVolume(std::string region,
                                         int plates,
                                         std::string absorberMaterial,
@@ -80,12 +63,10 @@ void DetectorConstruction_v1::AddVolume(std::string region,
                                         double x,
                                         double y,
                                         double z,
-                                        // production cuts
                                         double electronCut,
                                         double positronCut,
                                         double gammaCut,
                                         double photonCut,
-                                        // muon cut (aditivo; default 1 cm)
                                         double muonCut
                                         )
 {
@@ -107,7 +88,6 @@ void DetectorConstruction_v1::AddVolume(std::string region,
   v.positronCut      = positronCut;
   v.gammaCut         = gammaCut;
   v.photonCut        = photonCut;
-  // defaults aditivos (nao usados pelo ramo de calorimetro)
   v.muonCut          = muonCut;
   v.isMuonChamber    = false;
   v.chamberType      = 0;
@@ -119,9 +99,7 @@ void DetectorConstruction_v1::AddVolume(std::string region,
 }
 
 
-//
-// AddMuonChamber (aditivo): cria um Volume com isMuonChamber=true
-//
+
 void DetectorConstruction_v1::AddMuonChamber(std::string name,
                                              int chamberType,
                                              double rMin,
@@ -136,149 +114,156 @@ void DetectorConstruction_v1::AddMuonChamber(std::string name,
 {
   Volume v;
   v.name             = name;
-  v.plates           = 0; // barrel (Horizontal); o ramo de muons usa rMin/rMax/zSize
+  v.plates           = 0;
   v.absorberMaterial = chamberStructure;
   v.gapMaterial      = gasMixture;
   v.nofLayers        = 1;
-  v.absoThickness    = 0.5*cm;
-  v.gapThickness     = 1.0*cm;
   v.rMin             = rMin;
   v.rMax             = rMax;
   v.zSize            = zSize;
   v.x                = 0;
   v.y                = 0;
   v.z                = zPos;
-  v.electronCut      = 1.0*mm;
-  v.positronCut      = 1.0*mm;
-  v.gammaCut         = 1.0*mm;
-  v.photonCut        = 1.0*mm;
-  v.muonCut          = muonCut;
+
+  // ============================================================
+  // CUTS CORRIGIDOS: electronCut e o que controla a ionizacao
+  // ============================================================
+  v.electronCut      = 0.001 * mm;   // 1 um
+  v.positronCut      = 0.001 * mm;   // 1 um
+  v.gammaCut         = 0.01  * mm;   // 10 um
+  v.photonCut        = 0.01  * mm;   // 10 um
+  v.muonCut          = muonCut;      // nao critico para ionizacao
+
   v.isMuonChamber    = true;
   v.chamberType      = chamberType;
   v.gasMixture       = gasMixture;
   v.operatingVoltage = operatingVoltage;
   v.gasPressure      = gasPressure;
 
+  // ============================================================
+  // GEOMETRIA CORRIGIDA: gap e estrutura por tipo de camara
+  // ============================================================
+  switch (chamberType) {
+    case 0:  // MDT: tubo de Ar/CO2, diametro 29.2 mm
+      v.gapThickness  = 2 * 14.6 * mm;  // 29.2 mm
+      v.absoThickness = 0.4 * mm;       // parede de Al
+      break;
+    case 1:  // RPC: gap de 2 mm
+      v.gapThickness  = 2.0 * mm;
+      v.absoThickness = 2.0 * mm;       // placa resistiva
+      break;
+    case 2:  // TGC: gap de 2.8 mm
+      v.gapThickness  = 2.8 * mm;
+      v.absoThickness = 1.4 * mm;       // catodo/anodo
+      break;
+    default:
+      v.gapThickness  = 2.0 * mm;
+      v.absoThickness = 1.0 * mm;
+  }
+
   m_volumes.push_back(v);
 }
 
 
-
 G4VPhysicalVolume* DetectorConstruction_v1::Construct()
 {
-  // Define materials
   DefineMaterials();
-  // Define volumes
 
   G4Material* defaultMaterial  = G4Material::GetMaterial("Vacuum");
 
-  //
-  // World
-  //
-  G4VSolid* worldS = new G4Tubs( "World",     // its name
-                                 0,           // R min
-                                 6*m,         // R max
-                                 10*m,        // Z max
-                                 0*deg,       // phi_min
-                                 (!m_cutOnPhi)?(360*deg):(235*deg)      // phi_max
-                                 );
+  G4VSolid* worldS = new G4Tubs( "World",
+                                 0,
+                                 11*m,
+                                 15*m,
+                                 0*deg,
+                                 (!m_cutOnPhi)?(360*deg):(235*deg) );
 
   G4LogicalVolume* worldLV = new G4LogicalVolume(
-                                 worldS,           // its solid
-                                 defaultMaterial,  // its material
-                                 "World");         // its name
+                                 worldS,
+                                 defaultMaterial,
+                                 "World");
 
   G4VPhysicalVolume* worldPV = new G4PVPlacement(
-                 0,                // no rotation
-                 G4ThreeVector(),  // at (0,0,0)
-                 worldLV,          // its logical volume
-                 "World",          // its name
-                 0,                // its mother  volume
-                 false,            // no boolean operation
-                 0,                // copy number
-                 m_checkOverlaps);  // checking overlaps
-
-  
+                 0,
+                 G4ThreeVector(),
+                 worldLV,
+                 "World",
+                 0,
+                 false,
+                 0,
+                 m_checkOverlaps);
 
   for (auto &volume : m_volumes){
 
     MSG_INFO( "Creating Volume with name " << volume.name );
 
-    // --- Ramo aditivo: camara de muons ---
-    // Se o Volume foi criado por AddMuonChamber (isMuonChamber=true),
-    // construimos a camara (estrutura + gap de gas) e seguimos.
     if (volume.isMuonChamber) {
       auto region = GetRegion(volume.name);
       ConstructMuonChamber(worldLV, volume, defaultMaterial, region);
+
 
       G4ProductionCuts* cuts = new G4ProductionCuts();
       cuts->SetProductionCut(volume.gammaCut,    "gamma");
       cuts->SetProductionCut(volume.electronCut, "e-");
       cuts->SetProductionCut(volume.positronCut, "e+");
       cuts->SetProductionCut(volume.photonCut,   "proton");
-      cuts->SetProductionCut(volume.muonCut,     "mu-");
-      cuts->SetProductionCut(volume.muonCut,     "mu+");
       region->SetProductionCuts(cuts);
       continue;
     }
 
-    if(volume.plates == 0){ //Plates::Horizontal){
+    if(volume.plates == 0){
 
       auto region = GetRegion(volume.name);
 
-
-      // Create a region
       CreateHorizontalPlates( worldLV,
                     volume.name,
-                    defaultMaterial, // default
-                    G4Material::GetMaterial(volume.absorberMaterial), // absorber
-                    G4Material::GetMaterial(volume.gapMaterial), // gap
-                    volume.nofLayers, // ATLAS-like
-                    volume.absoThickness, // abso
-                    volume.gapThickness, // gap
-                    volume.rMin, // start radio,
-                    volume.zSize ,// z
+                    defaultMaterial,
+                    G4Material::GetMaterial(volume.absorberMaterial),
+                    G4Material::GetMaterial(volume.gapMaterial),
+                    volume.nofLayers,
+                    volume.absoThickness,
+                    volume.gapThickness,
+                    volume.rMin,
+                    volume.zSize,
                     G4ThreeVector(volume.x,volume.y,volume.z),
                     region );
+
       G4ProductionCuts* cuts=new G4ProductionCuts();
       cuts->SetProductionCut(volume.gammaCut,"gamma");
       cuts->SetProductionCut(volume.electronCut,"e-");
       cuts->SetProductionCut(volume.positronCut,"e+");
       cuts->SetProductionCut(volume.photonCut,"proton");
-      // assign cuts to the region and return succesfully
       region->SetProductionCuts(cuts);
       
-    }else if (volume.plates == 1){ //Plates::Vertical){
+    }else if (volume.plates == 1){
 
       auto region = GetRegion(volume.name);
-      // Create a region
+
       CreateVerticalPlates( worldLV,
                     volume.name,
-                    defaultMaterial, // default
-                    G4Material::GetMaterial(volume.absorberMaterial), // absorber
-                    G4Material::GetMaterial(volume.gapMaterial), // gap
-                    volume.nofLayers, // ATLAS-like
-                    volume.absoThickness, // abso
-                    volume.gapThickness, // gap
-                    volume.rMin, // start radio,
+                    defaultMaterial,
+                    G4Material::GetMaterial(volume.absorberMaterial),
+                    G4Material::GetMaterial(volume.gapMaterial),
+                    volume.nofLayers,
+                    volume.absoThickness,
+                    volume.gapThickness,
+                    volume.rMin,
                     volume.rMax,
-                    volume.zSize ,// z
+                    volume.zSize,
                     G4ThreeVector(volume.x,volume.y,volume.z),
                     region );
-
 
       G4ProductionCuts* cuts=new G4ProductionCuts();
       cuts->SetProductionCut(volume.gammaCut,"gamma");
       cuts->SetProductionCut(volume.electronCut,"e-");
       cuts->SetProductionCut(volume.positronCut,"e+");
       cuts->SetProductionCut(volume.photonCut,"proton");
-      // assign cuts to the region and return succesfully
       region->SetProductionCuts(cuts);
     
     }else{
       MSG_FATAL("Volume type is not recognize. Abort!");
     }
-  }// Loop over volumes
+  }
 
   return worldPV;
 }
@@ -286,65 +271,67 @@ G4VPhysicalVolume* DetectorConstruction_v1::Construct()
 
 void DetectorConstruction_v1::DefineMaterials()
 {
-  // Lead material defined using NIST Manager
-  G4NistManager* nistManager = G4NistManager::Instance();
-  nistManager->FindOrBuildMaterial("G4_Cu");
-  nistManager->FindOrBuildMaterial("G4_Pb");
-  nistManager->FindOrBuildMaterial("G4_Fe");
-  nistManager->FindOrBuildMaterial("G4_Al");
-  nistManager->FindOrBuildMaterial("G4_Si");
-  nistManager->FindOrBuildMaterial("G4_CESIUM_IODIDE");
-  nistManager->FindOrBuildMaterial("PLASTIC SCINTILLATOR");
-  // --- Aditivo: materiais usados pela camara de muons ---
-  nistManager->FindOrBuildMaterial("G4_Ar");
-  nistManager->FindOrBuildMaterial("G4_CO2");
-  nistManager->FindOrBuildMaterial("G4_AIR");
-  nistManager->FindOrBuildMaterial("G4_POLYSTYRENE");
-  G4Element* elH = new G4Element("Hydrogen", "H", 1., 1.0079 * g/mole);
-  G4Element* elC = new G4Element("Carbon", "C", 6., 12.011 * g/mole);
-  G4Material* scinti = new G4Material("PLASTIC SCINTILLATOR", 1.032 * g/cm3, 2); // Organic plastic scintillator, polystyrene
-  scinti->AddElement(elH, 8.5*perCent);
-  scinti->AddElement(elC, 91.5*perCent);
+    G4NistManager* nistManager = G4NistManager::Instance();
 
-  // Liquid argon material
-  G4double a;  // mass of a mole;
-  G4double z;  // z=mean number of protons;
-  G4double density;
-  // The argon by NIST Manager is a gas with a different density
-  new G4Material("liquidArgon", z=18., a= 39.95*g/mole, density= 1.390*g/cm3);
+    nistManager->FindOrBuildMaterial("G4_Cu");
+    nistManager->FindOrBuildMaterial("G4_Pb");
+    nistManager->FindOrBuildMaterial("G4_Fe");
+    nistManager->FindOrBuildMaterial("G4_Al");
+    nistManager->FindOrBuildMaterial("G4_Si");
+    nistManager->FindOrBuildMaterial("G4_CESIUM_IODIDE");
+    nistManager->FindOrBuildMaterial("G4_Ar");
+    nistManager->FindOrBuildMaterial("G4_AIR");
+    nistManager->FindOrBuildMaterial("G4_POLYSTYRENE");
 
-  // Vacuum
-  new G4Material("Vacuum", z=1., a=1.01*g/mole,density= universe_mean_density,kStateGas, 2.73*kelvin, 3.e-18*pascal);
+    G4Element* elH = new G4Element("Hydrogen", "H", 1., 1.0079 * g/mole);
+    G4Element* elC = new G4Element("Carbon",   "C", 6., 12.011 * g/mole);
+    G4Element* elF = new G4Element("Fluorine", "F", 9., 18.998 * g/mole);
+    G4Element* elO = new G4Element("Oxygen",   "O", 8., 15.999 * g/mole);
 
-  // Print materials
-  G4cout << *(G4Material::GetMaterialTable()) << G4endl;
+    if (!G4Material::GetMaterial("G4_CO2", false)) {
+        G4Material* co2 = new G4Material(
+            "G4_CO2", 1.842 * mg/cm3, 2,
+            kStateGas, 293.15 * kelvin, 1.0 * atmosphere);
+        co2->AddElement(elC, 1);
+        co2->AddElement(elO, 2);
+    }
+
+    if (!G4Material::GetMaterial("G4_C2H2F4", false)) {
+        G4Material* r134a = new G4Material(
+            "G4_C2H2F4", 4.25 * mg/cm3, 3,
+            kStateGas, 293.15 * kelvin, 1.0 * atmosphere);
+        r134a->AddElement(elC, 2);
+        r134a->AddElement(elH, 2);
+        r134a->AddElement(elF, 4);
+    }
+
+    if (!G4Material::GetMaterial("PLASTIC SCINTILLATOR", false)) {
+        G4Material* scinti = new G4Material(
+            "PLASTIC SCINTILLATOR", 1.032 * g/cm3, 2);
+        scinti->AddElement(elH, 8.5 * perCent);
+        scinti->AddElement(elC, 91.5 * perCent);
+    }
+
+    G4double a, z, density;
+
+    if (!G4Material::GetMaterial("liquidArgon", false)) {
+        new G4Material("liquidArgon", z = 18., a = 39.95 * g/mole,
+                       density = 1.390 * g/cm3);
+    }
+
+    if (!G4Material::GetMaterial("Vacuum", false)) {
+        new G4Material("Vacuum", z = 1., a = 1.01 * g/mole,
+                       density = universe_mean_density,
+                       kStateGas, 2.73 * kelvin, 3.e-18 * pascal);
+    }
+
+    G4cout << "\n========== GEANT4 MATERIAL TABLE ==========\n"
+           << *(G4Material::GetMaterialTable())
+           << "\n===========================================\n"
+           << G4endl;
 }
 
 
-
-
-
-
-
-/**
- * @brief Constructs the horizontal plates of a calorimeter module (Barrel).
- * 
- * Creates a "sandwich" structure of absorber, gap, and absorber layers arranged 
- * radially (for cylindrical/barrel geometry).
- * 
- * @param worldLV Mother logical volume.
- * @param name Unique name for the volume.
- * @param defaultMaterial Envelope material (usually Vacuum).
- * @param absorberMaterial Absorber material (e.g., Pb, Fe).
- * @param gapMaterial Active material (e.g., LAr, Scintillator).
- * @param nofLayers Number of repeating layers.
- * @param absoThickness Thickness of the absorber plate.
- * @param gapThickness Thickness of the active gap.
- * @param calorRmin Inner radius.
- * @param calorZ Total length in Z.
- * @param center_pos Center position (displacement).
- * @param region G4Region associated with this detector part.
- */
 void DetectorConstruction_v1::CreateHorizontalPlates(  G4LogicalVolume *worldLV, 
                                                     std::string name,  
                                                     G4Material *defaultMaterial,
@@ -358,7 +345,6 @@ void DetectorConstruction_v1::CreateHorizontalPlates(  G4LogicalVolume *worldLV,
                                                     const G4ThreeVector &center_pos,
                                                     G4Region *region
                                                     ) 
-
 {
   if ( ! defaultMaterial || ! absorberMaterial || ! gapMaterial ) {
     G4ExceptionDescription msg;
@@ -366,121 +352,98 @@ void DetectorConstruction_v1::CreateHorizontalPlates(  G4LogicalVolume *worldLV,
     G4Exception("DetectorConstruction_v1::DefineVolumes()", "MyCode0001", FatalException, msg);
   }
 
-
   G4double layerThickness=absoThickness+gapThickness; 
 
-  G4VSolid* calorimeterS = new G4Tubs( name,// its name
-                                 calorRmin, // R min 1700mm
-                                 calorRmin+ nofLayers*layerThickness, // R max 48cm+1700mm
-                                 calorZ/2,    // Z max, +250cm
-                                 0*deg,     // phi_min
-                                 (!m_cutOnPhi)?(360*deg):(235*deg)    // phi_max
-                                 ) ;
+  G4VSolid* calorimeterS = new G4Tubs( name,
+                                 calorRmin,
+                                 calorRmin+ nofLayers*layerThickness,
+                                 calorZ/2,
+                                 0*deg,
+                                 (!m_cutOnPhi)?(360*deg):(235*deg) );
 
-
-
-
-  G4LogicalVolume* calorLV = new G4LogicalVolume( calorimeterS,     // its solid
-                                                  defaultMaterial,  // its material
-                                                  name);   // its name
+  G4LogicalVolume* calorLV = new G4LogicalVolume( calorimeterS,
+                                                  defaultMaterial,
+                                                  name);
   new G4PVPlacement(
-                 0,                 // no rotation
-                 center_pos,        // at (0,0,0)
-                 calorLV,           // its logical volume
-                 name,              // its name
-                 worldLV,           // its mother  volume
-                 false,             // no boolean operation
-                 0,                 // copy number
-                 m_checkOverlaps);  // checking overlaps
+                 0,
+                 center_pos,
+                 calorLV,
+                 name,
+                 worldLV,
+                 false,
+                 0,
+                 m_checkOverlaps);
   
   region->AddRootLogicalVolume(calorLV);
 
-
-
   for (G4int layer=0; layer < nofLayers; ++layer){
 
-    G4VSolid* layerS = new G4Tubs(name+ "_Layer",// its name
-                                 calorRmin + layer*layerThickness,        // R min 1700mm
-                                 calorRmin + (layer+1)*layerThickness,   // R max 48cm+1700mm
-                                 calorZ/2,            // Z max, +250cm
-                                 0*deg,             // phi_min
-                                 (!m_cutOnPhi)?(360*deg):(235*deg)            // phi_max
-                                 ) ;
+    G4VSolid* layerS = new G4Tubs(name+ "_Layer",
+                                 calorRmin + layer*layerThickness,
+                                 calorRmin + (layer+1)*layerThickness,
+                                 calorZ/2,
+                                 0*deg,
+                                 (!m_cutOnPhi)?(360*deg):(235*deg) );
 
     G4LogicalVolume* layerLV = new G4LogicalVolume(
-                                                  layerS,           // its solid
-                                                  defaultMaterial,  // its material
-                                                  name+"_Layer");   // its name
-
+                                                  layerS,
+                                                  defaultMaterial,
+                                                  name+"_Layer");
 
     new G4PVPlacement(
-                 0,                 // no rotation
+                 0,
                  G4ThreeVector(0,0,0),
-                 //center_pos,        // at (0,0,0)
-                 layerLV,           // its logical volume
-                 name+"_Layer",     // its name
-                 calorLV,           // its mother  volume
-                 false,             // no boolean operation
-                 0,                 // copy number
-                 m_checkOverlaps);  // checking overlaps
-    
+                 layerLV,
+                 name+"_Layer",
+                 calorLV,
+                 false,
+                 0,
+                 m_checkOverlaps);
 
-
-    G4VSolid* absorverS = new G4Tubs( name+"_Abso",// its name
-                                 calorRmin + layer*(absoThickness + gapThickness) ,     // R min 1700mm
-                                 calorRmin + layer*(absoThickness + gapThickness) + absoThickness,   // R max 48cm+1700mm
-                                 calorZ/2,          // Z max, +250cm
-                                 0*deg,                 // phi_min
-                                 (!m_cutOnPhi)?(360*deg):(235*deg)             // phi_max
-                                 ) ;
+    G4VSolid* absorverS = new G4Tubs( name+"_Abso",
+                                 calorRmin + layer*(absoThickness + gapThickness) ,
+                                 calorRmin + layer*(absoThickness + gapThickness) + absoThickness,
+                                 calorZ/2,
+                                 0*deg,
+                                 (!m_cutOnPhi)?(360*deg):(235*deg) );
 
     G4LogicalVolume* absorverLV = new G4LogicalVolume(
-                                                  absorverS,           // its solid
-                                                  absorberMaterial,  // its material
-                                                  name+"_Abso");         // its name
-
+                                                  absorverS,
+                                                  absorberMaterial,
+                                                  name+"_Abso");
 
     new G4PVPlacement(
-                 0,                 // no rotation
+                 0,
                  G4ThreeVector(0,0,0),
-                 //center_pos,        // at (0,0,0)
-                 absorverLV,        // its logical volume
-                 name+"_Abso",      // its name
-                 layerLV,           // its mother  volume
-                 false,             // no boolean operation
-                 0,                 // copy number
-                 m_checkOverlaps);  // checking overlaps
+                 absorverLV,
+                 name+"_Abso",
+                 layerLV,
+                 false,
+                 0,
+                 m_checkOverlaps);
 
-
-
-
-    G4VSolid* gapS = new G4Tubs( name+"_Gap",// its name
-                                 calorRmin + layer*(absoThickness + gapThickness) + absoThickness,   // R max 48cm+1700mm
-                                 calorRmin + (layer+1)*(absoThickness + gapThickness),   // R max 48cm+1700mm
-                                 calorZ/2,          // Z max, +250cm
-                                 0*deg,           // phi_min
-                                 (!m_cutOnPhi)?(360*deg):(235*deg)          // phi_max
-        ); 
+    G4VSolid* gapS = new G4Tubs( name+"_Gap",
+                                 calorRmin + layer*(absoThickness + gapThickness) + absoThickness,
+                                 calorRmin + (layer+1)*(absoThickness + gapThickness),
+                                 calorZ/2,
+                                 0*deg,
+                                 (!m_cutOnPhi)?(360*deg):(235*deg) ); 
 
     G4LogicalVolume* gapLV = new G4LogicalVolume(
-                                                  gapS,           // its solid
-                                                  gapMaterial,  // its material
-                                                  name+"_Gap");         // its name
-
+                                                  gapS,
+                                                  gapMaterial,
+                                                  name+"_Gap");
 
     new G4PVPlacement(
-                 0,                 // no rotation
+                 0,
                  G4ThreeVector(0,0,0),
-                 //center_pos,        // at (0,0,0)
-                 gapLV,             // its logical volume
-                 name+"_Gap",       // its name
-                 layerLV,           // its mother  volume
-                 false,             // no boolean operation
-                 0,                 // copy number
-                 m_checkOverlaps);  // checking overlaps
-
-
-  }// Loop over calorimeter layers
+                 gapLV,
+                 name+"_Gap",
+                 layerLV,
+                 false,
+                 0,
+                 m_checkOverlaps);
+  }
 }
 
 
@@ -510,28 +473,26 @@ void DetectorConstruction_v1::CreateVerticalPlates(  G4LogicalVolume *worldLV,
 
   G4double layerThickness=absoThickness+gapThickness; 
 
-  G4VSolid* calorimeterS = new G4Tubs( name,// its name
+  G4VSolid* calorimeterS = new G4Tubs( name,
                                  calorRmin,
                                  calorRmax,
-                                 calorZ/2, // Size in z
-                                 0*deg,     // phi_min
-                                 (!m_cutOnPhi)?(360*deg):(235*deg)    // phi_max
-                                 ) ;
+                                 calorZ/2,
+                                 0*deg,
+                                 (!m_cutOnPhi)?(360*deg):(235*deg) );
 
-  G4LogicalVolume* calorLV = new G4LogicalVolume( calorimeterS,     // its solid
-                                                  defaultMaterial,  // its material
-                                                  name);   // its name
-
+  G4LogicalVolume* calorLV = new G4LogicalVolume( calorimeterS,
+                                                  defaultMaterial,
+                                                  name);
 
   new G4PVPlacement(
-                 0,                 // no rotation
-                 center_pos,        // at (0,0,0)
-                 calorLV,           // its logical volume
-                 name,              // its name
-                 worldLV,           // its mother  volume
-                 false,             // no boolean operation
-                 0,                 // copy number
-                 m_checkOverlaps);  // checking overlaps
+                 0,
+                 center_pos,
+                 calorLV,
+                 name,
+                 worldLV,
+                 false,
+                 0,
+                 m_checkOverlaps);
   
   region->AddRootLogicalVolume(calorLV);
 
@@ -540,113 +501,92 @@ void DetectorConstruction_v1::CreateVerticalPlates(  G4LogicalVolume *worldLV,
       continue;
     }
 
-    G4VSolid* layerS = new G4Tubs(name+ "_Layer",// its name
+    G4VSolid* layerS = new G4Tubs(name+ "_Layer",
                                  calorRmin,
                                  calorRmax,
                                  layerThickness/2,
                                  0*deg,
-                                 (!m_cutOnPhi)?(360*deg):(235*deg)
-                                 );
+                                 (!m_cutOnPhi)?(360*deg):(235*deg) );
 
     G4LogicalVolume* layerLV = new G4LogicalVolume(
-                                                  layerS,           // its solid
-                                                  defaultMaterial,  // its material
-                                                  name+"_Layer");   // its name
+                                                  layerS,
+                                                  defaultMaterial,
+                                                  name+"_Layer");
 
     const auto layerLVCenter = G4ThreeVector(0,0,
                    ((invertOrder)?-1.:+1.) * 
                    (sign(-layer)*((evenNofLayers)?0.5:0.) + (layer))
-                   *layerThickness // center at with respect to the calorimeter center
+                   *layerThickness
                  );
 
-    //G4cout << "Creating layer " << layer << " for: " << layerLVCenter << ". Size: " << layerThickness << std::endl;
-
     new G4PVPlacement(
-                 0,                 // no rotation
-                 layerLVCenter,     // center
-                 layerLV,           // its logical volume
-                 name+"_Layer",     // its name
-                 calorLV,           // its mother  volume
-                 false,             // no boolean operation
-                 0,                 // copy number
-                 m_checkOverlaps);  // checking overlaps
+                 0,
+                 layerLVCenter,
+                 layerLV,
+                 name+"_Layer",
+                 calorLV,
+                 false,
+                 0,
+                 m_checkOverlaps);
 
-
-
-    G4VSolid* absorverS = new G4Tubs( name+"_Abso",// its name
-                                 calorRmin,     // R min
-                                 calorRmax,     // R max
-                                 absoThickness/2,  // 
-                                 0*deg,         // phi_min
-                                 (!m_cutOnPhi)?(360*deg):(235*deg)        // phi_max
-                                 ) ;
+    G4VSolid* absorverS = new G4Tubs( name+"_Abso",
+                                 calorRmin,
+                                 calorRmax,
+                                 absoThickness/2,
+                                 0*deg,
+                                 (!m_cutOnPhi)?(360*deg):(235*deg) );
 
     G4LogicalVolume* absorverLV = new G4LogicalVolume(
-                                                  absorverS,           // its solid
-                                                  absorberMaterial,  // its material
-                                                  name+"_Abso");         // its name
-
+                                                  absorverS,
+                                                  absorberMaterial,
+                                                  name+"_Abso");
 
     new G4PVPlacement(
-                 0,                 // no rotation
+                 0,
                  G4ThreeVector(0,0,
                    ((invertOrder)?-1.:+1) * 
                    layerThickness/2
                    + ((invertOrder)?+1.:-1)/2 * 
                     absoThickness
                  ),
-                 absorverLV,        // its logical volume
-                 name+"_Abso",      // its name
-                 layerLV,           // its mother  volume
-                 false,             // no boolean operation
-                 0,                 // copy number
-                 m_checkOverlaps);  // checking overlaps
+                 absorverLV,
+                 name+"_Abso",
+                 layerLV,
+                 false,
+                 0,
+                 m_checkOverlaps);
 
-
-
-
-    G4VSolid* gapS = new G4Tubs( name+"_Gap",// its name
-                                 calorRmin,   // R max
-                                 calorRmax,   // R max
-                                 gapThickness/2,   // Z max,
-                                 0*deg,           // phi_min
-                                 (!m_cutOnPhi)?(360*deg):(235*deg)          // phi_max
-        ); 
+    G4VSolid* gapS = new G4Tubs( name+"_Gap",
+                                 calorRmin,
+                                 calorRmax,
+                                 gapThickness/2,
+                                 0*deg,
+                                 (!m_cutOnPhi)?(360*deg):(235*deg) ); 
 
     G4LogicalVolume* gapLV = new G4LogicalVolume(
-                                                  gapS,           // its solid
-                                                  gapMaterial,  // its material
-                                                  name+"_Gap");         // its name
-
+                                                  gapS,
+                                                  gapMaterial,
+                                                  name+"_Gap");
 
     new G4PVPlacement(
-                 0,                 // no rotation
+                 0,
                  G4ThreeVector(0,0,
                    ((invertOrder)?+1.:-1) * 
                    layerThickness/2
                    + ((invertOrder)?-1.:+1) * 
                     gapThickness/2
                  ),
-                 gapLV,             // its logical volume
-                 name+"_Gap",       // its name
-                 layerLV,           // its mother  volume
-                 false,             // no boolean operation
-                 0,                 // copy number
-                 m_checkOverlaps);  // checking overlaps
-  }// Loop over calorimeter layers
-
+                 gapLV,
+                 name+"_Gap",
+                 layerLV,
+                 false,
+                 0,
+                 m_checkOverlaps);
+  }
 }
 
 
-// --- Aditivo: construcao da camara de muons ---
-//
-// Estrutura (parede) + gap de gas. Recebe o Volume com isMuonChamber=true
-// e cria:
-//   <name>            : G4Tubs envelope (defaultMaterial)
-//   <name>_Structure  : G4Tubs de "absorberMaterial" (parede)
-//   <name>_Gas        : G4Tubs de "gasMixture" (gap sensivel)
-// A G4Region <name> e registrada como root do volume-mae.
-//
+
 void DetectorConstruction_v1::ConstructMuonChamber( G4LogicalVolume *worldLV,
                                                     const Volume &volume,
                                                     G4Material *defaultMaterial,
@@ -732,7 +672,11 @@ void DetectorConstruction_v1::ConstructMuonChamber( G4LogicalVolume *worldLV,
                      0,
                      m_checkOverlaps );
 
-  // Vis attributes (opcional, por tipo de camara)
+
+  G4UserLimits* gasLimits = new G4UserLimits(0.05 * mm);
+  gasLV->SetUserLimits(gasLimits);
+
+  // Vis attributes
   G4VisAttributes* vis = nullptr;
   switch (volume.chamberType) {
     case 0: vis = new G4VisAttributes(G4Colour(0.0, 1.0, 0.0)); break; // MDT
@@ -749,23 +693,14 @@ void DetectorConstruction_v1::ConstructSDandField(){
 
   if (m_useMagneticField){
     MSG_INFO("Set magnetic field")
-    // Create global magnetic field messenger.
-    // Uniform magnetic field is then created automatically if
-    // the field value is not zero.
     G4ThreeVector fieldValue(0.0 , 0.0, 2*tesla);
     m_magFieldMessenger = new G4GlobalMagFieldMessenger(fieldValue);
     m_magFieldMessenger->SetVerboseLevel(1);
-
-    // Register the field messenger for deleting
     G4AutoDelete::Register(m_magFieldMessenger); 
   }
 
-  // --- Aditivo: camara de muons ---
-  // Stub: registra a intencao. A SD C++ (MuonSensitiveDetector) ainda nao
-  // esta integrada neste repositorio; ver relatorio.
   SetupMuonSensitiveDetectors();
 }
-
 
 
 void DetectorConstruction_v1::SetupMuonSensitiveDetectors() {
@@ -776,7 +711,6 @@ void DetectorConstruction_v1::SetupMuonSensitiveDetectors() {
              << " (SetupMuonSensitiveDetectors: SD C++ ainda nao integrada)");
   }
 }
-
 
 
 G4Region* DetectorConstruction_v1::GetRegion( std::string name ){

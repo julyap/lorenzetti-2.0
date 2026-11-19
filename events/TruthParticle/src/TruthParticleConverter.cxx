@@ -1,11 +1,8 @@
-
+// TruthParticleConverter.cxx
 #include "TruthParticle/TruthParticleContainer.h"
 #include "TruthParticle/TruthParticleConverter.h"
 
-
 using namespace xAOD;
-
-
 
 bool TruthParticleConverter::convert( const TruthParticle *truth, TruthParticle_t &truth_t ) const
 {
@@ -22,12 +19,31 @@ bool TruthParticleConverter::convert( const TruthParticle *truth, TruthParticle_
     truth_t.vx     = truth->vx();
     truth_t.vy     = truth->vy();
     truth_t.vz     = truth->vz();
+    
+    // ============================================================
+    // INICIALIZAR NOVAS VARIÁVEIS COM VALORES PADRÃO (0 ou -1)
+    // ============================================================
+    truth_t.pair_pdg1 = 0;
+    truth_t.pair_pdg2 = 0;
+    truth_t.pair_pt1 = 0;
+    truth_t.pair_pt2 = 0;
+    truth_t.pair_eta1 = 0;
+    truth_t.pair_eta2 = 0;
+    truth_t.pair_phi1 = 0;
+    truth_t.pair_phi2 = 0;
+    truth_t.pair_delta_eta = 0;
+    truth_t.pair_delta_phi = 0;
+    truth_t.pair_delta_R = 0;
+    truth_t.pair_mass = 0;
+    truth_t.pair_pt = 0;
+    truth_t.pair_eta = 0;
+    truth_t.pair_phi = 0;
+    truth_t.pair_seedid = -1;
 
     return true;
   }
   return false;
 }
-
 
 bool TruthParticleConverter::convert( const TruthParticle_t &truth_t , TruthParticle *&truth ) const
 {
@@ -46,4 +62,3 @@ bool TruthParticleConverter::convert( const TruthParticle_t &truth_t , TruthPart
                                    truth_t.vz);                                  
   return true;
 }
-

@@ -11,26 +11,15 @@
 #include "GaugiKernel/macros.h"
 
 #include "CaloHit/CaloHitContainer.h"
+#include "MuonHit/MuonHitContainer.h"
 #include "EventInfo/EventInfoContainer.h"
 #include "TruthParticle/TruthParticleContainer.h"
 
 #include "TTree.h"
 #include "TFile.h"
 
-
-
 namespace Gaugi {
 
-/**
- * @class RootStreamHITReader
- * @brief Algorithm to read Hit-level data from a ROOT file.
- *
- * deserializes Hits, TruthParticles, and Seeds from a persistent ROOT format
- * back into the transient Event Store (StoreGate) for further processing (e.g., Digitization).
- *
- * --- Aditivo: muon ---
- * Also reads muon chamber hits (MuonHitContainer) when EnableMuonInput is true.
- */
 class RootStreamHITReader : public Algorithm
 {
 public:
@@ -53,22 +42,17 @@ private:
   template <class T>
   void InitBranch(TTree* fChain, std::string branch_name, T* param) const;
 
-  // --- Oficiais: calorimetro ---
-  std::string m_hitsKey;
-  std::string m_caloHitsKey;
-
-  // --- Aditivo: muon ---
-  std::string m_muonHitsKey;
-  bool m_enableMuonInput;
-
-  // --- Oficiais (comuns) ---
+  // Configurable properties
   std::string m_inputFile;
   std::string m_eventKey;
   std::string m_truthKey;
+  std::string m_caloHitsKey;   // Chave específica para CaloHits
+  std::string m_muonHitsKey;   // Chave específica para MuonHits
   std::string m_seedsKey;
-
+  
   std::string m_ntupleName;
   int m_outputLevel;
+  bool m_enableMuonInput;
 };
 
 } // namespace Gaugi

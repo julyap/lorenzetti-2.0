@@ -1,6 +1,5 @@
 // ============================================================================
 // Arquivo: MuonHit/MuonHit/MuonHit.h
-// Autora: Julya Pacheco Ferreira
 // Descrição: Declaração da classe xAOD::MuonHit, que representa um hit
 //            individual de múon no EDM. Herda de Gaugi::EDM e armazena:
 //              - Posição e dimensões: x, y, z, dx, dy;

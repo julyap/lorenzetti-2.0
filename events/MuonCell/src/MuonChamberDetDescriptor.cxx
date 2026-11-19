@@ -1,6 +1,5 @@
 // ============================================================================
 // Arquivo: src/MuonChamberDetDescriptor.cxx
-// Autora: Julya Pacheco Ferreira
 // Descrição: Implementação da classe xAOD::MuonChamberDescriptor, que
 //            representa o "descriptor" geométrico/físico de uma célula de
 //            múon. Armazena posição/dimensões, identificação (hash,

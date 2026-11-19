@@ -1,6 +1,5 @@
 // ============================================================================
 // Arquivo: MuonCell/MuonEnumeration.h
-// Autora: Julya Pacheco Ferreira
 // Descrição: Define os enums de enumeração usados pelo subsistema de câmara
 //            de múon:
 //              - MuonChamberType: MDT, RPC, TGC;

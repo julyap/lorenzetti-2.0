@@ -59,7 +59,7 @@ RootStreamESDMaker::RootStreamESDMaker( std::string name ) :
   declareProperty( "PhiWindow"          , m_phiWindow=0.6                   );
   declareProperty( "OnlyRoI"            , m_onlyRoI=true                    );
 
-  // --- Aditivo: aliases da sua versao ---
+  // --- Aditivo: aliases
   declareProperty( "InputCaloCellsKey"        , m_inputCaloCellsKey=""      );
   declareProperty( "InputTruthCaloCellsKey"   , m_inputTruthCaloCellsKey="" );
   declareProperty( "OutputCaloCellsKey"       , m_outputCaloCellsKey=""     );

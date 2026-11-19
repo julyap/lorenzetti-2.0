@@ -1,6 +1,5 @@
 // ============================================================================
 // Arquivo: src/MuonCell.cxx
-// Autora: Julya Pacheco Ferreira
 // Descrição: Implementação dos métodos da classe xAOD::MuonChamberCell.
 //            - Construtor parametrizado: inicializa posição/dimensões e zera
 //              todas as variáveis dinâmicas (sinal, tempo, flags, etc.).

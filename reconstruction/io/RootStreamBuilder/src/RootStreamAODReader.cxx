@@ -388,7 +388,7 @@ StatusCode RootStreamAODReader::deserialize(int evt, EventContext &ctx) const
 
       xAOD::MuonChamberConverter cell_cnv;
       for (auto &cell_t : *collection_muon_cells) {
-        xAOD::MuonChamber *cell = nullptr;
+        xAOD::MuonChamberCell *cell = nullptr;
         cell_cnv.convert(cell_t, cell);
         if (descriptor_links.count(cell_t.descriptor_link)) {
           cell->setDescriptor(descriptor_links[cell_t.descriptor_link]);

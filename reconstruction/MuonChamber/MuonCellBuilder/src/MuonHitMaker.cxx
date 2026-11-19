@@ -1,6 +1,5 @@
 // ============================================================================
 // Arquivo: MuonHitMaker.cxx
-// Autora: Julya Pacheco Ferreira
 // Descrição: Implementação do algoritmo MuonHitMaker. Cria a coleção de
 //            hits de muon (MuonHitCollection) numa grade cartesiana X/Y/Z
 //            configurada, restrita a uma faixa radial (RMin/RMax) e a uma

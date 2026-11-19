@@ -1,6 +1,5 @@
 // ============================================================================
 // Arquivo: MuonCluster/src/MuonClusterConverter.cxx
-// Autora: Julya Pacheco Ferreira
 // Descrição: Implementação da classe xAOD::MuonClusterConverter.
 //            - convert(const MuonCluster*, MuonCluster_t&): serializa as
 //              propriedades básicas, qualidade da track e energia para a
@@ -12,7 +11,7 @@
 //              criando um novo MuonCluster com as propriedades básicas.
 //            - resolveCells(...): reconstrói os links de células e seed
 //              a partir dos índices persistidos.
-# ============================================================================
+// ============================================================================
 
 #include "MuonCluster/MuonClusterConverter.h"
 #include "MuonCluster/MuonCluster.h"

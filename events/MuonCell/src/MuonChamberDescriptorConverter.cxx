@@ -1,6 +1,5 @@
 // ============================================================================
 // Arquivo: src/MuonChamberDescriptorConverter.cxx
-// Autora: Julya Pacheco Ferreira
 // Descrição: Implementação da classe xAOD::MuonChamberDescriptorConverter,
 //            responsável por converter entre:
 //              - MuonChamberDescriptor* → MuonChamberDescriptor_t

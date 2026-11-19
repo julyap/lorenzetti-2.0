@@ -1,6 +1,5 @@
 // ============================================================================
 // Arquivo: MuonPileupMerge.cxx
-// Autora: Julya Pacheco Ferreira
 // Descrição: Implementação do algoritmo MuonPileupMerge. Abre um arquivo
 //            ROOT de pileup (InputFile), lê a ntuple (NtupleName) com as
 //            coleções de hits (InputHitsKey) e de EventInfo (InputEventKey),

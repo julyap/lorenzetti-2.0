@@ -1,6 +1,5 @@
 // ============================================================================
 // Arquivo: MuonClusterMaker.h
-// Autora: Julya Pacheco Ferreira
 // Descrição: Declaração da classe MuonClusterMaker (implementação em
 //            MuonClusterMaker.cxx). Define a interface do algoritmo de
 //            clustering de células de muon, incluindo as funções de

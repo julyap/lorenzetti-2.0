@@ -1,6 +1,5 @@
 // ============================================================================
 // Arquivo: MuonShapes.cxx
-// Autora: Julya Pacheco Ferreira
 // Descrição: Implementação do MuonShapes (AlgTool). Recebe um MuonCluster
 //            e calcula:
 //              - variáveis de tracking (charge, pT, p, d0, z0, chi2 de

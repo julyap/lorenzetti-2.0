@@ -1,6 +1,5 @@
 // ============================================================================
 // Arquivo: src/MuonChamberConverter.cxx
-// Autora: Julya Pacheco Ferreira
 // Descrição: Implementação da classe xAOD::MuonChamberConverter, responsável
 //            por converter entre:
 //              - MuonChamberCell* ↔ MuonChamber_t (serialização/desserialização

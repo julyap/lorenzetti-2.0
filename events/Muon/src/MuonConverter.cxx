@@ -1,6 +1,5 @@
 // ============================================================================
 // Arquivo: MuonConverter.cxx
-// Autora: Julya Pacheco Ferreira
 // Descrição: Implementação dos métodos de conversão da classe
 //            xAOD::MuonConverter.
 //            - convert(const Muon*, Muon_t&): copia todas as variáveis do

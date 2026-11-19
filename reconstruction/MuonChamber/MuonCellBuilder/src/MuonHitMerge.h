@@ -1,6 +1,5 @@
 // ============================================================================
 // Arquivo: MuonHitMerge.h
-// Autora: Julya Pacheco Ferreira
 // Descrição: Declaração da classe MuonHitMerge (implementação em
 //            MuonHitMerge.cxx). Define a interface do algoritmo que funde
 //            múltiplas coleções de hits de muon em uma única coleção.

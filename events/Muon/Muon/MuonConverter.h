@@ -1,6 +1,5 @@
 // ============================================================================
 // Arquivo: MuonConverter.h
-// Autora: Julya Pacheco Ferreira
 // Descrição: Define a struct POD (Plain Old Data) xAOD::Muon_t, usada para
 //            persistir múons em arquivos ROOT (TTree) com campos primitivos,
 //            e a classe MuonConverter, responsável por converter entre a

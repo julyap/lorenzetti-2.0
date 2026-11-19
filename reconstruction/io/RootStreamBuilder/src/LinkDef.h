@@ -14,15 +14,19 @@
 #pragma link off all classes;
 #pragma link off all functions;
 #pragma link C++ nestedclass;
+#pragma link C++ namespace Gaugi;
 
 #pragma link C++ class RootStreamHITMaker+;
 #pragma link C++ class RootStreamAODMaker+;
 #pragma link C++ class RootStreamESDMaker+;
 #pragma link C++ class RootStreamNtupleMaker+;
-
 #pragma link C++ class RootStreamHITReader+;
+#pragma link C++ class Gaugi::RootStreamHITMaker+;
+#pragma link C++ class Gaugi::RootStreamHITReader+;
 #pragma link C++ class RootStreamESDReader+;
 #pragma link C++ class RootStreamAODReader+;
 
 
 #endif
+
+

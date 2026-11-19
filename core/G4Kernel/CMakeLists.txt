@@ -12,7 +12,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../GaugiKernel)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../events/TruthParticle)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../events/Seed)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../events/EventInfo)
-
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../geometry/src)
 ROOT_GENERATE_DICTIONARY(G4KernelDict ${HEADERS} LINKDEF ${CMAKE_CURRENT_SOURCE_DIR}/src/LinkDef.h  MODULE G4Kernel)
                                       
 add_library(G4Kernel  OBJECT ${SOURCES} G4KernelDict.cxx)

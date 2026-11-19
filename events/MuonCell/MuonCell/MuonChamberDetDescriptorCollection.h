@@ -1,6 +1,5 @@
 // ============================================================================
 // Arquivo: MuonCell/MuonChamberDetDescriptorCollection.h
-// Autora: Julya Pacheco Ferreira
 // Descrição: Define o container padrão de descriptors de câmara de múon
 //            (xAOD::MuonChamberDetDescriptorCollection), que herda de
 //            SG::Collection<xAOD::MuonChamberDescriptor>. Esse container é

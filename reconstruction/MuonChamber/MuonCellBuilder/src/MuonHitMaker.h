@@ -1,6 +1,5 @@
 // ============================================================================
 // Arquivo: MuonHitMaker.h
-// Autora: Julya Pacheco Ferreira
 // Descrição: Declaração da classe MuonHitMaker (implementação em
 //            MuonHitMaker.cxx). Define a interface do algoritmo de criação
 //            de hits de muon a partir dos steps do Geant4 e dos métodos

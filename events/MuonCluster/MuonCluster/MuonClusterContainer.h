@@ -1,6 +1,5 @@
 // ============================================================================
 // Arquivo: MuonCluster/MuonCluster/MuonClusterContainer.h
-// Autora: Julya Pacheco Ferreira
 // Descrição: Define o typedef xAOD::MuonClusterContainer como um
 //            SG::DataVector<xAOD::MuonCluster>, ou seja, um container padrão
 //            de clusters de múon do EDM. Esse typedef é usado pelo StoreGate

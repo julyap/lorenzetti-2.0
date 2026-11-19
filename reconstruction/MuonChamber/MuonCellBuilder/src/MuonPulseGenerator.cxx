@@ -1,6 +1,5 @@
 // ============================================================================
 // Arquivo: MuonPulseGenerator.cxx
-// Autora: Julya Pacheco Ferreira
 // Descrição: Implementação do MuonPulseGenerator (AlgTool). Gera a forma
 //            de onda amostrada de uma célula de muon (MuonChamberDescriptor)
 //            com base:

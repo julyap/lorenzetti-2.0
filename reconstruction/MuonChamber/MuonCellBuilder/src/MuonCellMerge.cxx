@@ -1,6 +1,5 @@
 // ============================================================================
 // Arquivo: MuonCellMerge.cxx
-// Autora: Julya Pacheco Ferreira
 // Descrição: Implementação do algoritmo MuonCellMerge. Lê todas as coleções
 //            de descriptors de células de muon (MuonChamberDetDescriptorCollection)
 //            produzidas pelos múltiplos MuonCellMaker e as funde em:

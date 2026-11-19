@@ -1,0 +1,1738 @@
+  Edep MeV = 5.5912e-25
+  Global time ns = 24.355
+  BCID start = -21
+  BCID end = 21
+  bc_duration = 35
+  m_time size = 43
+  m_time first = -752.5
+  m_time last = 717.5
+  find(t) = 23
+
+[MUON TIME DEBUG]
+  Detector = 2
+  Region = 2
+  Sampling = 6
+  Edep MeV = 1.21016e-22
+  Global time ns = 24.4065
+  BCID start = -21
+  BCID end = 21
+  bc_duration = 35
+  m_time size = 43
+  m_time first = -752.5
+  m_time last = 717.5
+  find(t) = 23
+
+[MUON TIME DEBUG]
+  Detector = 0
+  Region = 2
+  Sampling = 2
+  Edep MeV = 3.86234e-24
+  Global time ns = 35.5489
+  BCID start = -21
+  BCID end = 21
+  bc_duration = 40
+  m_time size = 43
+  m_time first = -860
+  m_time last = 820
+  find(t) = 23
+
+[MUON TIME DEBUG]
+  Detector = 0
+  Region = 2
+  Sampling = 2
+  Edep MeV = 3.37679e-24
+  Global time ns = 35.9045
+  BCID start = -21
+  BCID end = 21
+  bc_duration = 40
+  m_time size = 43
+  m_time first = -860
+  m_time last = 820
+  find(t) = 23
+
+[MUON TIME DEBUG]
+  Detector = 2
+  Region = 2
+  Sampling = 7
+  Edep MeV = 4.1934e-25
+  Global time ns = 36.2154
+  BCID start = -21
+  BCID end = 21
+  bc_duration = 40
+  m_time size = 43
+  m_time first = -860
+  m_time last = 820
+  find(t) = 23
+
+[MUON TIME DEBUG]
+  Detector = 2
+  Region = 2
+  Sampling = 7
+  Edep MeV = 1.21086e-22
+  Global time ns = 36.2541
+  BCID start = -21
+  BCID end = 21
+  bc_duration = 40
+  m_time size = 43
+  m_time first = -860
+  m_time last = 820
+  find(t) = 23
+
+[MUON TIME DEBUG]
+  Detector = 0
+  Region = 2
+  Sampling = 3
+  Edep MeV = 3.86234e-24
+  Global time ns = 47.4029
+  BCID start = -21
+  BCID end = 21
+  bc_duration = 50
+  m_time size = 43
+  m_time first = -1075
+  m_time last = 1025
+  find(t) = 23
+
+[MUON TIME DEBUG]
+  Detector = 0
+  Region = 2
+  Sampling = 3
+  Edep MeV = 3.48531e-23
+  Global time ns = 47.7585
+  BCID start = -21
+  BCID end = 21
+  bc_duration = 50
+  m_time size = 43
+  m_time first = -1075
+  m_time last = 1025
+  find(t) = 23
+[0mCxx.RunSequence                          INFO  (G4WT0) RunSequence::EndOfEvent...[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) ===========================================[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) MUON HIT MERGE - ESTATÍSTICAS DETALHADAS[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) ===========================================[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) Total de hits processados: 392704[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) Hits com energia > 0: 0[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) Hits sem energia (0): 392704[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) -------------------------------------------[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) Energia total: 0 MeV[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) -------------------------------------------[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) ===========================================[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) Container size: 392704[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) Hits with valid edep map: 0[0m
+[0mCxx.RunSequence                          INFO  (G4WT0) Event loop was completed with 400161 G4Steps and 10 seconds.[0m
+G4WT0 > --> Event 1 starts with initial seeds (55301888,97160606).
+[0mCxx.PrimaryGeneratorAction               INFO  (G4WT0) GeneratePrimaryVertex...[0m
+[0mCxx.EventReader                          INFO  (G4WT0) Get event (EventReader) with number 1 and EventNumber 1[0m
+[0mCxx.EventReader                          INFO  (G4WT0) Seed 0 in eta = 1.92754, phi = -2.07959[0m
+[0mCxx.EventReader                          INFO  (G4WT0) RunNumber        : 0[0m
+[0mCxx.EventReader                          INFO  (G4WT0) EventNumber      : 1[0m
+[0mCxx.EventReader                          INFO  (G4WT0) Avgmu            : 0[0m
+[0mCxx.EventReader                          INFO  (G4WT0) Total Mu         : 0[0m
+[0mCxx.EventReader                          INFO  (G4WT0) Number of seeds  : 1[0m
+[0mCxx.RunSequence                          INFO  (G4WT0) RunSequence::BeginOfEvent...[0m
+
+[MUON TIME DEBUG]
+  Detector = 0
+  Region = 1
+  Sampling = 1
+  Edep MeV = 4.73175e-24
+  Global time ns = 25.62
+  BCID start = -21
+  BCID end = 21
+  bc_duration = 35
+  m_time size = 43
+  m_time first = -752.5
+  m_time last = 717.5
+  find(t) = 23
+
+[MUON TIME DEBUG]
+  Detector = 0
+  Region = 1
+  Sampling = 1
+  Edep MeV = 1.14153e-22
+  Global time ns = 26.2306
+  BCID start = -21
+  BCID end = 21
+  bc_duration = 35
+  m_time size = 43
+  m_time first = -752.5
+  m_time last = 717.5
+  find(t) = 23
+
+[MUON TIME DEBUG]
+  Detector = 0
+  Region = 1
+  Sampling = 2
+  Edep MeV = 3.54881e-24
+  Global time ns = 40.9602
+  BCID start = -21
+  BCID end = 21
+  bc_duration = 40
+  m_time size = 43
+  m_time first = -860
+  m_time last = 820
+  find(t) = 23
+
+[MUON TIME DEBUG]
+  Detector = 0
+  Region = 1
+  Sampling = 2
+  Edep MeV = 3.10267e-24
+  Global time ns = 41.4181
+  BCID start = -21
+  BCID end = 21
+  bc_duration = 40
+  m_time size = 43
+  m_time first = -860
+  m_time last = 820
+  find(t) = 23
+
+[MUON TIME DEBUG]
+  Detector = 2
+  Region = 1
+  Sampling = 7
+  Edep MeV = 3.85299e-25
+  Global time ns = 41.8185
+  BCID start = -21
+  BCID end = 21
+  bc_duration = 40
+  m_time size = 43
+  m_time first = -860
+  m_time last = 820
+  find(t) = 23
+
+[MUON TIME DEBUG]
+  Detector = 2
+  Region = 1
+  Sampling = 7
+  Edep MeV = 1.11257e-22
+  Global time ns = 41.8682
+  BCID start = -21
+  BCID end = 21
+  bc_duration = 40
+  m_time size = 43
+  m_time first = -860
+  m_time last = 820
+  find(t) = 23
+
+[MUON TIME DEBUG]
+  Detector = 0
+  Region = 1
+  Sampling = 3
+  Edep MeV = 3.54881e-24
+  Global time ns = 56.2241
+  BCID start = -21
+  BCID end = 21
+  bc_duration = 50
+  m_time size = 43
+  m_time first = -1075
+  m_time last = 1025
+  find(t) = 23
+
+[MUON TIME DEBUG]
+  Detector = 0
+  Region = 1
+  Sampling = 3
+  Edep MeV = 3.20238e-23
+  Global time ns = 56.682
+  BCID start = -21
+  BCID end = 21
+  bc_duration = 50
+  m_time size = 43
+  m_time first = -1075
+  m_time last = 1025
+  find(t) = 23
+
+[MUON TIME DEBUG]
+  Detector = 0
+  Region = 1
+  Sampling = 1
+  Edep MeV = 5.03005e-24
+  Global time ns = 24.0507
+  BCID start = -21
+  BCID end = 21
+  bc_duration = 35
+  m_time size = 43
+  m_time first = -752.5
+  m_time last = 717.5
+  find(t) = 23
+
+[MUON TIME DEBUG]
+  Detector = 0
+  Region = 1
+  Sampling = 1
+  Edep MeV = 2.60125e-24
+  Global time ns = 24.5298
+  BCID start = -21
+  BCID end = 21
+  bc_duration = 35
+  m_time size = 43
+  m_time first = -752.5
+  m_time last = 717.5
+  find(t) = 23
+
+[MUON TIME DEBUG]
+  Detector = 2
+  Region = 1
+  Sampling = 6
+  Edep MeV = 5.46119e-25
+  Global time ns = 24.7776
+  BCID start = -21
+  BCID end = 21
+  bc_duration = 35
+  m_time size = 43
+  m_time first = -752.5
+  m_time last = 717.5
+  find(t) = 23
+
+[MUON TIME DEBUG]
+  Detector = 2
+  Region = 1
+  Sampling = 6
+  Edep MeV = 1.18202e-22
+  Global time ns = 24.8296
+  BCID start = -21
+  BCID end = 21
+  bc_duration = 35
+  m_time size = 43
+  m_time first = -752.5
+  m_time last = 717.5
+  find(t) = 23
+
+[MUON TIME DEBUG]
+  Detector = 0
+  Region = 1
+  Sampling = 2
+  Edep MeV = 3.77253e-24
+  Global time ns = 36.0891
+  BCID start = -21
+  BCID end = 21
+  bc_duration = 40
+  m_time size = 43
+  m_time first = -860
+  m_time last = 820
+  find(t) = 23
+
+[MUON TIME DEBUG]
+  Detector = 0
+  Region = 1
+  Sampling = 2
+  Edep MeV = 3.29827e-24
+  Global time ns = 36.4484
+  BCID start = -21
+  BCID end = 21
+  bc_duration = 40
+  m_time size = 43
+  m_time first = -860
+  m_time last = 820
+  find(t) = 23
+
+[MUON TIME DEBUG]
+  Detector = 2
+  Region = 1
+  Sampling = 7
+  Edep MeV = 4.09589e-25
+  Global time ns = 36.7626
+  BCID start = -21
+  BCID end = 21
+  bc_duration = 40
+  m_time size = 43
+  m_time first = -860
+  m_time last = 820
+  find(t) = 23
+
+[MUON TIME DEBUG]
+  Detector = 2
+  Region = 1
+  Sampling = 7
+  Edep MeV = 1.18271e-22
+  Global time ns = 36.8016
+  BCID start = -21
+  BCID end = 21
+  bc_duration = 40
+  m_time size = 43
+  m_time first = -860
+  m_time last = 820
+  find(t) = 23
+
+[MUON TIME DEBUG]
+  Detector = 0
+  Region = 1
+  Sampling = 3
+  Edep MeV = 3.77253e-24
+  Global time ns = 48.0676
+  BCID start = -21
+  BCID end = 21
+  bc_duration = 50
+  m_time size = 43
+  m_time first = -1075
+  m_time last = 1025
+  find(t) = 23
+
+[MUON TIME DEBUG]
+  Detector = 0
+  Region = 1
+  Sampling = 3
+  Edep MeV = 3.40426e-23
+  Global time ns = 48.4269
+  BCID start = -21
+  BCID end = 21
+  bc_duration = 50
+  m_time size = 43
+  m_time first = -1075
+  m_time last = 1025
+  find(t) = 23
+
+[MUON TIME DEBUG]
+  Detector = 0
+  Region = 1
+  Sampling = 1
+  Edep MeV = 5.12614e-24
+  Global time ns = 24.99
+  BCID start = -21
+  BCID end = 21
+  bc_duration = 35
+  m_time size = 43
+  m_time first = -752.5
+  m_time last = 717.5
+  find(t) = 23
+
+[MUON TIME DEBUG]
+  Detector = 0
+  Region = 1
+  Sampling = 1
+  Edep MeV = 2.65095e-24
+  Global time ns = 25.4937
+  BCID start = -21
+  BCID end = 21
+  bc_duration = 35
+  m_time size = 43
+  m_time first = -752.5
+  m_time last = 717.5
+  find(t) = 23
+
+[MUON TIME DEBUG]
+  Detector = 2
+  Region = 1
+  Sampling = 6
+  Edep MeV = 5.56552e-25
+  Global time ns = 25.7542
+  BCID start = -21
+  BCID end = 21
+  bc_duration = 35
+  m_time size = 43
+  m_time first = -752.5
+  m_time last = 717.5
+  find(t) = 23
+
+[MUON TIME DEBUG]
+  Detector = 2
+  Region = 1
+  Sampling = 6
+  Edep MeV = 1.20461e-22
+  Global time ns = 25.8089
+  BCID start = -21
+  BCID end = 21
+  bc_duration = 35
+  m_time size = 43
+  m_time first = -752.5
+  m_time last = 717.5
+  find(t) = 23
+
+[MUON TIME DEBUG]
+  Detector = 0
+  Region = 1
+  Sampling = 2
+  Edep MeV = 3.84461e-24
+  Global time ns = 37.6452
+  BCID start = -21
+  BCID end = 21
+  bc_duration = 40
+  m_time size = 43
+  m_time first = -860
+  m_time last = 820
+  find(t) = 23
+
+[MUON TIME DEBUG]
+  Detector = 0
+  Region = 1
+  Sampling = 2
+  Edep MeV = 3.36128e-24
+  Global time ns = 38.023
+  BCID start = -21
+  BCID end = 21
+  bc_duration = 40
+  m_time size = 43
+  m_time first = -860
+  m_time last = 820
+  find(t) = 23
+
+[MUON TIME DEBUG]
+  Detector = 2
+  Region = 1
+  Sampling = 7
+  Edep MeV = 4.17414e-25
+  Global time ns = 38.3533
+  BCID start = -21
+  BCID end = 21
+  bc_duration = 40
+  m_time size = 43
+  m_time first = -860
+  m_time last = 820
+  find(t) = 23
+
+[MUON TIME DEBUG]
+  Detector = 2
+  Region = 1
+  Sampling = 7
+  Edep MeV = 1.2053e-22
+  Global time ns = 38.3943
+  BCID start = -21
+  BCID end = 21
+  bc_duration = 40
+  m_time size = 43
+  m_time first = -860
+  m_time last = 820
+  find(t) = 23
+
+[MUON TIME DEBUG]
+  Detector = 0
+  Region = 1
+  Sampling = 3
+  Edep MeV = 3.84461e-24
+  Global time ns = 50.2374
+  BCID start = -21
+  BCID end = 21
+  bc_duration = 50
+  m_time size = 43
+  m_time first = -1075
+  m_time last = 1025
+  find(t) = 23
+
+[MUON TIME DEBUG]
+  Detector = 0
+  Region = 1
+  Sampling = 3
+  Edep MeV = 3.4693e-23
+  Global time ns = 50.6152
+  BCID start = -21
+  BCID end = 21
+  bc_duration = 50
+  m_time size = 43
+  m_time first = -1075
+  m_time last = 1025
+  find(t) = 23
+
+[MUON TIME DEBUG]
+  Detector = 0
+  Region = 1
+  Sampling = 1
+  Edep MeV = 7.58643e-24
+  Global time ns = 26.0422
+  BCID start = -21
+  BCID end = 21
+  bc_duration = 35
+  m_time size = 43
+  m_time first = -752.5
+  m_time last = 717.5
+  find(t) = 23
+
+[MUON TIME DEBUG]
+  Detector = 0
+  Region = 1
+  Sampling = 1
+  Edep MeV = 3.92327e-24
+  Global time ns = 26.9177
+  BCID start = -21
+  BCID end = 21
+  bc_duration = 35
+  m_time size = 43
+  m_time first = -752.5
+  m_time last = 717.5
+  find(t) = 23
+[0mCxx.RunSequence                          INFO  (G4WT0) RunSequence::EndOfEvent...[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) ===========================================[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) MUON HIT MERGE - ESTATÍSTICAS DETALHADAS[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) ===========================================[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) Total de hits processados: 392704[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) Hits com energia > 0: 0[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) Hits sem energia (0): 392704[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) -------------------------------------------[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) Energia total: 0 MeV[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) -------------------------------------------[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) ===========================================[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) Container size: 392704[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) Hits with valid edep map: 0[0m
+[0mCxx.RunSequence                          INFO  (G4WT0) Event loop was completed with 422619 G4Steps and 9 seconds.[0m
+G4WT0 > --> Event 2 starts with initial seeds (64190065,34130856).
+[0mCxx.PrimaryGeneratorAction               INFO  (G4WT0) GeneratePrimaryVertex...[0m
+[0mCxx.EventReader                          INFO  (G4WT0) Get event (EventReader) with number 2 and EventNumber 2[0m
+[0mCxx.EventReader                          INFO  (G4WT0) Seed 0 in eta = -0.534382, phi = -0.974685[0m
+[0mCxx.EventReader                          INFO  (G4WT0) RunNumber        : 0[0m
+[0mCxx.EventReader                          INFO  (G4WT0) EventNumber      : 2[0m
+[0mCxx.EventReader                          INFO  (G4WT0) Avgmu            : 0[0m
+[0mCxx.EventReader                          INFO  (G4WT0) Total Mu         : 0[0m
+[0mCxx.EventReader                          INFO  (G4WT0) Number of seeds  : 1[0m
+[0mCxx.RunSequence                          INFO  (G4WT0) RunSequence::BeginOfEvent...[0m
+
+!!! FILL DEBUG [1] !!!
+  Step energy: 0.0110387 MeV
+  Time: 17.7315 ns
+  samp=23, bcid=2
+  m_edep[bcid] antes = 0
+  m_energyDeposit antes = 0
+  m_edep[bcid] depois = 0.0110387
+  m_energyDeposit depois = 0.0110387
+  Sampling: 1
+  Detector: 0
+  Region: 0
+  Pos: (5050.19, -1809.28, -1421.88)
+  Threshold aplicado: 5 keV
+!!! FIM DEBUG !!!
+
+
+!!! Z NEGATIVO DEBUG [1/100] !!!
+  Step Z position: -1636.63 mm
+  Step energy: 0.0110387 MeV
+  Time: 17.7315 ns
+  Hit Z position (m_z): -1421.88 mm
+  Hit X position (m_x): 5050.19 mm
+  Hit Y position (m_y): -1809.28 mm
+  Detector: 0
+  Sampling: 1
+  Region: 0
+  bcid: 2
+  Threshold: 5 keV
+  Step position (x,y,z): (4086.41, -2881.19, -1636.63) mm
+!!! FIM Z NEGATIVO DEBUG !!!
+
+
+!!! FILL DEBUG [2] !!!
+  Step energy: 0.0133296 MeV
+  Time: 17.7316 ns
+  samp=23, bcid=2
+  m_edep[bcid] antes = 0.0110387
+  m_energyDeposit antes = 0.0110387
+  m_edep[bcid] depois = 0.0243683
+  m_energyDeposit depois = 0.0243683
+  Sampling: 1
+  Detector: 0
+  Region: 0
+  Pos: (5050.19, -1809.28, -1421.88)
+  Threshold aplicado: 5 keV
+!!! FIM DEBUG !!!
+
+
+!!! Z NEGATIVO DEBUG [2/100] !!!
+  Step Z position: -1636.64 mm
+  Step energy: 0.0133296 MeV
+  Time: 17.7316 ns
+  Hit Z position (m_z): -1421.88 mm
+  Hit X position (m_x): 5050.19 mm
+  Hit Y position (m_y): -1809.28 mm
+  Detector: 0
+  Sampling: 1
+  Region: 0
+  bcid: 2
+  Threshold: 5 keV
+  Step position (x,y,z): (4086.43, -2881.21, -1636.64) mm
+!!! FIM Z NEGATIVO DEBUG !!!
+
+
+!!! FILL DEBUG [3] !!!
+  Step energy: 0.0156515 MeV
+  Time: 17.7318 ns
+  samp=23, bcid=2
+  m_edep[bcid] antes = 0.0243683
+  m_energyDeposit antes = 0.0243683
+  m_edep[bcid] depois = 0.0400198
+  m_energyDeposit depois = 0.0400198
+  Sampling: 1
+  Detector: 0
+  Region: 0
+  Pos: (5050.19, -1809.28, -1421.88)
+  Threshold aplicado: 5 keV
+!!! FIM DEBUG !!!
+
+
+!!! Z NEGATIVO DEBUG [3/100] !!!
+  Step Z position: -1636.66 mm
+  Step energy: 0.0156515 MeV
+  Time: 17.7318 ns
+  Hit Z position (m_z): -1421.88 mm
+  Hit X position (m_x): 5050.19 mm
+  Hit Y position (m_y): -1809.28 mm
+  Detector: 0
+  Sampling: 1
+  Region: 0
+  bcid: 2
+  Threshold: 5 keV
+  Step position (x,y,z): (4086.47, -2881.24, -1636.66) mm
+!!! FIM Z NEGATIVO DEBUG !!!
+
+
+!!! FILL DEBUG [4] !!!
+  Step energy: 0.0142543 MeV
+  Time: 17.7321 ns
+  samp=23, bcid=2
+  m_edep[bcid] antes = 0.0400198
+  m_energyDeposit antes = 0.0400198
+  m_edep[bcid] depois = 0.0542741
+  m_energyDeposit depois = 0.0542741
+  Sampling: 1
+  Detector: 0
+  Region: 0
+  Pos: (5050.19, -1809.28, -1421.88)
+  Threshold aplicado: 5 keV
+!!! FIM DEBUG !!!
+
+
+!!! Z NEGATIVO DEBUG [4/100] !!!
+  Step Z position: -1636.68 mm
+  Step energy: 0.0142543 MeV
+  Time: 17.7321 ns
+  Hit Z position (m_z): -1421.88 mm
+  Hit X position (m_x): 5050.19 mm
+  Hit Y position (m_y): -1809.28 mm
+  Detector: 0
+  Sampling: 1
+  Region: 0
+  bcid: 2
+  Threshold: 5 keV
+  Step position (x,y,z): (4086.53, -2881.28, -1636.68) mm
+!!! FIM Z NEGATIVO DEBUG !!!
+
+
+!!! FILL DEBUG [5] !!!
+  Step energy: 0.0295684 MeV
+  Time: 17.7322 ns
+  samp=23, bcid=2
+  m_edep[bcid] antes = 0.0542741
+  m_energyDeposit antes = 0.0542741
+  m_edep[bcid] depois = 0.0838425
+  m_energyDeposit depois = 0.0838425
+  Sampling: 1
+  Detector: 0
+  Region: 0
+  Pos: (5050.19, -1809.28, -1421.88)
+  Threshold aplicado: 5 keV
+!!! FIM DEBUG !!!
+
+
+!!! Z NEGATIVO DEBUG [5/100] !!!
+  Step Z position: -1636.7 mm
+  Step energy: 0.0295684 MeV
+  Time: 17.7322 ns
+  Hit Z position (m_z): -1421.88 mm
+  Hit X position (m_x): 5050.19 mm
+  Hit Y position (m_y): -1809.28 mm
+  Detector: 0
+  Sampling: 1
+  Region: 0
+  bcid: 2
+  Threshold: 5 keV
+  Step position (x,y,z): (4086.56, -2881.3, -1636.7) mm
+!!! FIM Z NEGATIVO DEBUG !!!
+
+
+!!! FILL DEBUG [6] !!!
+  Step energy: 0.00906941 MeV
+  Time: 17.7325 ns
+  samp=23, bcid=2
+  m_edep[bcid] antes = 0.0838425
+  m_energyDeposit antes = 0.0838425
+  m_edep[bcid] depois = 0.0929119
+  m_energyDeposit depois = 0.0929119
+  Sampling: 1
+  Detector: 0
+  Region: 0
+  Pos: (5050.19, -1809.28, -1421.88)
+  Threshold aplicado: 5 keV
+!!! FIM DEBUG !!!
+
+
+!!! Z NEGATIVO DEBUG [6/100] !!!
+  Step Z position: -1636.72 mm
+  Step energy: 0.00906941 MeV
+  Time: 17.7325 ns
+  Hit Z position (m_z): -1421.88 mm
+  Hit X position (m_x): 5050.19 mm
+  Hit Y position (m_y): -1809.28 mm
+  Detector: 0
+  Sampling: 1
+  Region: 0
+  bcid: 2
+  Threshold: 5 keV
+  Step position (x,y,z): (4086.63, -2881.34, -1636.72) mm
+!!! FIM Z NEGATIVO DEBUG !!!
+
+
+!!! FILL DEBUG [7] !!!
+  Step energy: 0.00651193 MeV
+  Time: 17.7326 ns
+  samp=23, bcid=2
+  m_edep[bcid] antes = 0.0929119
+  m_energyDeposit antes = 0.0929119
+  m_edep[bcid] depois = 0.0994239
+  m_energyDeposit depois = 0.0994239
+  Sampling: 1
+  Detector: 0
+  Region: 0
+  Pos: (5050.19, -1809.28, -1421.88)
+  Threshold aplicado: 5 keV
+!!! FIM DEBUG !!!
+
+
+!!! Z NEGATIVO DEBUG [7/100] !!!
+  Step Z position: -1636.74 mm
+  Step energy: 0.00651193 MeV
+  Time: 17.7326 ns
+  Hit Z position (m_z): -1421.88 mm
+  Hit X position (m_x): 5050.19 mm
+  Hit Y position (m_y): -1809.28 mm
+  Detector: 0
+  Sampling: 1
+  Region: 0
+  bcid: 2
+  Threshold: 5 keV
+  Step position (x,y,z): (4086.66, -2881.36, -1636.74) mm
+!!! FIM Z NEGATIVO DEBUG !!!
+
+
+!!! FILL DEBUG [8] !!!
+  Step energy: 0.00808383 MeV
+  Time: 17.7327 ns
+  samp=23, bcid=2
+  m_edep[bcid] antes = 0.0994239
+  m_energyDeposit antes = 0.0994239
+  m_edep[bcid] depois = 0.107508
+  m_energyDeposit depois = 0.107508
+  Sampling: 1
+  Detector: 0
+  Region: 0
+  Pos: (5050.19, -1809.28, -1421.88)
+  Threshold aplicado: 5 keV
+!!! FIM DEBUG !!!
+
+
+!!! Z NEGATIVO DEBUG [8/100] !!!
+  Step Z position: -1636.75 mm
+  Step energy: 0.00808383 MeV
+  Time: 17.7327 ns
+  Hit Z position (m_z): -1421.88 mm
+  Hit X position (m_x): 5050.19 mm
+  Hit Y position (m_y): -1809.28 mm
+  Detector: 0
+  Sampling: 1
+  Region: 0
+  bcid: 2
+  Threshold: 5 keV
+  Step position (x,y,z): (4086.68, -2881.38, -1636.75) mm
+!!! FIM Z NEGATIVO DEBUG !!!
+
+
+!!! FILL DEBUG [9] !!!
+  Step energy: 0.00836758 MeV
+  Time: 17.7328 ns
+  samp=23, bcid=2
+  m_edep[bcid] antes = 0.107508
+  m_energyDeposit antes = 0.107508
+  m_edep[bcid] depois = 0.115875
+  m_energyDeposit depois = 0.115875
+  Sampling: 1
+  Detector: 0
+  Region: 0
+  Pos: (5050.19, -1809.28, -1421.88)
+  Threshold aplicado: 5 keV
+!!! FIM DEBUG !!!
+
+
+!!! Z NEGATIVO DEBUG [9/100] !!!
+  Step Z position: -1636.76 mm
+  Step energy: 0.00836758 MeV
+  Time: 17.7328 ns
+  Hit Z position (m_z): -1421.88 mm
+  Hit X position (m_x): 5050.19 mm
+  Hit Y position (m_y): -1809.28 mm
+  Detector: 0
+  Sampling: 1
+  Region: 0
+  bcid: 2
+  Threshold: 5 keV
+  Step position (x,y,z): (4086.71, -2881.4, -1636.76) mm
+!!! FIM Z NEGATIVO DEBUG !!!
+
+
+!!! FILL DEBUG [10] !!!
+  Step energy: 0.0185744 MeV
+  Time: 24.8097 ns
+  samp=23, bcid=2
+  m_edep[bcid] antes = 0
+  m_energyDeposit antes = 0
+  m_edep[bcid] depois = 0.0185744
+  m_energyDeposit depois = 0.0185744
+  Sampling: 2
+  Detector: 0
+  Region: 0
+  Pos: (6974.06, -2498.51, -2078.12)
+  Threshold aplicado: 5 keV
+!!! FIM DEBUG !!!
+
+
+!!! Z NEGATIVO DEBUG [10/100] !!!
+  Step Z position: -2335.32 mm
+  Step energy: 0.0185744 MeV
+  Time: 24.8097 ns
+  Hit Z position (m_z): -2078.12 mm
+  Hit X position (m_x): 6974.06 mm
+  Hit Y position (m_y): -2498.51 mm
+  Detector: 0
+  Sampling: 2
+  Region: 0
+  bcid: 2
+  Threshold: 5 keV
+  Step position (x,y,z): (5731.27, -4019.02, -2335.32) mm
+!!! FIM Z NEGATIVO DEBUG !!!
+
+
+!!! Z NEGATIVO DEBUG [11/100] !!!
+  Step Z position: -2335.36 mm
+  Step energy: 0.0108909 MeV
+  Time: 24.8101 ns
+  Hit Z position (m_z): -2078.12 mm
+  Hit X position (m_x): 6974.06 mm
+  Hit Y position (m_y): -2498.51 mm
+  Detector: 0
+  Sampling: 2
+  Region: 0
+  bcid: 2
+  Threshold: 5 keV
+  Step position (x,y,z): (5731.36, -4019.07, -2335.36) mm
+!!! FIM Z NEGATIVO DEBUG !!!
+
+
+!!! Z NEGATIVO DEBUG [12/100] !!!
+  Step Z position: -2335.38 mm
+  Step energy: 0.00849232 MeV
+  Time: 24.8102 ns
+  Hit Z position (m_z): -2078.12 mm
+  Hit X position (m_x): 6974.06 mm
+  Hit Y position (m_y): -2498.51 mm
+  Detector: 0
+  Sampling: 2
+  Region: 0
+  bcid: 2
+  Threshold: 5 keV
+  Step position (x,y,z): (5731.4, -4019.1, -2335.38) mm
+!!! FIM Z NEGATIVO DEBUG !!!
+
+
+!!! Z NEGATIVO DEBUG [13/100] !!!
+  Step Z position: -2335.39 mm
+  Step energy: 0.0186217 MeV
+  Time: 24.8104 ns
+  Hit Z position (m_z): -2078.12 mm
+  Hit X position (m_x): 6974.06 mm
+  Hit Y position (m_y): -2498.51 mm
+  Detector: 0
+  Sampling: 2
+  Region: 0
+  bcid: 2
+  Threshold: 5 keV
+  Step position (x,y,z): (5731.43, -4019.12, -2335.39) mm
+!!! FIM Z NEGATIVO DEBUG !!!
+
+
+!!! Z NEGATIVO DEBUG [14/100] !!!
+  Step Z position: -2335.41 mm
+  Step energy: 0.0117859 MeV
+  Time: 24.8106 ns
+  Hit Z position (m_z): -2078.12 mm
+  Hit X position (m_x): 6974.06 mm
+  Hit Y position (m_y): -2498.51 mm
+  Detector: 0
+  Sampling: 2
+  Region: 0
+  bcid: 2
+  Threshold: 5 keV
+  Step position (x,y,z): (5731.48, -4019.16, -2335.41) mm
+!!! FIM Z NEGATIVO DEBUG !!!
+
+
+!!! Z NEGATIVO DEBUG [15/100] !!!
+  Step Z position: -2335.43 mm
+  Step energy: 0.00851831 MeV
+  Time: 24.8108 ns
+  Hit Z position (m_z): -2078.12 mm
+  Hit X position (m_x): 6974.06 mm
+  Hit Y position (m_y): -2498.51 mm
+  Detector: 0
+  Sampling: 2
+  Region: 0
+  bcid: 2
+  Threshold: 5 keV
+  Step position (x,y,z): (5731.52, -4019.18, -2335.43) mm
+!!! FIM Z NEGATIVO DEBUG !!!
+
+
+!!! Z NEGATIVO DEBUG [16/100] !!!
+  Step Z position: -2335.44 mm
+  Step energy: 0.0133196 MeV
+  Time: 24.8109 ns
+  Hit Z position (m_z): -2078.12 mm
+  Hit X position (m_x): 6974.06 mm
+  Hit Y position (m_y): -2498.51 mm
+  Detector: 0
+  Sampling: 2
+  Region: 0
+  bcid: 2
+  Threshold: 5 keV
+  Step position (x,y,z): (5731.54, -4019.2, -2335.44) mm
+!!! FIM Z NEGATIVO DEBUG !!!
+
+
+!!! Z NEGATIVO DEBUG [17/100] !!!
+  Step Z position: -2335.45 mm
+  Step energy: 0.00575899 MeV
+  Time: 24.8109 ns
+  Hit Z position (m_z): -2078.12 mm
+  Hit X position (m_x): 6974.06 mm
+  Hit Y position (m_y): -2498.51 mm
+  Detector: 0
+  Sampling: 2
+  Region: 0
+  bcid: 2
+  Threshold: 5 keV
+  Step position (x,y,z): (5731.56, -4019.21, -2335.45) mm
+!!! FIM Z NEGATIVO DEBUG !!!
+
+
+!!! Z NEGATIVO DEBUG [18/100] !!!
+  Step Z position: -2335.45 mm
+  Step energy: 0.00683765 MeV
+  Time: 24.811 ns
+  Hit Z position (m_z): -2078.12 mm
+  Hit X position (m_x): 6974.06 mm
+  Hit Y position (m_y): -2498.51 mm
+  Detector: 0
+  Sampling: 2
+  Region: 0
+  bcid: 2
+  Threshold: 5 keV
+  Step position (x,y,z): (5731.58, -4019.23, -2335.45) mm
+!!! FIM Z NEGATIVO DEBUG !!!
+
+
+!!! Z NEGATIVO DEBUG [19/100] !!!
+  Step Z position: -3034.77 mm
+  Step energy: 0.0128898 MeV
+  Time: 31.8887 ns
+  Hit Z position (m_z): -2734.38 mm
+  Hit X position (m_x): 9138.43 mm
+  Hit Y position (m_y): -3273.92 mm
+  Detector: 0
+  Sampling: 3
+  Region: 0
+  bcid: 2
+  Threshold: 5 keV
+  Step position (x,y,z): (7376.81, -5155.84, -3034.77) mm
+!!! FIM Z NEGATIVO DEBUG !!!
+
+
+!!! Z NEGATIVO DEBUG [20/100] !!!
+  Step Z position: -3034.78 mm
+  Step energy: 0.0115704 MeV
+  Time: 31.8888 ns
+  Hit Z position (m_z): -2734.38 mm
+  Hit X position (m_x): 9138.43 mm
+  Hit Y position (m_y): -3273.92 mm
+  Detector: 0
+  Sampling: 3
+  Region: 0
+  bcid: 2
+  Threshold: 5 keV
+  Step position (x,y,z): (7376.85, -5155.86, -3034.78) mm
+!!! FIM Z NEGATIVO DEBUG !!!
+
+
+!!! Z NEGATIVO DEBUG [21/100] !!!
+  Step Z position: -3034.81 mm
+  Step energy: 0.00687685 MeV
+  Time: 31.8891 ns
+  Hit Z position (m_z): -2734.38 mm
+  Hit X position (m_x): 9138.43 mm
+  Hit Y position (m_y): -3273.92 mm
+  Detector: 0
+  Sampling: 3
+  Region: 0
+  bcid: 2
+  Threshold: 5 keV
+  Step position (x,y,z): (7376.9, -5155.9, -3034.81) mm
+!!! FIM Z NEGATIVO DEBUG !!!
+
+
+!!! Z NEGATIVO DEBUG [22/100] !!!
+  Step Z position: -3034.81 mm
+  Step energy: 0.00636772 MeV
+  Time: 31.8891 ns
+  Hit Z position (m_z): -2734.38 mm
+  Hit X position (m_x): 9138.43 mm
+  Hit Y position (m_y): -3273.92 mm
+  Detector: 0
+  Sampling: 3
+  Region: 0
+  bcid: 2
+  Threshold: 5 keV
+  Step position (x,y,z): (7376.92, -5155.91, -3034.81) mm
+!!! FIM Z NEGATIVO DEBUG !!!
+
+
+!!! Z NEGATIVO DEBUG [23/100] !!!
+  Step Z position: -3034.82 mm
+  Step energy: 0.0402302 MeV
+  Time: 31.8892 ns
+  Hit Z position (m_z): -2734.38 mm
+  Hit X position (m_x): 9138.43 mm
+  Hit Y position (m_y): -3273.92 mm
+  Detector: 0
+  Sampling: 3
+  Region: 0
+  bcid: 2
+  Threshold: 5 keV
+  Step position (x,y,z): (7376.94, -5155.92, -3034.82) mm
+!!! FIM Z NEGATIVO DEBUG !!!
+
+
+!!! Z NEGATIVO DEBUG [24/100] !!!
+  Step Z position: -3034.88 mm
+  Step energy: 0.017695 MeV
+  Time: 31.8898 ns
+  Hit Z position (m_z): -2734.38 mm
+  Hit X position (m_x): 9138.43 mm
+  Hit Y position (m_y): -3273.92 mm
+  Detector: 0
+  Sampling: 3
+  Region: 0
+  bcid: 2
+  Threshold: 5 keV
+  Step position (x,y,z): (7377.08, -5156.02, -3034.88) mm
+!!! FIM Z NEGATIVO DEBUG !!!
+
+
+!!! Z NEGATIVO DEBUG [25/100] !!!
+  Step Z position: -3034.88 mm
+  Step energy: 0.00922053 MeV
+  Time: 31.8898 ns
+  Hit Z position (m_z): -2734.38 mm
+  Hit X position (m_x): 9138.43 mm
+  Hit Y position (m_y): -3273.92 mm
+  Detector: 0
+  Sampling: 3
+  Region: 0
+  bcid: 2
+  Threshold: 5 keV
+  Step position (x,y,z): (7377.07, -5156.01, -3034.88) mm
+!!! FIM Z NEGATIVO DEBUG !!!
+
+
+!!! Z NEGATIVO DEBUG [26/100] !!!
+  Step Z position: -3034.78 mm
+  Step energy: 0.0089518 MeV
+  Time: 31.8888 ns
+  Hit Z position (m_z): -2734.38 mm
+  Hit X position (m_x): 9138.43 mm
+  Hit Y position (m_y): -3273.92 mm
+  Detector: 0
+  Sampling: 3
+  Region: 0
+  bcid: 2
+  Threshold: 5 keV
+  Step position (x,y,z): (7376.85, -5155.86, -3034.78) mm
+!!! FIM Z NEGATIVO DEBUG !!!
+
+
+!!! Z NEGATIVO DEBUG [27/100] !!!
+  Step Z position: -2340.84 mm
+  Step energy: 0.00536407 MeV
+  Time: 24.8656 ns
+  Hit Z position (m_z): -2078.12 mm
+  Hit X position (m_x): 6974.06 mm
+  Hit Y position (m_y): -2498.51 mm
+  Detector: 0
+  Sampling: 2
+  Region: 0
+  bcid: 2
+  Threshold: 5 keV
+  Step position (x,y,z): (5744.26, -4027.99, -2340.84) mm
+!!! FIM Z NEGATIVO DEBUG !!!
+
+
+!!! Z NEGATIVO DEBUG [28/100] !!!
+  Step Z position: -2342.36 mm
+  Step energy: 0.00733353 MeV
+  Time: 24.8903 ns
+  Hit Z position (m_z): -2078.12 mm
+  Hit X position (m_x): 6974.06 mm
+  Hit Y position (m_y): -2498.51 mm
+  Detector: 0
+  Sampling: 2
+  Region: 0
+  bcid: 2
+  Threshold: 5 keV
+  Step position (x,y,z): (5744.29, -4027.47, -2342.36) mm
+!!! FIM Z NEGATIVO DEBUG !!!
+
+
+!!! Z NEGATIVO DEBUG [29/100] !!!
+  Step Z position: -2335.39 mm
+  Step energy: 0.00598565 MeV
+  Time: 24.8104 ns
+  Hit Z position (m_z): -2078.12 mm
+  Hit X position (m_x): 6974.06 mm
+  Hit Y position (m_y): -2498.51 mm
+  Detector: 0
+  Sampling: 2
+  Region: 0
+  bcid: 2
+  Threshold: 5 keV
+  Step position (x,y,z): (5731.43, -4019.12, -2335.39) mm
+!!! FIM Z NEGATIVO DEBUG !!!
+
+
+!!! Z NEGATIVO DEBUG [30/100] !!!
+  Step Z position: -2335.36 mm
+  Step energy: 0.00581098 MeV
+  Time: 24.81 ns
+  Hit Z position (m_z): -2078.12 mm
+  Hit X position (m_x): 6974.06 mm
+  Hit Y position (m_y): -2498.51 mm
+  Detector: 0
+  Sampling: 2
+  Region: 0
+  bcid: 2
+  Threshold: 5 keV
+  Step position (x,y,z): (5731.35, -4019.07, -2335.36) mm
+!!! FIM Z NEGATIVO DEBUG !!!
+
+
+!!! Z NEGATIVO DEBUG [31/100] !!!
+  Step Z position: -1636.75 mm
+  Step energy: 0.00717597 MeV
+  Time: 17.7327 ns
+  Hit Z position (m_z): -1421.88 mm
+  Hit X position (m_x): 5050.19 mm
+  Hit Y position (m_y): -1809.28 mm
+  Detector: 0
+  Sampling: 1
+  Region: 0
+  bcid: 2
+  Threshold: 5 keV
+  Step position (x,y,z): (4086.68, -2881.38, -1636.75) mm
+!!! FIM Z NEGATIVO DEBUG !!!
+
+
+!!! Z NEGATIVO DEBUG [32/100] !!!
+  Step Z position: -1636.73 mm
+  Step energy: 0.0224755 MeV
+  Time: 17.7326 ns
+  Hit Z position (m_z): -1421.88 mm
+  Hit X position (m_x): 5050.19 mm
+  Hit Y position (m_y): -1809.28 mm
+  Detector: 0
+  Sampling: 1
+  Region: 0
+  bcid: 2
+  Threshold: 5 keV
+  Step position (x,y,z): (4086.66, -2881.37, -1636.73) mm
+!!! FIM Z NEGATIVO DEBUG !!!
+
+
+!!! Z NEGATIVO DEBUG [33/100] !!!
+  Step Z position: -1636.71 mm
+  Step energy: 0.0114541 MeV
+  Time: 17.7329 ns
+  Hit Z position (m_z): -1421.88 mm
+  Hit X position (m_x): 5050.19 mm
+  Hit Y position (m_y): -1809.28 mm
+  Detector: 0
+  Sampling: 1
+  Region: 0
+  bcid: 2
+  Threshold: 5 keV
+  Step position (x,y,z): (4086.7, -2881.41, -1636.71) mm
+!!! FIM Z NEGATIVO DEBUG !!!
+
+
+!!! Z NEGATIVO DEBUG [34/100] !!!
+  Step Z position: -1636.71 mm
+  Step energy: 0.0078693 MeV
+  Time: 17.733 ns
+  Hit Z position (m_z): -1421.88 mm
+  Hit X position (m_x): 5050.19 mm
+  Hit Y position (m_y): -1809.28 mm
+  Detector: 0
+  Sampling: 1
+  Region: 0
+  bcid: 2
+  Threshold: 5 keV
+  Step position (x,y,z): (4086.72, -2881.42, -1636.71) mm
+!!! FIM Z NEGATIVO DEBUG !!!
+
+
+!!! Z NEGATIVO DEBUG [35/100] !!!
+  Step Z position: -1645.77 mm
+  Step energy: 0.00821369 MeV
+  Time: 17.8792 ns
+  Hit Z position (m_z): -1421.88 mm
+  Hit X position (m_x): 5050.19 mm
+  Hit Y position (m_y): -1809.28 mm
+  Detector: 0
+  Sampling: 1
+  Region: 0
+  bcid: 2
+  Threshold: 5 keV
+  Step position (x,y,z): (4107.86, -2895.34, -1645.77) mm
+!!! FIM Z NEGATIVO DEBUG !!!
+
+
+!!! Z NEGATIVO DEBUG [36/100] !!!
+  Step Z position: -1654.97 mm
+  Step energy: 0.00603807 MeV
+  Time: 17.9717 ns
+  Hit Z position (m_z): -1421.88 mm
+  Hit X position (m_x): 5050.19 mm
+  Hit Y position (m_y): -1809.28 mm
+  Detector: 0
+  Sampling: 1
+  Region: 0
+  bcid: 2
+  Threshold: 5 keV
+  Step position (x,y,z): (4115.42, -2889.1, -1654.97) mm
+!!! FIM Z NEGATIVO DEBUG !!!
+
+
+!!! Z NEGATIVO DEBUG [37/100] !!!
+  Step Z position: -1660.18 mm
+  Step energy: 0.00591848 MeV
+  Time: 18.0183 ns
+  Hit Z position (m_z): -1421.88 mm
+  Hit X position (m_x): 5050.19 mm
+  Hit Y position (m_y): -1809.28 mm
+  Detector: 0
+  Sampling: 1
+  Region: 0
+  bcid: 2
+  Threshold: 5 keV
+  Step position (x,y,z): (4113.2, -2892.47, -1660.18) mm
+!!! FIM Z NEGATIVO DEBUG !!!
+
+
+!!! Z NEGATIVO DEBUG [38/100] !!!
+  Step Z position: -2158.76 mm
+  Step energy: 0.00540948 MeV
+  Time: 41.7016 ns
+  Hit Z position (m_z): -1859.38 mm
+  Hit X position (m_x): 5050.19 mm
+  Hit Y position (m_y): -1809.28 mm
+  Detector: 0
+  Sampling: 1
+  Region: 0
+  bcid: 3
+  Threshold: 5 keV
+  Step position (x,y,z): (4027.42, -3006.58, -2158.76) mm
+!!! FIM Z NEGATIVO DEBUG !!!
+
+
+!!! Z NEGATIVO DEBUG [39/100] !!!
+  Step Z position: -2160.13 mm
+  Step energy: 0.00508215 MeV
+  Time: 41.7383 ns
+  Hit Z position (m_z): -1859.38 mm
+  Hit X position (m_x): 5050.19 mm
+  Hit Y position (m_y): -1809.28 mm
+  Detector: 0
+  Sampling: 1
+  Region: 0
+  bcid: 3
+  Threshold: 5 keV
+  Step position (x,y,z): (4024.41, -3005.85, -2160.13) mm
+!!! FIM Z NEGATIVO DEBUG !!!
+
+
+!!! Z NEGATIVO DEBUG [40/100] !!!
+  Step Z position: -2160.26 mm
+  Step energy: 0.00524485 MeV
+  Time: 41.7492 ns
+  Hit Z position (m_z): -1859.38 mm
+  Hit X position (m_x): 5050.19 mm
+  Hit Y position (m_y): -1809.28 mm
+  Detector: 0
+  Sampling: 1
+  Region: 0
+  bcid: 3
+  Threshold: 5 keV
+  Step position (x,y,z): (4024.99, -3005.61, -2160.26) mm
+!!! FIM Z NEGATIVO DEBUG !!!
+
+
+!!! Z NEGATIVO DEBUG [41/100] !!!
+  Step Z position: -1636.71 mm
+  Step energy: 0.00836676 MeV
+  Time: 17.7329 ns
+  Hit Z position (m_z): -1421.88 mm
+  Hit X position (m_x): 5050.19 mm
+  Hit Y position (m_y): -1809.28 mm
+  Detector: 0
+  Sampling: 1
+  Region: 0
+  bcid: 2
+  Threshold: 5 keV
+  Step position (x,y,z): (4086.7, -2881.41, -1636.71) mm
+!!! FIM Z NEGATIVO DEBUG !!!
+
+
+!!! Z NEGATIVO DEBUG [42/100] !!!
+  Step Z position: -2077.63 mm
+  Step energy: 0.0341731 MeV
+  Time: 18.5552 ns
+  Hit Z position (m_z): -1859.38 mm
+  Hit X position (m_x): 5050.19 mm
+  Hit Y position (m_y): -1809.28 mm
+  Detector: 0
+  Sampling: 1
+  Region: 0
+  bcid: 2
+  Threshold: 5 keV
+  Step position (x,y,z): (4164.64, -2766.91, -2077.63) mm
+!!! FIM Z NEGATIVO DEBUG !!!
+
+
+!!! Z NEGATIVO DEBUG [43/100] !!!
+  Step Z position: -2077.71 mm
+  Step energy: 0.00796393 MeV
+  Time: 18.5556 ns
+  Hit Z position (m_z): -1859.38 mm
+  Hit X position (m_x): 5050.19 mm
+  Hit Y position (m_y): -1809.28 mm
+  Detector: 0
+  Sampling: 1
+  Region: 0
+  bcid: 2
+  Threshold: 5 keV
+  Step position (x,y,z): (4164.71, -2766.95, -2077.71) mm
+!!! FIM Z NEGATIVO DEBUG !!!
+
+
+!!! Z NEGATIVO DEBUG [44/100] !!!
+  Step Z position: -2077.74 mm
+  Step energy: 0.029367 MeV
+  Time: 18.5557 ns
+  Hit Z position (m_z): -1859.38 mm
+  Hit X position (m_x): 5050.19 mm
+  Hit Y position (m_y): -1809.28 mm
+  Detector: 0
+  Sampling: 1
+  Region: 0
+  bcid: 2
+  Threshold: 5 keV
+  Step position (x,y,z): (4164.73, -2766.96, -2077.74) mm
+!!! FIM Z NEGATIVO DEBUG !!!
+
+
+!!! Z NEGATIVO DEBUG [45/100] !!!
+  Step Z position: -2077.83 mm
+  Step energy: 0.0290136 MeV
+  Time: 18.5561 ns
+  Hit Z position (m_z): -1859.38 mm
+  Hit X position (m_x): 5050.19 mm
+  Hit Y position (m_y): -1809.28 mm
+  Detector: 0
+  Sampling: 1
+  Region: 0
+  bcid: 2
+  Threshold: 5 keV
+  Step position (x,y,z): (4164.8, -2767.01, -2077.83) mm
+!!! FIM Z NEGATIVO DEBUG !!!
+
+
+!!! Z NEGATIVO DEBUG [46/100] !!!
+  Step Z position: -2077.93 mm
+  Step energy: 0.00534005 MeV
+  Time: 18.5566 ns
+  Hit Z position (m_z): -1859.38 mm
+  Hit X position (m_x): 5050.19 mm
+  Hit Y position (m_y): -1809.28 mm
+  Detector: 0
+  Sampling: 1
+  Region: 0
+  bcid: 2
+  Threshold: 5 keV
+  Step position (x,y,z): (4164.87, -2767.06, -2077.93) mm
+!!! FIM Z NEGATIVO DEBUG !!!
+
+
+!!! Z NEGATIVO DEBUG [47/100] !!!
+  Step Z position: -2077.94 mm
+  Step energy: 0.0135069 MeV
+  Time: 18.5566 ns
+  Hit Z position (m_z): -1859.38 mm
+  Hit X position (m_x): 5050.19 mm
+  Hit Y position (m_y): -1809.28 mm
+  Detector: 0
+  Sampling: 1
+  Region: 0
+  bcid: 2
+  Threshold: 5 keV
+  Step position (x,y,z): (4164.88, -2767.07, -2077.94) mm
+!!! FIM Z NEGATIVO DEBUG !!!
+
+
+!!! Z NEGATIVO DEBUG [48/100] !!!
+  Step Z position: -2077.99 mm
+  Step energy: 0.0194227 MeV
+  Time: 18.5568 ns
+  Hit Z position (m_z): -1859.38 mm
+  Hit X position (m_x): 5050.19 mm
+  Hit Y position (m_y): -1809.28 mm
+  Detector: 0
+  Sampling: 1
+  Region: 0
+  bcid: 2
+  Threshold: 5 keV
+  Step position (x,y,z): (4164.92, -2767.1, -2077.99) mm
+!!! FIM Z NEGATIVO DEBUG !!!
+
+
+!!! Z NEGATIVO DEBUG [49/100] !!!
+  Step Z position: -2078.05 mm
+  Step energy: 0.00733625 MeV
+  Time: 18.5571 ns
+  Hit Z position (m_z): -1859.38 mm
+  Hit X position (m_x): 5050.19 mm
+  Hit Y position (m_y): -1809.28 mm
+  Detector: 0
+  Sampling: 1
+  Region: 0
+  bcid: 2
+  Threshold: 5 keV
+  Step position (x,y,z): (4164.97, -2767.14, -2078.05) mm
+!!! FIM Z NEGATIVO DEBUG !!!
+
+
+!!! Z NEGATIVO DEBUG [50/100] !!!
+  Step Z position: -2077.99 mm
+  Step energy: 0.0053655 MeV
+  Time: 18.5568 ns
+  Hit Z position (m_z): -1859.38 mm
+  Hit X position (m_x): 5050.19 mm
+  Hit Y position (m_y): -1809.28 mm
+  Detector: 0
+  Sampling: 1
+  Region: 0
+  bcid: 2
+  Threshold: 5 keV
+  Step position (x,y,z): (4164.92, -2767.1, -2077.99) mm
+!!! FIM Z NEGATIVO DEBUG !!!
+
+[0mCxx.RunSequence                          INFO  (G4WT0) RunSequence::EndOfEvent...[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) HIT #1: sampling=1, detector=0, region=0, energy=0.167226 MeV, x=5050.19, y=-1809.28, z=-1859.38[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0)   BCIDs: start=-21, end=21, duration=25[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0)     BCID 2: edep=0.151489 MeV, tof=18.5568[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0)     BCID 3: edep=0.0157365 MeV, tof=41.7492[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) HIT #2: sampling=1, detector=0, region=0, energy=0.193387 MeV, x=5050.19, y=-1809.28, z=-1421.88[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0)   BCIDs: start=-21, end=21, duration=25[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0)     BCID 2: edep=0.193387 MeV, tof=17.7329[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) HIT #3: sampling=2, detector=0, region=0, energy=0.127294 MeV, x=6974.06, y=-2498.51, z=-2078.12[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0)   BCIDs: start=-21, end=21, duration=25[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0)     BCID 2: edep=0.127294 MeV, tof=24.81[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) HIT #4: sampling=3, detector=0, region=0, energy=0.113802 MeV, x=9138.43, y=-3273.92, z=-2734.38[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0)   BCIDs: start=-21, end=21, duration=25[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0)     BCID 2: edep=0.113802 MeV, tof=31.8888[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) ===========================================[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) MUON HIT MERGE - ESTATÍSTICAS DETALHADAS[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) ===========================================[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) Total de hits processados: 392704[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) Hits com energia > 0: 4[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) Hits sem energia (0): 392700[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) Energia mínima: 0.113802 MeV[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) Energia máxima: 0.193387 MeV[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) Energia média: 0.150427 MeV[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) -------------------------------------------[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) Energia total: 0.601709 MeV[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) -------------------------------------------[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) Energia por sampling:[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0)   Sampling 1: 0.360613 MeV (2 hits)[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0)   Sampling 2: 0.127294 MeV (1 hits)[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0)   Sampling 3: 0.113802 MeV (1 hits)[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) ===========================================[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) Container size: 392704[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) Hits with valid edep map: 4[0m
+[0mCxx.RunSequence                          INFO  (G4WT0) Event loop was completed with 135361 G4Steps and 8 seconds.[0m
+G4WT0 > --> Event 3 starts with initial seeds (99022847,61270663).
+[0mCxx.PrimaryGeneratorAction               INFO  (G4WT0) GeneratePrimaryVertex...[0m
+[0mCxx.EventReader                          INFO  (G4WT0) Get event (EventReader) with number 3 and EventNumber 3[0m
+[0mCxx.EventReader                          INFO  (G4WT0) Seed 0 in eta = -1.33106, phi = -1.56615[0m
+[0mCxx.EventReader                          INFO  (G4WT0) RunNumber        : 0[0m
+[0mCxx.EventReader                          INFO  (G4WT0) EventNumber      : 3[0m
+[0mCxx.EventReader                          INFO  (G4WT0) Avgmu            : 0[0m
+[0mCxx.EventReader                          INFO  (G4WT0) Total Mu         : 0[0m
+[0mCxx.EventReader                          INFO  (G4WT0) Number of seeds  : 1[0m
+[0mCxx.RunSequence                          INFO  (G4WT0) RunSequence::BeginOfEvent...[0m
+[0mCxx.RunSequence                          INFO  (G4WT0) RunSequence::EndOfEvent...[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) ===========================================[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) MUON HIT MERGE - ESTATÍSTICAS DETALHADAS[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) ===========================================[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) Total de hits processados: 392704[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) Hits com energia > 0: 0[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) Hits sem energia (0): 392704[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) -------------------------------------------[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) Energia total: 0 MeV[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) -------------------------------------------[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) ===========================================[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) Container size: 392704[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) Hits with valid edep map: 0[0m
+[0mCxx.RunSequence                          INFO  (G4WT0) Event loop was completed with 191555 G4Steps and 8 seconds.[0m
+G4WT0 > --> Event 4 starts with initial seeds (98437269,19475155).
+[0mCxx.PrimaryGeneratorAction               INFO  (G4WT0) GeneratePrimaryVertex...[0m
+[0mCxx.EventReader                          INFO  (G4WT0) Get event (EventReader) with number 4 and EventNumber 4[0m
+[0mCxx.EventReader                          INFO  (G4WT0) Seed 0 in eta = -1.95118, phi = -1.81308[0m
+[0mCxx.EventReader                          INFO  (G4WT0) RunNumber        : 0[0m
+[0mCxx.EventReader                          INFO  (G4WT0) EventNumber      : 4[0m
+[0mCxx.EventReader                          INFO  (G4WT0) Avgmu            : 0[0m
+[0mCxx.EventReader                          INFO  (G4WT0) Total Mu         : 0[0m
+[0mCxx.EventReader                          INFO  (G4WT0) Number of seeds  : 1[0m
+[0mCxx.RunSequence                          INFO  (G4WT0) RunSequence::BeginOfEvent...[0m
+[0mCxx.RunSequence                          INFO  (G4WT0) RunSequence::EndOfEvent...[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) ===========================================[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) MUON HIT MERGE - ESTATÍSTICAS DETALHADAS[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) ===========================================[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) Total de hits processados: 392704[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) Hits com energia > 0: 0[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) Hits sem energia (0): 392704[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) -------------------------------------------[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) Energia total: 0 MeV[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) -------------------------------------------[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) ===========================================[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) Container size: 392704[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) Hits with valid edep map: 0[0m
+[0mCxx.RunSequence                          INFO  (G4WT0) Event loop was completed with 761472 G4Steps and 9 seconds.[0m
+G4WT0 > --> Event 5 starts with initial seeds (48845564,64256087).
+[0mCxx.PrimaryGeneratorAction               INFO  (G4WT0) GeneratePrimaryVertex...[0m
+[0mCxx.EventReader                          INFO  (G4WT0) Get event (EventReader) with number 5 and EventNumber 5[0m
+[0mCxx.EventReader                          INFO  (G4WT0) Seed 0 in eta = 0.963054, phi = 2.1586[0m
+[0mCxx.EventReader                          INFO  (G4WT0) RunNumber        : 0[0m
+[0mCxx.EventReader                          INFO  (G4WT0) EventNumber      : 5[0m
+[0mCxx.EventReader                          INFO  (G4WT0) Avgmu            : 0[0m
+[0mCxx.EventReader                          INFO  (G4WT0) Total Mu         : 0[0m
+[0mCxx.EventReader                          INFO  (G4WT0) Number of seeds  : 1[0m
+[0mCxx.RunSequence                          INFO  (G4WT0) RunSequence::BeginOfEvent...[0m
+[0mCxx.RunSequence                          INFO  (G4WT0) RunSequence::EndOfEvent...[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) HIT #1: sampling=3, detector=0, region=0, energy=0.0694789 MeV, x=-8415.29, y=3997.06, z=1203.12[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0)   BCIDs: start=-21, end=21, duration=25[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0)     BCID 3: edep=0.0694789 MeV, tof=40.6725[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) ===========================================[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) MUON HIT MERGE - ESTATÍSTICAS DETALHADAS[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) ===========================================[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) Total de hits processados: 392704[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) Hits com energia > 0: 1[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) Hits sem energia (0): 392703[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) Energia mínima: 0.0694789 MeV[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) Energia máxima: 0.0694789 MeV[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) Energia média: 0.0694789 MeV[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) -------------------------------------------[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) Energia total: 0.0694789 MeV[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) -------------------------------------------[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) Energia por sampling:[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0)   Sampling 3: 0.0694789 MeV (1 hits)[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) ===========================================[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) Container size: 392704[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) Hits with valid edep map: 1[0m
+[0mCxx.RunSequence                          INFO  (G4WT0) Event loop was completed with 181634 G4Steps and 8 seconds.[0m
+G4WT0 > --> Event 6 starts with initial seeds (49627965,1055055).
+[0mCxx.PrimaryGeneratorAction               INFO  (G4WT0) GeneratePrimaryVertex...[0m
+[0mCxx.EventReader                          INFO  (G4WT0) Get event (EventReader) with number 6 and EventNumber 6[0m
+[0mCxx.EventReader                          INFO  (G4WT0) Seed 0 in eta = 1.10058, phi = 2.87365[0m
+[0mCxx.EventReader                          INFO  (G4WT0) RunNumber        : 0[0m
+[0mCxx.EventReader                          INFO  (G4WT0) EventNumber      : 6[0m
+[0mCxx.EventReader                          INFO  (G4WT0) Avgmu            : 0[0m
+[0mCxx.EventReader                          INFO  (G4WT0) Total Mu         : 0[0m
+[0mCxx.EventReader                          INFO  (G4WT0) Number of seeds  : 1[0m
+[0mCxx.RunSequence                          INFO  (G4WT0) RunSequence::BeginOfEvent...[0m
+[0mCxx.RunSequence                          INFO  (G4WT0) RunSequence::EndOfEvent...[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) ===========================================[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) MUON HIT MERGE - ESTATÍSTICAS DETALHADAS[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) ===========================================[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) Total de hits processados: 392704[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) Hits com energia > 0: 0[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) Hits sem energia (0): 392704[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) -------------------------------------------[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) Energia total: 0 MeV[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) -------------------------------------------[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) ===========================================[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) Container size: 392704[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) Hits with valid edep map: 0[0m
+[0mCxx.RunSequence                          INFO  (G4WT0) Event loop was completed with 218545 G4Steps and 8 seconds.[0m
+G4WT0 > --> Event 7 starts with initial seeds (34047239,29466558).
+[0mCxx.PrimaryGeneratorAction               INFO  (G4WT0) GeneratePrimaryVertex...[0m
+[0mCxx.EventReader                          INFO  (G4WT0) Get event (EventReader) with number 7 and EventNumber 7[0m
+[0mCxx.EventReader                          INFO  (G4WT0) Seed 0 in eta = -0.497101, phi = 1.4523[0m
+[0mCxx.EventReader                          INFO  (G4WT0) RunNumber        : 0[0m
+[0mCxx.EventReader                          INFO  (G4WT0) EventNumber      : 7[0m
+[0mCxx.EventReader                          INFO  (G4WT0) Avgmu            : 0[0m
+[0mCxx.EventReader                          INFO  (G4WT0) Total Mu         : 0[0m
+[0mCxx.EventReader                          INFO  (G4WT0) Number of seeds  : 1[0m
+[0mCxx.RunSequence                          INFO  (G4WT0) RunSequence::BeginOfEvent...[0m
+[0mCxx.RunSequence                          INFO  (G4WT0) RunSequence::EndOfEvent...[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) ===========================================[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) MUON HIT MERGE - ESTATÍSTICAS DETALHADAS[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) ===========================================[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) Total de hits processados: 392704[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) Hits com energia > 0: 0[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) Hits sem energia (0): 392704[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) -------------------------------------------[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) Energia total: 0 MeV[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) -------------------------------------------[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) ===========================================[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) Container size: 392704[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) Hits with valid edep map: 0[0m
+[0mCxx.RunSequence                          INFO  (G4WT0) Event loop was completed with 273862 G4Steps and 8 seconds.[0m
+G4WT0 > --> Event 8 starts with initial seeds (57901461,82180625).
+[0mCxx.PrimaryGeneratorAction               INFO  (G4WT0) GeneratePrimaryVertex...[0m
+[0mCxx.EventReader                          INFO  (G4WT0) Get event (EventReader) with number 8 and EventNumber 8[0m
+[0mCxx.EventReader                          INFO  (G4WT0) Seed 0 in eta = 0.919756, phi = 1.55077[0m
+[0mCxx.EventReader                          INFO  (G4WT0) RunNumber        : 0[0m
+[0mCxx.EventReader                          INFO  (G4WT0) EventNumber      : 8[0m
+[0mCxx.EventReader                          INFO  (G4WT0) Avgmu            : 0[0m
+[0mCxx.EventReader                          INFO  (G4WT0) Total Mu         : 0[0m
+[0mCxx.EventReader                          INFO  (G4WT0) Number of seeds  : 1[0m
+[0mCxx.RunSequence                          INFO  (G4WT0) RunSequence::BeginOfEvent...[0m
+[0mCxx.RunSequence                          INFO  (G4WT0) RunSequence::EndOfEvent...[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) ===========================================[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) MUON HIT MERGE - ESTATÍSTICAS DETALHADAS[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) ===========================================[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) Total de hits processados: 392704[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) Hits com energia > 0: 0[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) Hits sem energia (0): 392704[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) -------------------------------------------[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) Energia total: 0 MeV[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) -------------------------------------------[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) ===========================================[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) Container size: 392704[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) Hits with valid edep map: 0[0m
+[0mCxx.RunSequence                          INFO  (G4WT0) Event loop was completed with 102859 G4Steps and 7 seconds.[0m
+G4WT0 > --> Event 9 starts with initial seeds (36326477,34101837).
+[0mCxx.PrimaryGeneratorAction               INFO  (G4WT0) GeneratePrimaryVertex...[0m
+[0mCxx.EventReader                          INFO  (G4WT0) Get event (EventReader) with number 9 and EventNumber 9[0m
+[0mCxx.EventReader                          INFO  (G4WT0) Seed 0 in eta = -1.40287, phi = -2.5514[0m
+[0mCxx.EventReader                          INFO  (G4WT0) RunNumber        : 0[0m
+[0mCxx.EventReader                          INFO  (G4WT0) EventNumber      : 9[0m
+[0mCxx.EventReader                          INFO  (G4WT0) Avgmu            : 0[0m
+[0mCxx.EventReader                          INFO  (G4WT0) Total Mu         : 0[0m
+[0mCxx.EventReader                          INFO  (G4WT0) Number of seeds  : 1[0m
+[0mCxx.RunSequence                          INFO  (G4WT0) RunSequence::BeginOfEvent...[0m
+[0mCxx.RunSequence                          INFO  (G4WT0) RunSequence::EndOfEvent...[0m
+[0mCxx.MuonHitMerge                         INFO  (G4WT0) ===========================================[0m
+
+
+hadd Target path: Jpsi_eta.MUON.HIT.root:/Expert/MuonHits/MDT_EndcapC_Middle
+hadd Target path: Jpsi_eta.MUON.HIT.root:/Expert/MuonHits/TGC_EndcapC_Outer
+hadd Target path: Jpsi_eta.MUON.HIT.root:/Expert/MuonHits/MDT_EndcapC_Outer

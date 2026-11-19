@@ -1,6 +1,5 @@
 // ============================================================================
 // Arquivo: MuonCluster/MuonCluster/MuonClusterConverter.h
-// Autora: Julya Pacheco Ferreira
 // Descrição: Define:
 //              - a struct POD xAOD::MuonCluster_t, usada para persistir
 //                clusters em arquivos ROOT com campos primitivos;

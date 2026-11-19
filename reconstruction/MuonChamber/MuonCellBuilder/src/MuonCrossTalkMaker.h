@@ -1,6 +1,5 @@
 // ============================================================================
 // Arquivo: MuonCrossTalkMaker.h
-// Autora: Julya Pacheco Ferreira
 // Descrição: Declaração da classe MuonCrossTalkMaker (implementação em
 //            MuonCrossTalkMaker.cxx). Define a interface do algoritmo de
 //            cross-talk de hits de muon, incluindo parâmetros do modelo

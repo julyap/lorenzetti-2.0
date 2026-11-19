@@ -1,6 +1,5 @@
 // ============================================================================
 // Arquivo: MuonMaker.cxx
-// Autora: Julya Pacheco Ferreira
 // Descrição: Implementação do algoritmo MuonMaker. Recebe a coleção de
 //            clusters de múons (InputMuonClusterKey) e produz a coleção de
 //            múons reconstruídos (OutputMuonKey). Aplica cortes de qualidade

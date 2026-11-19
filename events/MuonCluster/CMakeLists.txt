@@ -6,7 +6,7 @@ include_directories(
     ${ROOT_INCLUDE_DIRS} 
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${CMAKE_CURRENT_SOURCE_DIR}/MuonCluster  # Adiciona o subdiretório
-    ${CMAKE_CURRENT_SOURCE_DIR}/../../events/MuonCell/MuonCell  # Adiciona MuonCell
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../events/MuonCell # Adiciona MuonCell
     ${CMAKE_CURRENT_SOURCE_DIR}/../../core/GaugiKernel
     ${CMAKE_CURRENT_SOURCE_DIR}/../../events/MuonDefs
     ${CMAKE_CURRENT_SOURCE_DIR}/../../events/EventInfo # Adiciona EventInfo

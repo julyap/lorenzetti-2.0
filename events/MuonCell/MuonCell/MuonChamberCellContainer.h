@@ -1,6 +1,5 @@
 // ============================================================================
 // Arquivo: MuonCell/MuonChamberCellContainer.h
-// Autora: Julya Pacheco Ferreira
 // Descrição: Define o container padrão de células de câmara de múon
 //            (xAOD::MuonChamberCellContainer), que herda de
 //            SG::DataVector<xAOD::MuonChamberCell>. Esse container é usado

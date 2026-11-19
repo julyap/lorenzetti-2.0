@@ -9,13 +9,24 @@
 #            as coleções de hits em uma única coleção de saída
 #            (OutputHitsKey).
 #
-#            Atualmente cobre:
-#              - Barrel (Region=0):      MDT Inner/Middle/Outer,
-#                                        RPC Inner/Outer
-#              - Endcap A (Region=1):    MDT Inner/Middle/Outer,
-#                                        TGC Inner/Outer
-#              - Endcap C (Region=2):    MDT Inner/Middle/Outer,
-#                                        TGC Inner/Outer
+#            ATENÇÃO: os RMin/RMax/ZMin/ZMax abaixo estão ALINHADOS com a
+#            geometria definida em ATLAS/MuonChamber.py e ATLAS/MuonEndcap.py.
+#            Se você mudar a geometria, mude estes valores também.
+#
+#            Cobertura:
+#              - Barrel (Region=0):
+#                  MDT_Inner   R=500-550  cm  |z|<=350  cm   (ZSize=7m)
+#                  MDT_Middle  R=700-750  cm  |z|<=350  cm
+#                  MDT_Outer   R=900-1000 cm  |z|<=350  cm
+#                  RPC_Middle  R=600-650  cm  |z|<=350  cm
+#                  RPC_Outer   R=800-850  cm  |z|<=350  cm
+#              - Endcap A (Region=1, z>0):
+#                  MDT_EC1     z= 700 cm  (ZSize=14 cm)   -> z in [693, 707]
+#                  TGC_EC1     z= 700+15=715 cm           -> z in [707.4, 722.6]
+#                  MDT_EC2     z=1050 cm  (ZSize=10.5 cm) -> z in [1044.75, 1055.25]
+#                  TGC_EC2     z=1050+15=1065 cm          -> z in [1059.3, 1070.7]
+#                  MDT_EC3     z=1400 cm  (ZSize=10.5 cm) -> z in [1394.75, 1405.25]
+#              - Endcap C (Region=2, z<0): idem com sinal negativo.
 # ============================================================================
 
 __all__ = ["MuonHitBuilder"]
@@ -57,17 +68,27 @@ class MuonHitBuilder(Logger):
     def configure(self):
         """Configure the MuonHitBuilder with detector-specific settings"""
 
-        MSG_INFO(self, "Configure MuonHitBuilder.")
+        MSG_INFO(self, "Configure MuonHitBuilder (geometry-aligned).")
 
         # Import here to avoid circular imports
         from MuonHitMaker import MuonHitMaker
 
         # ============================================
         # B A R R E L   (Region = 0)
+        #
+        # Geometria (MuonChamber.py):
+        #   MDT_Inner  : R = 500-550  cm, ZSize = 7 m -> |z| <= 350 cm
+        #   MDT_Middle : R = 700-750  cm, ZSize = 7 m -> |z| <= 350 cm
+        #   MDT_Outer  : R = 900-1000 cm, ZSize = 7 m -> |z| <= 350 cm
+        #   RPC_Middle : R = 600-650  cm, ZSize = 7 m -> |z| <= 350 cm
+        #   RPC_Outer  : R = 800-850  cm, ZSize = 7 m -> |z| <= 350 cm
         # ============================================
 
+        barrel_zmin_mm = -3500.0
+        barrel_zmax_mm = +3500.0
+
         # -------------------------------------------------
-        # MDT BARREL - INNER (R=350-400cm, Z=-800-800cm)
+        # MDT BARREL - INNER (R=500-550 cm, |Z|<=350 cm)
         # -------------------------------------------------
         mdt_inner_collection = "MDT_Inner_Barrel_Hits"
         MSG_INFO(
@@ -76,17 +97,13 @@ class MuonHitBuilder(Logger):
             mdt_inner_collection
         )
 
-        # Divide o círculo em 16 setores phi para gerar a grade em X,Y
         n_phi_inner = 16
-        phi_bins = np.linspace(-np.pi, np.pi, n_phi_inner + 1)
-        avg_radius_inner = (350.0 + 400.0) / 2.0  # cm
+        phi_bins_inner = np.linspace(-np.pi, np.pi, n_phi_inner + 1)
+        avg_radius_inner = (500.0 + 550.0) / 2.0  # cm
 
-        # CORRIGIDO: y_bins agora usa sin(phi)
-        # x = r·cos(φ), y = r·sin(φ) — coordenadas cartesianas da grade
-        x_bins_inner = [avg_radius_inner * 10.0 * np.cos(phi) for phi in phi_bins]  # mm
-        y_bins_inner = [avg_radius_inner * 10.0 * np.sin(phi) for phi in phi_bins]  # mm - CORRIGIDO!
+        x_bins_inner = [avg_radius_inner * 10.0 * np.cos(phi) for phi in phi_bins_inner]  # mm
+        y_bins_inner = [avg_radius_inner * 10.0 * np.sin(phi) for phi in phi_bins_inner]  # mm
 
-        # Cria o MuonHitMaker do MDT Inner Barrel
         histogramPath = self.HistogramPath + '/MDT_Inner_Barrel'
         mdt_inner = MuonHitMaker(
             "MuonHitMaker_MDT_Inner_Barrel",
@@ -98,11 +115,11 @@ class MuonHitBuilder(Logger):
             DetailedHistograms=True,
             XBins=x_bins_inner,
             YBins=y_bins_inner,
-            ZBins=np.linspace(-8000.0, 8000.0, 33).tolist(),  # mm
-            RMin=3500.0,   # mm
-            RMax=4000.0,   # mm
-            ZMin=-8000.0,  # mm
-            ZMax=8000.0,   # mm
+            ZBins=np.linspace(barrel_zmin_mm, barrel_zmax_mm, 33).tolist(),
+            RMin=5000.0,   # mm  (500 cm)
+            RMax=5500.0,   # mm  (550 cm)
+            ZMin=barrel_zmin_mm,
+            ZMax=barrel_zmax_mm,
             Detector="MDT",
             Sampling=1,
             Region=0,
@@ -115,7 +132,7 @@ class MuonHitBuilder(Logger):
         self.OutputCollectionKeys.append(mdt_inner_collection)
 
         # -------------------------------------------------
-        # MDT BARREL - MIDDLE (R=500-550cm, Z=-800-800cm)
+        # MDT BARREL - MIDDLE (R=700-750 cm, |Z|<=350 cm)
         # -------------------------------------------------
         mdt_middle_collection = "MDT_Middle_Barrel_Hits"
         MSG_INFO(
@@ -124,12 +141,10 @@ class MuonHitBuilder(Logger):
             mdt_middle_collection
         )
 
-        avg_radius_middle = (500.0 + 550.0) / 2.0  # cm
+        avg_radius_middle = (700.0 + 750.0) / 2.0  # cm
 
-        # Grade cartesiana (x = r·cos φ, y = r·sin φ)
-        # CORRIGIDO: y_bins agora usa sin(phi)
-        x_bins_middle = [avg_radius_middle * 10.0 * np.cos(phi) for phi in phi_bins]
-        y_bins_middle = [avg_radius_middle * 10.0 * np.sin(phi) for phi in phi_bins]  # CORRIGIDO!
+        x_bins_middle = [avg_radius_middle * 10.0 * np.cos(phi) for phi in phi_bins_inner]
+        y_bins_middle = [avg_radius_middle * 10.0 * np.sin(phi) for phi in phi_bins_inner]
 
         histogramPath = self.HistogramPath + '/MDT_Middle_Barrel'
         mdt_middle = MuonHitMaker(
@@ -142,11 +157,11 @@ class MuonHitBuilder(Logger):
             DetailedHistograms=True,
             XBins=x_bins_middle,
             YBins=y_bins_middle,
-            ZBins=np.linspace(-8000.0, 8000.0, 33).tolist(),
-            RMin=5000.0,   # mm
-            RMax=5500.0,   # mm
-            ZMin=-8000.0,  # mm
-            ZMax=8000.0,   # mm
+            ZBins=np.linspace(barrel_zmin_mm, barrel_zmax_mm, 33).tolist(),
+            RMin=7000.0,   # mm  (700 cm)
+            RMax=7500.0,   # mm  (750 cm)
+            ZMin=barrel_zmin_mm,
+            ZMax=barrel_zmax_mm,
             Detector="MDT",
             Sampling=2,
             Region=0,
@@ -159,7 +174,7 @@ class MuonHitBuilder(Logger):
         self.OutputCollectionKeys.append(mdt_middle_collection)
 
         # -------------------------------------------------
-        # MDT BARREL - OUTER (R=700-750cm, Z=-800-800cm)
+        # MDT BARREL - OUTER (R=900-1000 cm, |Z|<=350 cm)
         # -------------------------------------------------
         mdt_outer_collection = "MDT_Outer_Barrel_Hits"
         MSG_INFO(
@@ -168,12 +183,10 @@ class MuonHitBuilder(Logger):
             mdt_outer_collection
         )
 
-        avg_radius_outer = (700.0 + 750.0) / 2.0  # cm
+        avg_radius_outer = (900.0 + 1000.0) / 2.0  # cm
 
-        # Grade cartesiana (x = r·cos φ, y = r·sin φ)
-        # CORRIGIDO: y_bins agora usa sin(phi)
-        x_bins_outer = [avg_radius_outer * 10.0 * np.cos(phi) for phi in phi_bins]
-        y_bins_outer = [avg_radius_outer * 10.0 * np.sin(phi) for phi in phi_bins]  # CORRIGIDO!
+        x_bins_outer = [avg_radius_outer * 10.0 * np.cos(phi) for phi in phi_bins_inner]
+        y_bins_outer = [avg_radius_outer * 10.0 * np.sin(phi) for phi in phi_bins_inner]
 
         histogramPath = self.HistogramPath + '/MDT_Outer_Barrel'
         mdt_outer = MuonHitMaker(
@@ -186,11 +199,11 @@ class MuonHitBuilder(Logger):
             DetailedHistograms=True,
             XBins=x_bins_outer,
             YBins=y_bins_outer,
-            ZBins=np.linspace(-8000.0, 8000.0, 33).tolist(),
-            RMin=7000.0,   # mm
-            RMax=7500.0,   # mm
-            ZMin=-8000.0,  # mm
-            ZMax=8000.0,   # mm
+            ZBins=np.linspace(barrel_zmin_mm, barrel_zmax_mm, 33).tolist(),
+            RMin=9000.0,   # mm  (900 cm)
+            RMax=10000.0,  # mm  (1000 cm)
+            ZMin=barrel_zmin_mm,
+            ZMax=barrel_zmax_mm,
             Detector="MDT",
             Sampling=3,
             Region=0,
@@ -203,41 +216,38 @@ class MuonHitBuilder(Logger):
         self.OutputCollectionKeys.append(mdt_outer_collection)
 
         # -------------------------------------------------
-        # RPC BARREL - INNER (R=420-450cm, Z=-800-800cm)
+        # RPC BARREL - MIDDLE (R=600-650 cm, |Z|<=350 cm)
         # -------------------------------------------------
-        rpc_inner_collection = "RPC_Inner_Barrel_Hits"
+        rpc_middle_collection = "RPC_Middle_Barrel_Hits"
         MSG_INFO(
             self,
-            "Create new MuonHitMaker for RPC Inner Barrel and dump hits into %s collection",
-            rpc_inner_collection
+            "Create new MuonHitMaker for RPC Middle Barrel and dump hits into %s collection",
+            rpc_middle_collection
         )
 
-        # RPC usa apenas 8 setores phi (granularidade menor)
         n_phi_rpc = 8
         phi_bins_rpc = np.linspace(-np.pi, np.pi, n_phi_rpc + 1)
-        avg_radius_rpc_inner = (420.0 + 450.0) / 2.0  # cm
+        avg_radius_rpc_middle = (600.0 + 650.0) / 2.0  # cm
 
-        # Grade cartesiana (x = r·cos φ, y = r·sin φ)
-        # CORRIGIDO: y_bins agora usa sin(phi)
-        x_bins_rpc_inner = [avg_radius_rpc_inner * 10.0 * np.cos(phi) for phi in phi_bins_rpc]
-        y_bins_rpc_inner = [avg_radius_rpc_inner * 10.0 * np.sin(phi) for phi in phi_bins_rpc]  # CORRIGIDO!
+        x_bins_rpc_middle = [avg_radius_rpc_middle * 10.0 * np.cos(phi) for phi in phi_bins_rpc]
+        y_bins_rpc_middle = [avg_radius_rpc_middle * 10.0 * np.sin(phi) for phi in phi_bins_rpc]
 
-        histogramPath = self.HistogramPath + '/RPC_Inner_Barrel'
-        rpc_inner = MuonHitMaker(
-            "MuonHitMaker_RPC_Inner_Barrel",
-            OutputCollectionKey=rpc_inner_collection,
+        histogramPath = self.HistogramPath + '/RPC_Middle_Barrel'
+        rpc_middle = MuonHitMaker(
+            "MuonHitMaker_RPC_Middle_Barrel",
+            OutputCollectionKey=rpc_middle_collection,
             OutputLevel=self.OutputLevel,
             HistogramPath=histogramPath,
             SamplingNoiseStd=0.0,
             UseCartesianGrid=True,
             DetailedHistograms=True,
-            XBins=x_bins_rpc_inner,
-            YBins=y_bins_rpc_inner,
-            ZBins=np.linspace(-8000.0, 8000.0, 33).tolist(),
-            RMin=4200.0,   # mm
-            RMax=4500.0,   # mm
-            ZMin=-8000.0,  # mm
-            ZMax=8000.0,   # mm
+            XBins=x_bins_rpc_middle,
+            YBins=y_bins_rpc_middle,
+            ZBins=np.linspace(barrel_zmin_mm, barrel_zmax_mm, 33).tolist(),
+            RMin=6000.0,   # mm  (600 cm)
+            RMax=6500.0,   # mm  (650 cm)
+            ZMin=barrel_zmin_mm,
+            ZMax=barrel_zmax_mm,
             Detector="RPC",
             Sampling=4,
             Region=0,
@@ -246,11 +256,11 @@ class MuonHitBuilder(Logger):
             BunchIdEnd=21,
             BunchDuration=25.0
         )
-        self.__recoAlgs.append(rpc_inner)
-        self.OutputCollectionKeys.append(rpc_inner_collection)
+        self.__recoAlgs.append(rpc_middle)
+        self.OutputCollectionKeys.append(rpc_middle_collection)
 
         # -------------------------------------------------
-        # RPC BARREL - OUTER (R=600-650cm, Z=-800-800cm)
+        # RPC BARREL - OUTER (R=800-850 cm, |Z|<=350 cm)
         # -------------------------------------------------
         rpc_outer_collection = "RPC_Outer_Barrel_Hits"
         MSG_INFO(
@@ -259,12 +269,10 @@ class MuonHitBuilder(Logger):
             rpc_outer_collection
         )
 
-        avg_radius_rpc_outer = (600.0 + 650.0) / 2.0  # cm
+        avg_radius_rpc_outer = (800.0 + 850.0) / 2.0  # cm
 
-        # Grade cartesiana (x = r·cos φ, y = r·sin φ)
-        # CORRIGIDO: y_bins agora usa sin(phi)
         x_bins_rpc_outer = [avg_radius_rpc_outer * 10.0 * np.cos(phi) for phi in phi_bins_rpc]
-        y_bins_rpc_outer = [avg_radius_rpc_outer * 10.0 * np.sin(phi) for phi in phi_bins_rpc]  # CORRIGIDO!
+        y_bins_rpc_outer = [avg_radius_rpc_outer * 10.0 * np.sin(phi) for phi in phi_bins_rpc]
 
         histogramPath = self.HistogramPath + '/RPC_Outer_Barrel'
         rpc_outer = MuonHitMaker(
@@ -277,11 +285,11 @@ class MuonHitBuilder(Logger):
             DetailedHistograms=True,
             XBins=x_bins_rpc_outer,
             YBins=y_bins_rpc_outer,
-            ZBins=np.linspace(-8000.0, 8000.0, 33).tolist(),
-            RMin=6000.0,   # mm
-            RMax=6500.0,   # mm
-            ZMin=-8000.0,  # mm
-            ZMax=8000.0,   # mm
+            ZBins=np.linspace(barrel_zmin_mm, barrel_zmax_mm, 33).tolist(),
+            RMin=8000.0,   # mm  (800 cm)
+            RMax=8500.0,   # mm  (850 cm)
+            ZMin=barrel_zmin_mm,
+            ZMax=barrel_zmax_mm,
             Detector="RPC",
             Sampling=5,
             Region=0,
@@ -295,17 +303,48 @@ class MuonHitBuilder(Logger):
 
         # ============================================
         # E N D C A P   A   (Region = 1, Z > 0)
+        #
+        # Geometria (MuonEndcap.py):
+        #   MDT_EC1 z = +700 cm,  ZSize = 14 cm    -> z in [693,   707]     cm
+        #   TGC_EC1 z = +715 cm,  ZSize = 15.2 cm  -> z in [707.4, 722.6]   cm
+        #   MDT_EC2 z = +1050 cm, ZSize = 10.5 cm  -> z in [1044.75, 1055.25] cm
+        #   TGC_EC2 z = +1065 cm, ZSize = 11.4 cm  -> z in [1059.3, 1070.7] cm
+        #   MDT_EC3 z = +1400 cm, ZSize = 10.5 cm  -> z in [1394.75, 1405.25] cm
         # ============================================
 
         # Parâmetros comuns para Endcaps
-        # phi: 16 setores, R: 10 anéis entre 200 e 850 cm
         n_phi_ec = 16
         n_r_ec = 10
         phi_bins_ec = np.linspace(-np.pi, np.pi, n_phi_ec + 1)
-        r_bins_ec = np.linspace(200.0, 850.0, n_r_ec + 1)  # cm
+        r_bins_ec = np.linspace(50.0, 850.0, n_r_ec + 1)  # cm
+
+        # Gera os pontos (x,y) para MDT endcap
+        x_bins_ec = []
+        y_bins_ec = []
+        for r in r_bins_ec:
+            for phi in phi_bins_ec:
+                x_bins_ec.append(r * 10.0 * np.cos(phi))
+                y_bins_ec.append(r * 10.0 * np.sin(phi))
+        x_bins_ec = sorted(list(set(x_bins_ec)))
+        y_bins_ec = sorted(list(set(y_bins_ec)))
+
+        # Parâmetros comuns para TGC (menor granularidade)
+        n_phi_tgc = 8
+        n_r_tgc = 5
+        phi_bins_tgc = np.linspace(-np.pi, np.pi, n_phi_tgc + 1)
+        r_bins_tgc = np.linspace(100.0, 850.0, n_r_tgc + 1)  # cm
+
+        x_bins_tgc = []
+        y_bins_tgc = []
+        for r in r_bins_tgc:
+            for phi in phi_bins_tgc:
+                x_bins_tgc.append(r * 10.0 * np.cos(phi))
+                y_bins_tgc.append(r * 10.0 * np.sin(phi))
+        x_bins_tgc = sorted(list(set(x_bins_tgc)))
+        y_bins_tgc = sorted(list(set(y_bins_tgc)))
 
         # -------------------------------------------------
-        # MDT ENDCAP A - INNER (Z=1150-1250 cm)
+        # MDT ENDCAP A - INNER (z em [693, 707] cm)
         # -------------------------------------------------
         mdt_ec_a1_collection = "MDT_EndcapA_Inner_Hits"
         MSG_INFO(
@@ -313,17 +352,6 @@ class MuonHitBuilder(Logger):
             "Create new MuonHitMaker for MDT EndcapA Inner and dump hits into %s collection",
             mdt_ec_a1_collection
         )
-
-        # Gera a grade combinando raios (r_bins_ec) e ângulos (phi_bins_ec)
-        # Cada ponto (r, φ) vira (x, y) = (r·cos φ, r·sin φ)
-        x_bins_ec_a1 = []
-        y_bins_ec_a1 = []
-        for r in r_bins_ec:
-            for phi in phi_bins_ec:
-                x_bins_ec_a1.append(r * 10.0 * np.cos(phi))  # mm
-                y_bins_ec_a1.append(r * 10.0 * np.sin(phi))  # mm - CORRIGIDO!
-        x_bins_ec_a1 = sorted(list(set(x_bins_ec_a1)))
-        y_bins_ec_a1 = sorted(list(set(y_bins_ec_a1)))
 
         histogramPath = self.HistogramPath + '/MDT_EndcapA_Inner'
         mdt_ec_a1 = MuonHitMaker(
@@ -334,13 +362,13 @@ class MuonHitBuilder(Logger):
             SamplingNoiseStd=0.0,
             UseCartesianGrid=True,
             DetailedHistograms=True,
-            XBins=x_bins_ec_a1,
-            YBins=y_bins_ec_a1,
-            ZBins=np.linspace(11500.0, 12500.0, 21).tolist(),  # mm
-            RMin=2000.0,    # mm
+            XBins=x_bins_ec,
+            YBins=y_bins_ec,
+            ZBins=np.linspace(6930.0, 7070.0, 9).tolist(),  # mm
+            RMin=500.0,     # mm  -- atenção: no MuonHitMaker, RMin/RMax são em cm
             RMax=8500.0,    # mm
-            ZMin=11500.0,   # mm
-            ZMax=12500.0,   # mm
+            ZMin=6930.0,    # mm
+            ZMax=7070.0,    # mm
             Detector="MDT",
             Sampling=1,
             Region=1,
@@ -353,7 +381,7 @@ class MuonHitBuilder(Logger):
         self.OutputCollectionKeys.append(mdt_ec_a1_collection)
 
         # -------------------------------------------------
-        # TGC ENDCAP A - INNER (Z=1265-1295 cm)
+        # TGC ENDCAP A - INNER (z em [707.4, 722.6] cm)
         # -------------------------------------------------
         tgc_ec_a1_collection = "TGC_EndcapA_Inner_Hits"
         MSG_INFO(
@@ -361,21 +389,6 @@ class MuonHitBuilder(Logger):
             "Create new MuonHitMaker for TGC EndcapA Inner and dump hits into %s collection",
             tgc_ec_a1_collection
         )
-
-        # TGC usa apenas 8 setores phi e 5 anéis em R
-        n_phi_tgc = 8
-        n_r_tgc = 5
-        phi_bins_tgc = np.linspace(-np.pi, np.pi, n_phi_tgc + 1)
-        r_bins_tgc = np.linspace(200.0, 850.0, n_r_tgc + 1)  # cm
-
-        x_bins_tgc_a1 = []
-        y_bins_tgc_a1 = []
-        for r in r_bins_tgc:
-            for phi in phi_bins_tgc:
-                x_bins_tgc_a1.append(r * 10.0 * np.cos(phi))
-                y_bins_tgc_a1.append(r * 10.0 * np.sin(phi))  # CORRIGIDO!
-        x_bins_tgc_a1 = sorted(list(set(x_bins_tgc_a1)))
-        y_bins_tgc_a1 = sorted(list(set(y_bins_tgc_a1)))
 
         histogramPath = self.HistogramPath + '/TGC_EndcapA_Inner'
         tgc_ec_a1 = MuonHitMaker(
@@ -386,13 +399,13 @@ class MuonHitBuilder(Logger):
             SamplingNoiseStd=0.0,
             UseCartesianGrid=True,
             DetailedHistograms=True,
-            XBins=x_bins_tgc_a1,
-            YBins=y_bins_tgc_a1,
-            ZBins=np.linspace(12650.0, 12950.0, 11).tolist(),  # mm
-            RMin=2000.0,    # mm
+            XBins=x_bins_tgc,
+            YBins=y_bins_tgc,
+            ZBins=np.linspace(7074.0, 7226.0, 7).tolist(),  # mm
+            RMin=1000.0,    # mm
             RMax=8500.0,    # mm
-            ZMin=12650.0,   # mm
-            ZMax=12950.0,   # mm
+            ZMin=7074.0,    # mm
+            ZMax=7226.0,    # mm
             Detector="TGC",
             Sampling=6,
             Region=1,
@@ -405,7 +418,7 @@ class MuonHitBuilder(Logger):
         self.OutputCollectionKeys.append(tgc_ec_a1_collection)
 
         # -------------------------------------------------
-        # MDT ENDCAP A - MIDDLE (Z=1340-1380 cm)
+        # MDT ENDCAP A - MIDDLE (z em [1044.75, 1055.25] cm)
         # -------------------------------------------------
         mdt_ec_a2_collection = "MDT_EndcapA_Middle_Hits"
         MSG_INFO(
@@ -413,15 +426,6 @@ class MuonHitBuilder(Logger):
             "Create new MuonHitMaker for MDT EndcapA Middle and dump hits into %s collection",
             mdt_ec_a2_collection
         )
-
-        x_bins_ec_a2 = []
-        y_bins_ec_a2 = []
-        for r in r_bins_ec:
-            for phi in phi_bins_ec:
-                x_bins_ec_a2.append(r * 10.0 * np.cos(phi))
-                y_bins_ec_a2.append(r * 10.0 * np.sin(phi))  # CORRIGIDO!
-        x_bins_ec_a2 = sorted(list(set(x_bins_ec_a2)))
-        y_bins_ec_a2 = sorted(list(set(y_bins_ec_a2)))
 
         histogramPath = self.HistogramPath + '/MDT_EndcapA_Middle'
         mdt_ec_a2 = MuonHitMaker(
@@ -432,13 +436,13 @@ class MuonHitBuilder(Logger):
             SamplingNoiseStd=0.0,
             UseCartesianGrid=True,
             DetailedHistograms=True,
-            XBins=x_bins_ec_a2,
-            YBins=y_bins_ec_a2,
-            ZBins=np.linspace(13400.0, 13800.0, 21).tolist(),  # mm
-            RMin=2000.0,    # mm
+            XBins=x_bins_ec,
+            YBins=y_bins_ec,
+            ZBins=np.linspace(10447.5, 10552.5, 9).tolist(),  # mm
+            RMin=500.0,     # mm
             RMax=8500.0,    # mm
-            ZMin=13400.0,   # mm
-            ZMax=13800.0,   # mm
+            ZMin=10447.5,   # mm
+            ZMax=10552.5,   # mm
             Detector="MDT",
             Sampling=2,
             Region=1,
@@ -451,7 +455,7 @@ class MuonHitBuilder(Logger):
         self.OutputCollectionKeys.append(mdt_ec_a2_collection)
 
         # -------------------------------------------------
-        # TGC ENDCAP A - OUTER (Z=1425-1455 cm)
+        # TGC ENDCAP A - OUTER (z em [1059.3, 1070.7] cm)
         # -------------------------------------------------
         tgc_ec_a2_collection = "TGC_EndcapA_Outer_Hits"
         MSG_INFO(
@@ -459,15 +463,6 @@ class MuonHitBuilder(Logger):
             "Create new MuonHitMaker for TGC EndcapA Outer and dump hits into %s collection",
             tgc_ec_a2_collection
         )
-
-        x_bins_tgc_a2 = []
-        y_bins_tgc_a2 = []
-        for r in r_bins_tgc:
-            for phi in phi_bins_tgc:
-                x_bins_tgc_a2.append(r * 10.0 * np.cos(phi))
-                y_bins_tgc_a2.append(r * 10.0 * np.sin(phi))  # CORRIGIDO!
-        x_bins_tgc_a2 = sorted(list(set(x_bins_tgc_a2)))
-        y_bins_tgc_a2 = sorted(list(set(y_bins_tgc_a2)))
 
         histogramPath = self.HistogramPath + '/TGC_EndcapA_Outer'
         tgc_ec_a2 = MuonHitMaker(
@@ -478,13 +473,13 @@ class MuonHitBuilder(Logger):
             SamplingNoiseStd=0.0,
             UseCartesianGrid=True,
             DetailedHistograms=True,
-            XBins=x_bins_tgc_a2,
-            YBins=y_bins_tgc_a2,
-            ZBins=np.linspace(14250.0, 14550.0, 11).tolist(),  # mm
-            RMin=2000.0,    # mm
+            XBins=x_bins_tgc,
+            YBins=y_bins_tgc,
+            ZBins=np.linspace(10593.0, 10707.0, 7).tolist(),  # mm
+            RMin=1000.0,    # mm
             RMax=8500.0,    # mm
-            ZMin=14250.0,   # mm
-            ZMax=14550.0,   # mm
+            ZMin=10593.0,   # mm
+            ZMax=10707.0,   # mm
             Detector="TGC",
             Sampling=7,
             Region=1,
@@ -497,7 +492,7 @@ class MuonHitBuilder(Logger):
         self.OutputCollectionKeys.append(tgc_ec_a2_collection)
 
         # -------------------------------------------------
-        # MDT ENDCAP A - OUTER (Z=1500-1600 cm)
+        # MDT ENDCAP A - OUTER (z em [1394.75, 1405.25] cm)
         # -------------------------------------------------
         mdt_ec_a3_collection = "MDT_EndcapA_Outer_Hits"
         MSG_INFO(
@@ -505,15 +500,6 @@ class MuonHitBuilder(Logger):
             "Create new MuonHitMaker for MDT EndcapA Outer and dump hits into %s collection",
             mdt_ec_a3_collection
         )
-
-        x_bins_ec_a3 = []
-        y_bins_ec_a3 = []
-        for r in r_bins_ec:
-            for phi in phi_bins_ec:
-                x_bins_ec_a3.append(r * 10.0 * np.cos(phi))
-                y_bins_ec_a3.append(r * 10.0 * np.sin(phi))  # CORRIGIDO!
-        x_bins_ec_a3 = sorted(list(set(x_bins_ec_a3)))
-        y_bins_ec_a3 = sorted(list(set(y_bins_ec_a3)))
 
         histogramPath = self.HistogramPath + '/MDT_EndcapA_Outer'
         mdt_ec_a3 = MuonHitMaker(
@@ -524,13 +510,13 @@ class MuonHitBuilder(Logger):
             SamplingNoiseStd=0.0,
             UseCartesianGrid=True,
             DetailedHistograms=True,
-            XBins=x_bins_ec_a3,
-            YBins=y_bins_ec_a3,
-            ZBins=np.linspace(15000.0, 16000.0, 41).tolist(),  # mm
-            RMin=2000.0,    # mm
+            XBins=x_bins_ec,
+            YBins=y_bins_ec,
+            ZBins=np.linspace(13947.5, 14052.5, 9).tolist(),  # mm
+            RMin=500.0,     # mm
             RMax=8500.0,    # mm
-            ZMin=15000.0,   # mm
-            ZMax=16000.0,   # mm
+            ZMin=13947.5,   # mm
+            ZMax=14052.5,   # mm
             Detector="MDT",
             Sampling=3,
             Region=1,
@@ -547,7 +533,7 @@ class MuonHitBuilder(Logger):
         # ============================================
 
         # -------------------------------------------------
-        # MDT ENDCAP C - INNER (Z=-1250 a -1150 cm)
+        # MDT ENDCAP C - INNER (z em [-707, -693] cm)
         # -------------------------------------------------
         mdt_ec_c1_collection = "MDT_EndcapC_Inner_Hits"
         MSG_INFO(
@@ -555,15 +541,6 @@ class MuonHitBuilder(Logger):
             "Create new MuonHitMaker for MDT EndcapC Inner and dump hits into %s collection",
             mdt_ec_c1_collection
         )
-
-        x_bins_ec_c1 = []
-        y_bins_ec_c1 = []
-        for r in r_bins_ec:
-            for phi in phi_bins_ec:
-                x_bins_ec_c1.append(r * 10.0 * np.cos(phi))
-                y_bins_ec_c1.append(r * 10.0 * np.sin(phi))  # CORRIGIDO!
-        x_bins_ec_c1 = sorted(list(set(x_bins_ec_c1)))
-        y_bins_ec_c1 = sorted(list(set(y_bins_ec_c1)))
 
         histogramPath = self.HistogramPath + '/MDT_EndcapC_Inner'
         mdt_ec_c1 = MuonHitMaker(
@@ -574,13 +551,13 @@ class MuonHitBuilder(Logger):
             SamplingNoiseStd=0.0,
             UseCartesianGrid=True,
             DetailedHistograms=True,
-            XBins=x_bins_ec_c1,
-            YBins=y_bins_ec_c1,
-            ZBins=np.linspace(-12500.0, -11500.0, 21).tolist(),  # mm
-            RMin=2000.0,    # mm
+            XBins=x_bins_ec,
+            YBins=y_bins_ec,
+            ZBins=np.linspace(-7070.0, -6930.0, 9).tolist(),  # mm
+            RMin=500.0,     # mm
             RMax=8500.0,    # mm
-            ZMin=-12500.0,  # mm
-            ZMax=-11500.0,  # mm
+            ZMin=-7070.0,   # mm
+            ZMax=-6930.0,   # mm
             Detector="MDT",
             Sampling=1,
             Region=2,
@@ -593,7 +570,7 @@ class MuonHitBuilder(Logger):
         self.OutputCollectionKeys.append(mdt_ec_c1_collection)
 
         # -------------------------------------------------
-        # TGC ENDCAP C - INNER (Z=-1295 a -1265 cm)
+        # TGC ENDCAP C - INNER (z em [-722.6, -707.4] cm)
         # -------------------------------------------------
         tgc_ec_c1_collection = "TGC_EndcapC_Inner_Hits"
         MSG_INFO(
@@ -601,15 +578,6 @@ class MuonHitBuilder(Logger):
             "Create new MuonHitMaker for TGC EndcapC Inner and dump hits into %s collection",
             tgc_ec_c1_collection
         )
-
-        x_bins_tgc_c1 = []
-        y_bins_tgc_c1 = []
-        for r in r_bins_tgc:
-            for phi in phi_bins_tgc:
-                x_bins_tgc_c1.append(r * 10.0 * np.cos(phi))
-                y_bins_tgc_c1.append(r * 10.0 * np.sin(phi))  # CORRIGIDO!
-        x_bins_tgc_c1 = sorted(list(set(x_bins_tgc_c1)))
-        y_bins_tgc_c1 = sorted(list(set(y_bins_tgc_c1)))
 
         histogramPath = self.HistogramPath + '/TGC_EndcapC_Inner'
         tgc_ec_c1 = MuonHitMaker(
@@ -620,13 +588,13 @@ class MuonHitBuilder(Logger):
             SamplingNoiseStd=0.0,
             UseCartesianGrid=True,
             DetailedHistograms=True,
-            XBins=x_bins_tgc_c1,
-            YBins=y_bins_tgc_c1,
-            ZBins=np.linspace(-12950.0, -12650.0, 11).tolist(),  # mm
-            RMin=2000.0,    # mm
+            XBins=x_bins_tgc,
+            YBins=y_bins_tgc,
+            ZBins=np.linspace(-7226.0, -7074.0, 7).tolist(),  # mm
+            RMin=1000.0,    # mm
             RMax=8500.0,    # mm
-            ZMin=-12950.0,  # mm
-            ZMax=-12650.0,  # mm
+            ZMin=-7226.0,   # mm
+            ZMax=-7074.0,   # mm
             Detector="TGC",
             Sampling=6,
             Region=2,
@@ -639,7 +607,7 @@ class MuonHitBuilder(Logger):
         self.OutputCollectionKeys.append(tgc_ec_c1_collection)
 
         # -------------------------------------------------
-        # MDT ENDCAP C - MIDDLE (Z=-1380 a -1340 cm)
+        # MDT ENDCAP C - MIDDLE (z em [-1055.25, -1044.75] cm)
         # -------------------------------------------------
         mdt_ec_c2_collection = "MDT_EndcapC_Middle_Hits"
         MSG_INFO(
@@ -647,15 +615,6 @@ class MuonHitBuilder(Logger):
             "Create new MuonHitMaker for MDT EndcapC Middle and dump hits into %s collection",
             mdt_ec_c2_collection
         )
-
-        x_bins_ec_c2 = []
-        y_bins_ec_c2 = []
-        for r in r_bins_ec:
-            for phi in phi_bins_ec:
-                x_bins_ec_c2.append(r * 10.0 * np.cos(phi))
-                y_bins_ec_c2.append(r * 10.0 * np.sin(phi))  # CORRIGIDO!
-        x_bins_ec_c2 = sorted(list(set(x_bins_ec_c2)))
-        y_bins_ec_c2 = sorted(list(set(y_bins_ec_c2)))
 
         histogramPath = self.HistogramPath + '/MDT_EndcapC_Middle'
         mdt_ec_c2 = MuonHitMaker(
@@ -666,13 +625,13 @@ class MuonHitBuilder(Logger):
             SamplingNoiseStd=0.0,
             UseCartesianGrid=True,
             DetailedHistograms=True,
-            XBins=x_bins_ec_c2,
-            YBins=y_bins_ec_c2,
-            ZBins=np.linspace(-13800.0, -13400.0, 21).tolist(),  # mm
-            RMin=2000.0,    # mm
+            XBins=x_bins_ec,
+            YBins=y_bins_ec,
+            ZBins=np.linspace(-10552.5, -10447.5, 9).tolist(),  # mm
+            RMin=500.0,     # mm
             RMax=8500.0,    # mm
-            ZMin=-13800.0,  # mm
-            ZMax=-13400.0,  # mm
+            ZMin=-10552.5,  # mm
+            ZMax=-10447.5,  # mm
             Detector="MDT",
             Sampling=2,
             Region=2,
@@ -685,7 +644,7 @@ class MuonHitBuilder(Logger):
         self.OutputCollectionKeys.append(mdt_ec_c2_collection)
 
         # -------------------------------------------------
-        # TGC ENDCAP C - OUTER (Z=-1455 a -1425 cm)
+        # TGC ENDCAP C - OUTER (z em [-1070.7, -1059.3] cm)
         # -------------------------------------------------
         tgc_ec_c2_collection = "TGC_EndcapC_Outer_Hits"
         MSG_INFO(
@@ -693,15 +652,6 @@ class MuonHitBuilder(Logger):
             "Create new MuonHitMaker for TGC EndcapC Outer and dump hits into %s collection",
             tgc_ec_c2_collection
         )
-
-        x_bins_tgc_c2 = []
-        y_bins_tgc_c2 = []
-        for r in r_bins_tgc:
-            for phi in phi_bins_tgc:
-                x_bins_tgc_c2.append(r * 10.0 * np.cos(phi))
-                y_bins_tgc_c2.append(r * 10.0 * np.sin(phi))  # CORRIGIDO!
-        x_bins_tgc_c2 = sorted(list(set(x_bins_tgc_c2)))
-        y_bins_tgc_c2 = sorted(list(set(y_bins_tgc_c2)))
 
         histogramPath = self.HistogramPath + '/TGC_EndcapC_Outer'
         tgc_ec_c2 = MuonHitMaker(
@@ -712,13 +662,13 @@ class MuonHitBuilder(Logger):
             SamplingNoiseStd=0.0,
             UseCartesianGrid=True,
             DetailedHistograms=True,
-            XBins=x_bins_tgc_c2,
-            YBins=y_bins_tgc_c2,
-            ZBins=np.linspace(-14550.0, -14250.0, 11).tolist(),  # mm
-            RMin=2000.0,    # mm
+            XBins=x_bins_tgc,
+            YBins=y_bins_tgc,
+            ZBins=np.linspace(-10707.0, -10593.0, 7).tolist(),  # mm
+            RMin=1000.0,    # mm
             RMax=8500.0,    # mm
-            ZMin=-14550.0,  # mm
-            ZMax=-14250.0,  # mm
+            ZMin=-10707.0,  # mm
+            ZMax=-10593.0,  # mm
             Detector="TGC",
             Sampling=7,
             Region=2,
@@ -731,7 +681,7 @@ class MuonHitBuilder(Logger):
         self.OutputCollectionKeys.append(tgc_ec_c2_collection)
 
         # -------------------------------------------------
-        # MDT ENDCAP C - OUTER (Z=-1600 a -1500 cm)
+        # MDT ENDCAP C - OUTER (z em [-1405.25, -1394.75] cm)
         # -------------------------------------------------
         mdt_ec_c3_collection = "MDT_EndcapC_Outer_Hits"
         MSG_INFO(
@@ -739,15 +689,6 @@ class MuonHitBuilder(Logger):
             "Create new MuonHitMaker for MDT EndcapC Outer and dump hits into %s collection",
             mdt_ec_c3_collection
         )
-
-        x_bins_ec_c3 = []
-        y_bins_ec_c3 = []
-        for r in r_bins_ec:
-            for phi in phi_bins_ec:
-                x_bins_ec_c3.append(r * 10.0 * np.cos(phi))
-                y_bins_ec_c3.append(r * 10.0 * np.sin(phi))  # CORRIGIDO!
-        x_bins_ec_c3 = sorted(list(set(x_bins_ec_c3)))
-        y_bins_ec_c3 = sorted(list(set(y_bins_ec_c3)))
 
         histogramPath = self.HistogramPath + '/MDT_EndcapC_Outer'
         mdt_ec_c3 = MuonHitMaker(
@@ -758,13 +699,13 @@ class MuonHitBuilder(Logger):
             SamplingNoiseStd=0.0,
             UseCartesianGrid=True,
             DetailedHistograms=True,
-            XBins=x_bins_ec_c3,
-            YBins=y_bins_ec_c3,
-            ZBins=np.linspace(-16000.0, -15000.0, 41).tolist(),  # mm
-            RMin=2000.0,    # mm
+            XBins=x_bins_ec,
+            YBins=y_bins_ec,
+            ZBins=np.linspace(-14052.5, -13947.5, 9).tolist(),  # mm
+            RMin=500.0,     # mm
             RMax=8500.0,    # mm
-            ZMin=-16000.0,  # mm
-            ZMax=-15000.0,  # mm
+            ZMin=-14052.5,  # mm
+            ZMax=-13947.5,  # mm
             Detector="MDT",
             Sampling=3,
             Region=2,
@@ -786,8 +727,6 @@ class MuonHitBuilder(Logger):
             self.OutputHitsKey
         )
 
-        # Cria o algoritmo de merge final, tentando importar MuonHitMerge.
-        # Se não estiver disponível, apenas avisa e continua sem merge.
         try:
             from MuonHitMerge import MuonHitMerge
             mergeAlg = MuonHitMerge(

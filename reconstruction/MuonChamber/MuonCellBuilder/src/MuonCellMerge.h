@@ -1,6 +1,5 @@
 // ============================================================================
 // Arquivo: MuonCellMerge.h
-// Autora: Julya Pacheco Ferreira
 // Descrição: Declaração da classe MuonCellMerge (implementação em
 //            MuonCellMerge.cxx). Define a interface do algoritmo que funde
 //            múltiplas coleções de descriptors de células de muon em uma

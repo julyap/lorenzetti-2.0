@@ -1,6 +1,5 @@
 // ============================================================================
 // Arquivo: MuonHit/MuonHit/MuonHitConverter.h
-// Autora: Julya Pacheco Ferreira
 // Descrição: Define a struct POD xAOD::MuonHit_t (usada para persistência
 //            em ROOT) e a classe MuonHitConverter, responsável por converter
 //            entre xAOD::MuonHit* e MuonHit_t.

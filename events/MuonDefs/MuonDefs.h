@@ -1,6 +1,5 @@
 // ============================================================================
 // Arquivo: MuonDefs/MuonDefs.h
-// Autora: Julya Pacheco Ferreira
 // Descrição: Definições auxiliares para o subsistema de múons no EDM.
 //            Este header fornece:
 //              - A enumeração MuonSampling (Inner/Middle/Outer), que

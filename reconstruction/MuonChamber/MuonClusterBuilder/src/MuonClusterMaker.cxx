@@ -1,6 +1,5 @@
 // ============================================================================
 // Arquivo: MuonClusterMaker.cxx
-// Autora: Julya Pacheco Ferreira
 // Descrição: Implementação do algoritmo MuonClusterMaker. Responsável por
 //            agrupar ("clusterizar") células de muon em torno de sementes
 //            (seeds) com base em janelas de proximidade:

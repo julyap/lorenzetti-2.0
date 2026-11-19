@@ -1,6 +1,5 @@
 // ============================================================================
 // Arquivo: MuonHit/MuonHit/MuonHitCollection.h
-// Autora: Julya Pacheco Ferreira
 // Descrição: Define o typedef xAOD::MuonHitCollection como um
 //            SG::Collection<xAOD::MuonHit>, ou seja, uma coleção
 //            especializada de hits de múon que armazena apenas objetos

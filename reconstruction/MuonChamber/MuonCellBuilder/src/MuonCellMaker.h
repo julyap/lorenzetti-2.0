@@ -1,6 +1,5 @@
 // ============================================================================
 // Arquivo: MuonCellMaker.h
-// Autora: Julya Pacheco Ferreira
 // Descrição: Declaração da classe MuonCellMaker (implementação em
 //            MuonCellMaker.cxx). Define a interface do algoritmo de
 //            reconstrução de células de muon, incluindo métodos de

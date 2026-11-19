@@ -1,6 +1,5 @@
 // ============================================================================
 // Arquivo: MuonHitBuilder.cxx
-// Autora: Julya Pacheco Ferreira
 // Descrição: Implementação (stub) do algoritmo MuonHitBuilder. No estado
 //            atual, apenas registra mensagens de inicialização/finalização
 //            e retorna SUCCESS. A lógica de fato de criação/merge de hits

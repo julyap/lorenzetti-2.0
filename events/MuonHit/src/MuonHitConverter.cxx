@@ -1,6 +1,5 @@
 // ============================================================================
 // Arquivo: MuonHit/src/MuonHitConverter.cxx
-// Autora: Julya Pacheco Ferreira
 // Descrição: Implementação da classe xAOD::MuonHitConverter.
 //            - convert(const MuonHit*, MuonHit_t&): serializa todos os
 //              campos básicos e itera sobre o range de BCIDs para preencher
@@ -9,7 +8,7 @@
 //            - convert(const MuonHit_t&, MuonHit*&): cria um novo
 //              xAOD::MuonHit com os campos básicos e restaura os mapas de
 //              BCID usando set_edep/set_tof/set_driftTime.
-# ============================================================================
+// ============================================================================
 
 #include "MuonHit/MuonHitConverter.h"
 #include <iostream>

@@ -1,6 +1,5 @@
 // ============================================================================
 // Arquivo: MuonCell/MuonChamberConverter.h
-// Autora: Julya Pacheco Ferreira
 // Descrição: Define a struct POD xAOD::MuonChamber_t, usada
 //            para persistir células de câmara de múon em arquivos ROOT, e a
 //            classe MuonChamberConverter, responsável por converter entre a
